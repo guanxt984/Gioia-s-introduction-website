@@ -19,4 +19,14 @@ assert.doesNotMatch(index, /\/files\//);
 assert.match(index, /data-portfolio-version=["']v11["']/);
 assert.match(structure, /id=["']experience["']/);
 
-console.log(JSON.stringify({ status: "PASS", checks: "stable V11 shell" }, null, 2));
+const source = await fs.readFile("src/portfolio-island.js", "utf8");
+const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
+assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);
+assert.doesNotMatch(index, /loading=["']lazy["']/);
+assert.match(index, /portfolio-island\.bundle\.js/);
+assert.match(source, /experience-island-uploaded-preview\.glb/);
+assert.match(source, /export async function mountExperienceIsland/);
+assert.match(source, /enablePan\s*=\s*false/);
+assert.match(pkg.scripts["build:site"], /portfolio-island\.js/);
+
+console.log(JSON.stringify({ status: "PASS", checks: "stable V11 shell and embedded island" }, null, 2));

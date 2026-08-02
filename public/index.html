@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Product Manager Portfolio</title>
+  <link rel="preload" href="./models/experience-island-uploaded-preview.glb" as="fetch" crossorigin>
+  <script type="module" src="./portfolio-island.bundle.js"></script>
   <style id="final-removal">
     .global-utility,
     .identity-tab {
@@ -67,6 +69,17 @@
 
       var root = document.getElementById('render-root');
       root.replaceWith.apply(root, Array.from(structureBody.children));
+      var islandArea = document.querySelector('.island-area');
+      if (islandArea) {
+        islandArea.classList.remove('placeholder');
+        islandArea.classList.add('is-3d');
+        islandArea.innerHTML = [
+          '<div class="island-canvas" aria-label="\u53ef\u65cb\u8f6c\u7684 3D \u7ecf\u5386\u5c9b"></div>',
+          '<p class="island-loading" role="status">\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026</p>',
+          '<button class="island-retry" type="button" hidden>\u91cd\u65b0\u52a0\u8f7d\u6a21\u578b</button>'
+        ].join('');
+      }
+      window.dispatchEvent(new Event('portfolio:ready'));
     }).catch(function (error) {
       document.getElementById('render-root').textContent = error.message;
     });

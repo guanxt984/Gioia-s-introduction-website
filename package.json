@@ -1,0 +1,19 @@
+{
+  "name": "portfolio-experience-island-3d",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:model": "node scripts/build-model.mjs && npm.cmd run build:viewer && npm.cmd run build:site",
+    "build:viewer": "esbuild src/viewer.js --bundle --format=esm --outfile=public/viewer.bundle.js",
+    "check:model": "node scripts/check-model.mjs",
+    "check:internship": "node scripts/check-internship-model.mjs",
+    "serve": "node scripts/serve.mjs",
+    "build:site": "esbuild src/portfolio-island.js --bundle --format=esm --outfile=public/portfolio-island.bundle.js"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.3.0",
+    "esbuild": "^0.25.0",
+    "three": "^0.179.1"
+  }
+}
