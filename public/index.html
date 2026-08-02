@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-portfolio-version="v11">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Product Manager Portfolio</title>
+  <style id="final-removal">
+    .global-utility,
+    .identity-tab {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <main id="render-root">
+    <div style="display:grid;place-items:center;width:100vw;height:100svh;background:#eeeeee;color:#524d46;font:500 12px/1.4 ui-monospace,monospace">
+      正在移除悬浮 Tab…
+    </div>
+  </main>
+
+  <script>
+    Promise.all([
+      fetch('./site/homepage-viewport-fit-v5.html').then(function (response) {
+        if (!response.ok) throw new Error('首页结构载入失败');
+        return response.text();
+      }),
+      fetch('./site/full-five-page-structure-v8.html').then(function (response) {
+        if (!response.ok) throw new Error('五页结构载入失败');
+        return response.text();
+      }),
+      fetch('./site/full-five-page-coveo-render-v9.html').then(function (response) {
+        if (!response.ok) throw new Error('COVEO 样式载入失败');
+        return response.text();
+      }),
+      fetch('./site/full-five-page-reviewed-v10.html').then(function (response) {
+        if (!response.ok) throw new Error('批注样式载入失败');
+        return response.text();
+      })
+    ]).then(function (sources) {
+      var homepage = new DOMParser().parseFromString(sources[0], 'text/html');
+      var structure = new DOMParser().parseFromString(sources[1], 'text/html');
+      var coveo = new DOMParser().parseFromString(sources[2], 'text/html');
+      var reviewed = new DOMParser().parseFromString(sources[3], 'text/html');
+
+      var homepageStyle = homepage.querySelector('style');
+      var homepagePage = homepage.querySelector('.page');
+      var structureStyle = structure.querySelector('style');
+      var structureBody = structure.body.cloneNode(true);
+      var coveoStyle = coveo.querySelector('#coveo-polish');
+      var reviewStyle = reviewed.querySelector('#review-revisions');
+      if (!homepageStyle || !homepagePage || !structureStyle || !coveoStyle || !reviewStyle) {
+        throw new Error('预览结构不完整');
+      }
+
+      structureBody.querySelectorAll('script').forEach(function (script) { script.remove(); });
+      structureBody.querySelector('.global-utility')?.remove();
+      structureBody.querySelector('#destination .actions')?.remove();
+      homepagePage.querySelector('.utility')?.remove();
+      homepagePage.querySelector('.confirm')?.remove();
+      structureBody.querySelector('#home').replaceChildren(homepagePage.cloneNode(true));
+
+      [homepageStyle, structureStyle, coveoStyle, reviewStyle].forEach(function (sourceStyle) {
+        var style = document.createElement('style');
+        style.textContent = sourceStyle.textContent;
+        document.head.insertBefore(style, document.getElementById('final-removal'));
+      });
+
+      var root = document.getElementById('render-root');
+      root.replaceWith.apply(root, Array.from(structureBody.children));
+    }).catch(function (error) {
+      document.getElementById('render-root').textContent = error.message;
+    });
+  </script>
+</body>
+</html>

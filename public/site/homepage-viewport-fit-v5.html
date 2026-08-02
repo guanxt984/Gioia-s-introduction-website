@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>首页视口比例 V5</title>
+  <style>
+    :root {
+      --canvas: #eeeeee;
+      --ink: #1d1812;
+      --muted: #524d46;
+      --placeholder-a: #c4c4c0;
+      --placeholder-b: #b7b7b3;
+      --placeholder-c: #d0d0cc;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans SC", sans-serif;
+    }
+    .page {
+      position: relative;
+      width: 100vw;
+      height: 100svh;
+      min-height: 520px;
+      overflow: hidden;
+    }
+    .utility {
+      position: absolute;
+      z-index: 10;
+      top: clamp(16px, 2vh, 28px);
+      right: clamp(18px, 2.4vw, 48px);
+      display: flex;
+      gap: clamp(14px, 1.5vw, 28px);
+      font: 500 clamp(10px, .7vw, 13px)/1.2 ui-monospace, monospace;
+      color: var(--muted);
+    }
+    .side-copy {
+      position: absolute;
+      left: clamp(20px, 2.5vw, 52px);
+      top: 10vh;
+      height: 62vh;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      font-size: clamp(10px, .75vw, 14px);
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .ghost-script {
+      position: absolute;
+      inset: -4vh -3vw auto -3vw;
+      height: 48vh;
+      overflow: hidden;
+      color: rgba(255,255,255,.68);
+      font: italic 700 clamp(64px, 12vw, 220px)/.78 Georgia, serif;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+      transform: rotate(-7deg);
+      pointer-events: none;
+    }
+    .orbit {
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      width: min(79vw, 1320px);
+      height: min(66vh, 650px);
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+    }
+    .tile {
+      position: absolute;
+      width: clamp(48px, 5.8vw, 102px);
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border-radius: 22%;
+      color: #5f5f5a;
+      font: 500 clamp(8px, .55vw, 10px)/1 ui-monospace, monospace;
+    }
+    .tile:nth-child(1) { left: 2%; top: 61%; background: var(--placeholder-b); transform: rotate(12deg); }
+    .tile:nth-child(2) { left: 10%; top: 28%; background: var(--placeholder-c); transform: rotate(-9deg); }
+    .tile:nth-child(3) { left: 24%; top: 7%; background: var(--placeholder-a); transform: rotate(10deg); }
+    .tile:nth-child(4) { left: 40%; top: -3%; background: var(--placeholder-c); transform: rotate(-5deg); }
+    .tile:nth-child(5) { left: 55%; top: -1%; background: var(--placeholder-b); transform: rotate(8deg); }
+    .tile:nth-child(6) { left: 70%; top: 11%; background: var(--placeholder-c); transform: rotate(12deg); }
+    .tile:nth-child(7) { left: 84%; top: 35%; background: var(--placeholder-a); transform: rotate(-8deg); }
+    .tile:nth-child(8) { left: 91%; top: 68%; background: var(--placeholder-b); transform: rotate(9deg); }
+    .tile:nth-child(9) { left: 4%; top: 91%; background: var(--placeholder-c); transform: rotate(-6deg); }
+    .tile:nth-child(10) { left: 86%; top: 96%; background: var(--placeholder-a); transform: rotate(5deg); }
+    .portrait {
+      position: absolute;
+      left: 50%;
+      top: 55%;
+      width: clamp(112px, 9.2vw, 176px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      display: grid;
+      place-items: center;
+      text-align: center;
+      border-radius: 50%;
+      background: #a9a9a5;
+      color: #4c4c48;
+      font: 500 clamp(9px, .65vw, 12px)/1.4 ui-monospace, monospace;
+    }
+    .identity {
+      position: absolute;
+      left: 50%;
+      top: 69%;
+      transform: translateX(-50%);
+      text-align: center;
+    }
+    .identity strong {
+      display: block;
+      font-size: clamp(17px, 1.35vw, 26px);
+      line-height: 1.1;
+    }
+    .identity span {
+      display: block;
+      margin-top: .7vh;
+      font-size: clamp(11px, .82vw, 16px);
+    }
+    .intro {
+      position: absolute;
+      left: 50%;
+      top: 82.5%;
+      transform: translateX(-50%);
+      font-size: clamp(12px, 1vw, 19px);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .next-title {
+      position: absolute;
+      left: 50%;
+      top: 91%;
+      transform: translateX(-50%);
+      width: 100%;
+      text-align: center;
+      font: 400 clamp(54px, 7.3vw, 140px)/.92 Arial, sans-serif;
+      letter-spacing: -.035em;
+      white-space: nowrap;
+    }
+    .confirm {
+      position: absolute;
+      right: clamp(18px, 2.4vw, 48px);
+      bottom: clamp(14px, 1.8vh, 26px);
+      z-index: 12;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid rgba(0,0,0,.28);
+      border-radius: 999px;
+      background: rgba(238,238,238,.88);
+      color: var(--ink);
+      font: 500 11px/1 ui-monospace, monospace;
+      cursor: pointer;
+    }
+    @media (max-width: 760px) {
+      .utility span:nth-child(-n+2), .side-copy, .ghost-script { display: none; }
+      .orbit { width: 116vw; height: 52vh; top: 39%; }
+      .tile { width: clamp(42px, 13vw, 58px); }
+      .portrait { top: 52%; width: 108px; }
+      .identity { top: 66%; }
+      .intro { top: 79%; font-size: 13px; }
+      .next-title { top: 89%; font-size: clamp(46px, 15vw, 72px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <nav class="utility" aria-label="快捷信息">
+      <span>18100839418</span>
+      <span>1042369137@qq.com</span>
+      <span>PDF 简历 ↓</span>
+    </nav>
+
+    <p class="side-copy">xxx首页侧边补充介绍xxx</p>
+    <div class="ghost-script" aria-hidden="true">xxx背景装饰文字xxx</div>
+
+    <div class="orbit" aria-label="首页叙事素材占位">
+      <div class="tile">xxxx</div><div class="tile">xxxx</div>
+      <div class="tile">xxxx</div><div class="tile">xxxx</div>
+      <div class="tile">xxxx</div><div class="tile">xxxx</div>
+      <div class="tile">xxxx</div><div class="tile">xxxx</div>
+      <div class="tile">xxxx</div><div class="tile">xxxx</div>
+    </div>
+
+    <div class="portrait">人物照片<br>居中</div>
+    <div class="identity">
+      <strong>xxx姓名xxx</strong>
+      <span>AI 产品经理</span>
+    </div>
+    <div class="intro">xxx一句话个人介绍xxx</div>
+    <div class="next-title">xxx下一页标题xxx</div>
+
+    <button class="confirm" data-choice="homepage-v5-approved" onclick="toggleSelect(this)">
+      此比例正确
+    </button>
+  </main>
+</body>
+</html>

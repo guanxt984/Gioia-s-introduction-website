@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>五页 COVEO 风格渲染 V9</title>
+  <style id="coveo-polish">
+    :root {
+      --canvas: #eeeeee;
+      --ink: #1d1812;
+      --muted: #524d46;
+      --surface: #dddddd;
+      --surface-hover: #cdcdcd;
+      --accent: #fe5416;
+      --line: rgba(0,0,0,.07);
+      --line-strong: rgba(0,0,0,.2);
+      --font-rational: "Avenir Next", Avenir, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --font-emotional: "Songti SC", "Noto Serif SC", Georgia, serif;
+      --font-meta: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--canvas) !important;
+      color: var(--ink) !important;
+      font-family: var(--font-rational) !important;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      z-index: 100;
+      right: 0;
+      top: 0;
+      width: 3px;
+      height: 100svh;
+      background: var(--accent);
+      transform: scaleY(.18);
+      transform-origin: top;
+      pointer-events: none;
+    }
+    .global-utility {
+      right: 24px !important;
+      top: 18px !important;
+      padding: 8px 10px;
+      background: rgba(238,238,238,.94);
+      font-family: var(--font-meta) !important;
+      letter-spacing: -.01em;
+    }
+    .global-utility a {
+      position: relative;
+      padding-bottom: 2px;
+      border-bottom: 1px dotted transparent;
+      transition: color .3s, border-color .3s;
+    }
+    .global-utility a:hover,
+    .global-utility a:focus-visible {
+      color: var(--accent);
+      border-color: currentColor;
+      outline: none;
+    }
+    .stage {
+      isolation: isolate;
+      background: var(--canvas) !important;
+    }
+    .stage::after {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      left: clamp(12px, 5vw, 64px);
+      right: clamp(12px, 5vw, 64px);
+      bottom: 0;
+      height: 1px;
+      background: var(--line);
+    }
+    .stage:last-of-type::after { display: none; }
+    .page-index,
+    .meta,
+    .next-cue,
+    .resume-row span:first-child,
+    .resume-row span:last-child,
+    .experience-row span:first-child,
+    .experience-row span:last-child {
+      font-family: var(--font-meta) !important;
+    }
+    .page-index {
+      left: 24px !important;
+      top: 18px !important;
+      letter-spacing: .01em;
+    }
+    .next-cue {
+      bottom: 18px !important;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.075);
+      transition: background .3s, color .3s, transform .3s cubic-bezier(.25,1,.5,1);
+    }
+    .next-cue:hover {
+      background: var(--surface-hover);
+      color: var(--accent);
+      transform: translateX(-50%) translateY(-2px);
+    }
+    .section-title {
+      max-width: 11ch;
+      font-family: var(--font-rational) !important;
+      font-weight: 500 !important;
+    }
+    #skills .section-title,
+    .destination-title {
+      font-family: var(--font-emotional) !important;
+      font-weight: 400 !important;
+      font-style: italic;
+      letter-spacing: -.025em !important;
+    }
+    .placeholder {
+      background: var(--surface) !important;
+      color: var(--muted) !important;
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px var(--line);
+    }
+    .portrait {
+      background: var(--accent) !important;
+      color: var(--ink) !important;
+      box-shadow: none !important;
+    }
+    .tile {
+      border-radius: 24% !important;
+      box-shadow: none !important;
+      transition: transform .35s cubic-bezier(.25,1,.5,1), background .3s;
+    }
+    .tile:hover {
+      background: var(--surface-hover) !important;
+      z-index: 5;
+    }
+    .identity strong { font-family: var(--font-rational) !important; }
+    .intro { font-family: var(--font-rational) !important; }
+    .next-title {
+      font-family: var(--font-emotional) !important;
+      font-style: italic;
+      font-weight: 400 !important;
+    }
+    .resume-content {
+      border-top-color: var(--line-strong) !important;
+    }
+    .resume-row {
+      min-height: clamp(58px, 8.3vh, 86px);
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      border-bottom: 1px dotted var(--line-strong) !important;
+      transition: background .3s, color .3s;
+    }
+    .resume-row:hover {
+      background: var(--surface);
+      color: var(--accent);
+    }
+    .resume-document {
+      border-radius: 12px !important;
+      transform: rotate(1.2deg);
+    }
+    .experience-intro {
+      max-width: 42rem;
+      font-size: clamp(14px, 1vw, 17px) !important;
+      line-height: 1.8 !important;
+    }
+    .experience-list {
+      border-top-color: var(--line-strong) !important;
+    }
+    .experience-row {
+      padding: 0 12px;
+      border-bottom: 1px dotted var(--line-strong) !important;
+      transition: background .3s, color .3s, transform .3s cubic-bezier(.25,1,.5,1);
+    }
+    .experience-row:hover {
+      background: var(--surface);
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+    .island-area {
+      border-radius: 24% !important;
+      background:
+        radial-gradient(circle at 50% 48%, var(--surface-hover) 0 13%, transparent 14%),
+        var(--surface) !important;
+      box-shadow: 0 0 0 1px var(--line) !important;
+    }
+    .island-area::after {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      position: absolute;
+      right: 12%;
+      top: 12%;
+    }
+    .skill-pills { align-items: center; }
+    .skill-pill {
+      border: 0 !important;
+      background: rgba(0,0,0,.085) !important;
+      font-family: var(--font-meta) !important;
+      transition: background .3s, color .3s, transform .3s cubic-bezier(.25,1,.5,1);
+    }
+    .skill-pill:hover,
+    .skill-pill:focus-visible {
+      background: var(--surface-hover) !important;
+      color: var(--accent);
+      outline: 1px solid var(--ink);
+      outline-offset: 3px;
+      transform: translateY(-3px);
+    }
+    .cloud {
+      border-radius: 52% 48% 0 0 !important;
+      box-shadow: none !important;
+    }
+    .character {
+      border-radius: 48% 48% 18% 18% !important;
+      background: var(--accent) !important;
+      box-shadow: none !important;
+    }
+    .destination-copy { z-index: 3; }
+    .destination-title {
+      max-width: 12ch;
+      margin-inline: auto !important;
+      text-wrap: balance;
+    }
+    .action {
+      border: 0 !important;
+      background: rgba(0,0,0,.085) !important;
+      font-family: var(--font-rational) !important;
+      transition: background .3s, color .3s, transform .3s cubic-bezier(.25,1,.5,1);
+    }
+    .action:hover,
+    .action:focus-visible {
+      background: var(--surface-hover) !important;
+      color: var(--accent);
+      outline: 1px solid var(--ink);
+      outline-offset: 3px;
+      transform: translateY(-2px);
+    }
+    .action.primary {
+      background: var(--ink) !important;
+      color: white !important;
+    }
+    .action.primary:hover { background: var(--accent) !important; }
+    .destination-visual {
+      border-radius: 52% 48% 0 0 !important;
+      box-shadow: none !important;
+    }
+    @media (max-width: 767px) {
+      .global-utility { right: 12px !important; }
+      .page-index { left: 12px !important; }
+      .stage::after { left: 12px; right: 12px; }
+      .section-title { font-size: clamp(38px, 12vw, 58px) !important; }
+      .destination-title { font-size: clamp(44px, 13vw, 72px) !important; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="render-root">
+    <div style="display:grid;place-items:center;width:100vw;height:100svh;color:#524d46;font:500 12px/1.4 ui-monospace,monospace">
+      正在按照 COVEO 设计规范渲染五页结构…
+    </div>
+  </main>
+
+  <script>
+    Promise.all([
+      fetch('/files/full-five-page-structure-v8.html').then(function (response) {
+        if (!response.ok) throw new Error('五页结构载入失败');
+        return response.text();
+      }),
+      fetch('/files/homepage-viewport-fit-v5.html').then(function (response) {
+        if (!response.ok) throw new Error('首页结构载入失败');
+        return response.text();
+      })
+    ]).then(function (sources) {
+      var structure = new DOMParser().parseFromString(sources[0], 'text/html');
+      var homepage = new DOMParser().parseFromString(sources[1], 'text/html');
+      var structureStyle = structure.querySelector('style');
+      var homepageStyle = homepage.querySelector('style');
+      var structureBody = structure.body.cloneNode(true);
+      var homepagePage = homepage.querySelector('.page');
+
+      if (!structureStyle || !homepageStyle || !homepagePage) {
+        throw new Error('预览结构不完整');
+      }
+
+      structureBody.querySelectorAll('script').forEach(function (script) { script.remove(); });
+      homepagePage.querySelector('.utility')?.remove();
+      homepagePage.querySelector('.confirm')?.remove();
+      structureBody.querySelector('#home').replaceChildren(homepagePage.cloneNode(true));
+
+      [homepageStyle, structureStyle].forEach(function (sourceStyle) {
+        var style = document.createElement('style');
+        style.textContent = sourceStyle.textContent;
+        document.head.insertBefore(style, document.getElementById('coveo-polish'));
+      });
+
+      var root = document.getElementById('render-root');
+      root.replaceWith.apply(root, Array.from(structureBody.children));
+    }).catch(function (error) {
+      document.getElementById('render-root').textContent = error.message;
+    });
+  </script>
+</body>
+</html>
