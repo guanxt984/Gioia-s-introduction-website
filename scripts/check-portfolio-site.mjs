@@ -21,6 +21,7 @@ assert.match(structure, /id=["']experience["']/);
 
 const source = await fs.readFile("src/portfolio-island.js", "utf8");
 const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
+const server = await fs.readFile("scripts/serve.mjs", "utf8");
 assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);
 assert.doesNotMatch(index, /loading=["']lazy["']/);
 assert.match(index, /portfolio-island\.bundle\.js/);
@@ -34,5 +35,6 @@ assert.match(index, /@media\s*\(max-width:\s*760px\)/);
 assert.match(source, /document\.hidden/);
 assert.match(source, /webgl-unavailable/);
 assert.match(source, /island-retry/);
+assert.match(server, /pathname\s*===\s*["\']\/["\']\s*\?\s*["\']\/index\.html["\']/);
 
 console.log(JSON.stringify({ status: "PASS", checks: "stable V11 shell and embedded island" }, null, 2));
