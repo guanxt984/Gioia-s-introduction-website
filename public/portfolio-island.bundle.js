@@ -31739,9 +31739,17 @@ async function mountExperienceIsland(container) {
   activeMount = (async () => {
     const area = container.closest(".island-area");
     const status = area?.querySelector(".island-loading");
+    const retry = area?.querySelector(".island-retry");
     const scene = new Scene();
     const camera = new PerspectiveCamera(32, 1, 0.1, 1e3);
-    const renderer = new WebGLRenderer({ antialias: true, alpha: true });
+    let renderer;
+    try {
+      renderer = new WebGLRenderer({ antialias: true, alpha: true });
+    } catch (error) {
+      area?.classList.add("webgl-unavailable");
+      if (status) status.textContent = "\u5F53\u524D\u6D4F\u89C8\u5668\u65E0\u6CD5\u663E\u793A 3D \u6A21\u578B";
+      throw error;
+    }
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0, 0);
     renderer.outputColorSpace = SRGBColorSpace;
@@ -31757,43 +31765,82 @@ async function mountExperienceIsland(container) {
     controls.enablePan = false;
     controls.minPolarAngle = Math.PI * 0.18;
     controls.maxPolarAngle = Math.PI * 0.82;
+    let model = null;
     let radius = 4;
+    let frame = 0;
+    let running = false;
+    let loading2 = false;
+    const fitModel = () => {
+      if (!model) return;
+      const distance = modelDistance(camera, radius);
+      camera.position.copy(new Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(distance));
+      controls.target.set(0, 0, 0);
+      controls.minDistance = distance * 0.58;
+      controls.maxDistance = distance * 1.75;
+      controls.update();
+    };
     const resize = () => {
       const width = Math.max(container.clientWidth, 1);
       const height = Math.max(container.clientHeight, 1);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      fitModel();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
-    const gltf = await loadModel(new GLTFLoader(), (event) => {
-      if (!status || !event.total) return;
-      status.textContent = `\u6A21\u578B\u52A0\u8F7D ${Math.round(event.loaded / event.total * 100)}%`;
-    });
-    const model = gltf.scene;
-    const bounds = new Box3().setFromObject(model);
-    const sphere = bounds.getBoundingSphere(new Sphere());
-    model.position.sub(sphere.center);
-    radius = Math.max(sphere.radius, 0.1);
-    scene.add(model);
-    resize();
-    const distance = modelDistance(camera, radius);
-    camera.position.copy(new Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(distance));
-    controls.target.set(0, 0, 0);
-    controls.minDistance = distance * 0.58;
-    controls.maxDistance = distance * 1.75;
-    controls.update();
-    if (status) status.textContent = "\u62D6\u52A8\u65CB\u8F6C \xB7 \u6EDA\u8F6E\u7F29\u653E";
-    let frame = 0;
     const render = () => {
+      if (!running) return;
       controls.update();
       renderer.render(scene, camera);
       frame = requestAnimationFrame(render);
     };
-    render();
-    return { renderer, controls, resizeObserver, stop: () => cancelAnimationFrame(frame) };
+    const start = () => {
+      if (running || !model) return;
+      running = true;
+      render();
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frame);
+    };
+    const syncVisibility = () => document.hidden ? stop() : start();
+    document.addEventListener("visibilitychange", syncVisibility);
+    const loader = new GLTFLoader();
+    const loadScene = async () => {
+      if (loading2 || model) return Boolean(model);
+      loading2 = true;
+      area?.classList.remove("model-load-error");
+      if (retry) retry.hidden = true;
+      if (status) status.textContent = "\u6B63\u5728\u52A0\u8F7D\u7ECF\u5386\u5C9B\u6A21\u578B\u2026";
+      try {
+        const gltf = await loadModel(loader, (event) => {
+          if (!status || !event.total) return;
+          status.textContent = `\u6A21\u578B\u52A0\u8F7D ${Math.round(event.loaded / event.total * 100)}%`;
+        });
+        model = gltf.scene;
+        const bounds = new Box3().setFromObject(model);
+        const sphere = bounds.getBoundingSphere(new Sphere());
+        model.position.sub(sphere.center);
+        radius = Math.max(sphere.radius, 0.1);
+        scene.add(model);
+        resize();
+        if (status) status.textContent = "\u62D6\u52A8\u65CB\u8F6C \xB7 \u6EDA\u8F6E\u7F29\u653E";
+        syncVisibility();
+        return true;
+      } catch {
+        area?.classList.add("model-load-error");
+        if (status) status.textContent = "\u6A21\u578B\u52A0\u8F7D\u5931\u8D25";
+        if (retry) retry.hidden = false;
+        return false;
+      } finally {
+        loading2 = false;
+      }
+    };
+    retry?.addEventListener("click", loadScene);
+    await loadScene();
+    return { renderer, controls, resizeObserver, stop };
   })();
   return activeMount;
 }

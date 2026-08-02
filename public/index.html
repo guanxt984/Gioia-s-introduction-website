@@ -12,6 +12,66 @@
       display: none !important;
     }
   </style>
+  <style id="island-3d-integration">
+    .island-area.is-3d {
+      display: block;
+      overflow: visible;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      color: var(--ink);
+    }
+    .island-area.is-3d::after { display: none !important; }
+    .island-canvas {
+      position: absolute;
+      inset: -6%;
+      min-width: 1px;
+      min-height: 1px;
+      touch-action: none;
+      cursor: grab;
+    }
+    .island-canvas:active { cursor: grabbing; }
+    .island-canvas canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      outline: none;
+    }
+    .island-loading {
+      position: absolute;
+      left: 50%;
+      bottom: -24px;
+      z-index: 2;
+      width: max-content;
+      max-width: 100%;
+      margin: 0;
+      transform: translateX(-50%);
+      color: var(--muted);
+      font: 500 clamp(9px, .65vw, 11px)/1.4 ui-monospace, monospace;
+      text-align: center;
+      pointer-events: none;
+    }
+    .island-retry {
+      position: absolute;
+      left: 50%;
+      bottom: 8px;
+      z-index: 3;
+      transform: translateX(-50%);
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      padding: 8px 12px;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 500 11px/1 ui-monospace, monospace;
+      cursor: pointer;
+    }
+    .island-retry[hidden] { display: none; }
+    .webgl-unavailable .island-canvas { display: none; }
+    @media (max-width: 760px) {
+      .island-canvas { inset: -10% -8% -4%; }
+      .island-loading { bottom: -20px; font-size: 9px; }
+    }
+  </style>
 </head>
 <body>
   <main id="render-root">

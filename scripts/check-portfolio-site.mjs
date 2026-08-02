@@ -28,5 +28,11 @@ assert.match(source, /experience-island-uploaded-preview\.glb/);
 assert.match(source, /export async function mountExperienceIsland/);
 assert.match(source, /enablePan\s*=\s*false/);
 assert.match(pkg.scripts["build:site"], /portfolio-island\.js/);
+assert.match(index, /\.island-area\.is-3d/);
+assert.match(index, /\.island-canvas\s*\{/);
+assert.match(index, /@media\s*\(max-width:\s*760px\)/);
+assert.match(source, /document\.hidden/);
+assert.match(source, /webgl-unavailable/);
+assert.match(source, /island-retry/);
 
 console.log(JSON.stringify({ status: "PASS", checks: "stable V11 shell and embedded island" }, null, 2));

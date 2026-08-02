@@ -24,9 +24,19 @@ export async function mountExperienceIsland(container) {
   activeMount = (async () => {
     const area = container.closest(".island-area");
     const status = area?.querySelector(".island-loading");
+    const retry = area?.querySelector(".island-retry");
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    let renderer;
+
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (error) {
+      area?.classList.add("webgl-unavailable");
+      if (status) status.textContent = "\u5f53\u524d\u6d4f\u89c8\u5668\u65e0\u6cd5\u663e\u793a 3D \u6a21\u578b";
+      throw error;
+    }
+
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -45,48 +55,87 @@ export async function mountExperienceIsland(container) {
     controls.minPolarAngle = Math.PI * 0.18;
     controls.maxPolarAngle = Math.PI * 0.82;
 
+    let model = null;
     let radius = 4;
+    let frame = 0;
+    let running = false;
+    let loading = false;
+
+    const fitModel = () => {
+      if (!model) return;
+      const distance = modelDistance(camera, radius);
+      camera.position.copy(new THREE.Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(distance));
+      controls.target.set(0, 0, 0);
+      controls.minDistance = distance * 0.58;
+      controls.maxDistance = distance * 1.75;
+      controls.update();
+    };
+
     const resize = () => {
       const width = Math.max(container.clientWidth, 1);
       const height = Math.max(container.clientHeight, 1);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+      fitModel();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
 
-    const gltf = await loadModel(new GLTFLoader(), event => {
-      if (!status || !event.total) return;
-      status.textContent = `模型加载 ${Math.round(event.loaded / event.total * 100)}%`;
-    });
-
-    const model = gltf.scene;
-    const bounds = new THREE.Box3().setFromObject(model);
-    const sphere = bounds.getBoundingSphere(new THREE.Sphere());
-    model.position.sub(sphere.center);
-    radius = Math.max(sphere.radius, 0.1);
-    scene.add(model);
-
-    resize();
-    const distance = modelDistance(camera, radius);
-    camera.position.copy(new THREE.Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(distance));
-    controls.target.set(0, 0, 0);
-    controls.minDistance = distance * 0.58;
-    controls.maxDistance = distance * 1.75;
-    controls.update();
-    if (status) status.textContent = "拖动旋转 · 滚轮缩放";
-
-    let frame = 0;
     const render = () => {
+      if (!running) return;
       controls.update();
       renderer.render(scene, camera);
       frame = requestAnimationFrame(render);
     };
-    render();
+    const start = () => {
+      if (running || !model) return;
+      running = true;
+      render();
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(frame);
+    };
+    const syncVisibility = () => document.hidden ? stop() : start();
+    document.addEventListener("visibilitychange", syncVisibility);
 
-    return { renderer, controls, resizeObserver, stop: () => cancelAnimationFrame(frame) };
+    const loader = new GLTFLoader();
+    const loadScene = async () => {
+      if (loading || model) return Boolean(model);
+      loading = true;
+      area?.classList.remove("model-load-error");
+      if (retry) retry.hidden = true;
+      if (status) status.textContent = "\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026";
+      try {
+        const gltf = await loadModel(loader, event => {
+          if (!status || !event.total) return;
+          status.textContent = `\u6a21\u578b\u52a0\u8f7d ${Math.round(event.loaded / event.total * 100)}%`;
+        });
+        model = gltf.scene;
+        const bounds = new THREE.Box3().setFromObject(model);
+        const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+        model.position.sub(sphere.center);
+        radius = Math.max(sphere.radius, 0.1);
+        scene.add(model);
+        resize();
+        if (status) status.textContent = "\u62d6\u52a8\u65cb\u8f6c \u00b7 \u6eda\u8f6e\u7f29\u653e";
+        syncVisibility();
+        return true;
+      } catch {
+        area?.classList.add("model-load-error");
+        if (status) status.textContent = "\u6a21\u578b\u52a0\u8f7d\u5931\u8d25";
+        if (retry) retry.hidden = false;
+        return false;
+      } finally {
+        loading = false;
+      }
+    };
+
+    retry?.addEventListener("click", loadScene);
+    await loadScene();
+    return { renderer, controls, resizeObserver, stop };
   })();
 
   return activeMount;
