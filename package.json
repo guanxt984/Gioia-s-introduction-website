@@ -8,6 +8,7 @@
     "build:viewer": "esbuild src/viewer.js --bundle --format=esm --outfile=public/viewer.bundle.js",
     "check:model": "node scripts/check-model.mjs",
     "check:internship": "node scripts/check-internship-model.mjs",
+    "check:zoom": "node scripts/check-experience-island-zoom.mjs",
     "serve": "node scripts/serve.mjs",
     "build:site": "esbuild src/portfolio-island.js --bundle --format=esm --outfile=public/portfolio-island.bundle.js"
   },

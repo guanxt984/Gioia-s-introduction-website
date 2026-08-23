@@ -12,6 +12,7 @@
       --placeholder-a: #c4c4c0;
       --placeholder-b: #b7b7b3;
       --placeholder-c: #d0d0cc;
+      --brand-orange: #fe5416;
     }
     * { box-sizing: border-box; }
     html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -50,15 +51,18 @@
     }
     .ghost-script {
       position: absolute;
-      inset: -4vh -3vw auto -3vw;
+      inset: calc(-4vh - 20px) calc(-3vw - 76px) auto calc(-3vw + 76px);
       height: 48vh;
       overflow: hidden;
       color: rgba(255,255,255,.68);
-      font: italic 700 clamp(64px, 12vw, 220px)/.78 Georgia, serif;
+      font: italic 700 clamp(48px, calc(7vw + 6px), 134px)/.86 Georgia, serif;
       letter-spacing: -.035em;
       white-space: nowrap;
       transform: rotate(-7deg);
       pointer-events: none;
+    }
+    .ghost-script .accent {
+      color: rgba(254, 84, 22, .8);
     }
     .orbit {
       position: absolute;
@@ -103,6 +107,13 @@
       background: #a9a9a5;
       color: #4c4c48;
       font: 500 clamp(9px, .65vw, 12px)/1.4 ui-monospace, monospace;
+      overflow: hidden;
+    }
+    .portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
     }
     .identity {
       position: absolute;
@@ -113,22 +124,18 @@
     }
     .identity strong {
       display: block;
-      font-size: clamp(17px, 1.35vw, 26px);
+      font-size: clamp(24px, 1.8vw, 36px);
       line-height: 1.1;
     }
     .identity span {
       display: block;
       margin-top: .7vh;
-      font-size: clamp(11px, .82vw, 16px);
+      font-size: clamp(14px, 1.05vw, 20px);
     }
-    .intro {
-      position: absolute;
-      left: 50%;
-      top: 82.5%;
-      transform: translateX(-50%);
-      font-size: clamp(12px, 1vw, 19px);
-      font-weight: 700;
-      white-space: nowrap;
+    .identity .contact-line {
+      margin-top: .45vh;
+      color: var(--muted);
+     white-space: nowrap;
     }
     .next-title {
       position: absolute;
@@ -141,6 +148,13 @@
       letter-spacing: -.035em;
       white-space: nowrap;
     }
+    .next-title span {
+      display: block;
+      width: max-content;
+      margin-inline: auto;
+    }
+    .next-title span:first-child { transform: translateX(-5vw); }
+    .next-title span:last-child { transform: translateX(5vw); }
     .confirm {
       position: absolute;
       right: clamp(18px, 2.4vw, 48px);
@@ -162,8 +176,9 @@
       .tile { width: clamp(42px, 13vw, 58px); }
       .portrait { top: 52%; width: 108px; }
       .identity { top: 66%; }
-      .intro { top: 79%; font-size: 13px; }
       .next-title { top: 89%; font-size: clamp(46px, 15vw, 72px); }
+      .next-title span:first-child { transform: translateX(-4vw); }
+      .next-title span:last-child { transform: translateX(4vw); }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
@@ -178,8 +193,7 @@
       <span>PDF 简历 ↓</span>
     </nav>
 
-    <p class="side-copy">xxx首页侧边补充介绍xxx</p>
-    <div class="ghost-script" aria-hidden="true">xxx背景装饰文字xxx</div>
+    <div class="ghost-script" aria-hidden="true"><span class="accent">ESTJ</span> | curiosity, courage</div>
 
     <div class="orbit" aria-label="首页叙事素材占位">
       <div class="tile">xxxx</div><div class="tile">xxxx</div>
@@ -189,13 +203,16 @@
       <div class="tile">xxxx</div><div class="tile">xxxx</div>
     </div>
 
-    <div class="portrait">人物照片<br>居中</div>
+    <div class="portrait"><img src="./assets/gioia-home.jpg" alt="官晓彤与银色机器人合影"></div>
     <div class="identity">
-      <strong>xxx姓名xxx</strong>
-      <span>AI 产品经理</span>
+      <strong>官晓彤 Gioia</strong>
+      <span>AI 产品经理 · FROM 浙江</span>
+      <span class="contact-line">VX &amp; PHONE 18100839418 · EMAIL 1042369137@qq.com</span>
     </div>
-    <div class="intro">xxx一句话个人介绍xxx</div>
-    <div class="next-title">xxx下一页标题xxx</div>
+    <div class="next-title">
+      <span>有创意，把好点子想出来；</span>
+      <span>懂执行，把好点子做出来</span>
+    </div>
 
     <button class="confirm" data-choice="homepage-v5-approved" onclick="toggleSelect(this)">
       此比例正确

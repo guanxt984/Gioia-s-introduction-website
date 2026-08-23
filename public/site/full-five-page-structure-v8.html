@@ -88,9 +88,11 @@
     /* Resume */
     .resume-inner {
       position: absolute;
-      inset: clamp(70px, 10vh, 112px) clamp(28px, 8vw, 150px) clamp(36px, 6vh, 68px);
-      display: flex;
-      flex-direction: column;
+      inset: clamp(42px, 6vh, 72px) clamp(36px, 6vw, 112px) clamp(38px, 6vh, 70px);
+      display: grid;
+      grid-template-columns: auto minmax(280px, 1fr);
+      gap: clamp(40px, 5.4vw, 104px);
+      align-items: stretch;
     }
     .resume-heading {
       display: flex;
@@ -123,7 +125,153 @@
       color: var(--muted);
       font: 500 .8em/1.35 ui-monospace, monospace;
     }
-    .resume-document { min-height: 0; }
+    .resume-document {
+      position: relative;
+      height: 200%;
+      aspect-ratio: 2380 / 3608;
+      align-self: center;
+      min-height: 0;
+      overflow: visible;
+      display: block;
+      justify-self: start;
+      margin: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      transform: none;
+      rotate: 0deg;
+      skew: none;
+    }
+    .resume-document img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: none;
+      object-fit: contain;
+      object-position: center;
+      background: transparent;
+      transform: none;
+      rotate: 0deg;
+    }
+    .resume-tools {
+      position: absolute;
+      left: 0;
+      top: -42px;
+      z-index: 3;
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .resume-tool {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 54px;
+      min-height: 30px;
+      padding: 7px 12px;
+      border: 1px solid rgba(0,0,0,.14);
+      border-radius: 999px;
+      background: rgba(238,238,238,.78);
+      color: var(--muted);
+      text-decoration: none;
+      font: 600 clamp(10px, .72vw, 12px)/1 ui-monospace, monospace;
+      backdrop-filter: blur(12px);
+      transition: color .18s ease, border-color .18s ease, transform .18s ease;
+    }
+    .resume-download-icon {
+      width: 18px;
+      height: 18px;
+      flex: 0 0 18px;
+      color: var(--accent);
+      padding: 2px;
+      border-radius: 999px;
+      background: rgba(254,84,22,.14);
+      stroke: currentColor;
+      stroke-width: 2.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .resume-tool:hover,
+    .resume-tool:focus-visible {
+      color: var(--accent);
+      border-color: rgba(254,84,22,.72);
+      transform: translateY(-1px);
+      outline: none;
+    }
+    .resume-directory {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: clamp(12px, 2vh, 24px);
+    }
+    .directory-current {
+      margin: 0 0 clamp(18px, 3vh, 34px);
+      font: 600 clamp(11px, .8vw, 14px)/1.2 ui-monospace, monospace;
+      color: var(--accent);
+    }
+    .resume-directory .section-title {
+      margin: 0;
+      font-size: clamp(54px, 8vw, 132px);
+    }
+    .resume-directory .meta {
+      margin: clamp(12px, 2vh, 22px) 0 clamp(28px, 5vh, 54px);
+      max-width: 42ch;
+    }
+    .directory-list {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid var(--line-strong);
+    }
+    .directory-list a {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) auto;
+      gap: clamp(14px, 1.5vw, 26px);
+      align-items: center;
+      min-height: clamp(54px, 7vh, 76px);
+      border-bottom: 1px dotted var(--line);
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .directory-list span {
+      font: 600 clamp(11px, .78vw, 13px)/1 ui-monospace, monospace;
+      color: var(--muted);
+    }
+    .directory-list strong {
+      font: 700 clamp(17px, 1.5vw, 26px)/1.1 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: -.02em;
+    }
+    .directory-list em {
+      font: 500 clamp(11px, .8vw, 14px)/1.2 ui-monospace, monospace;
+      font-style: normal;
+      color: var(--muted);
+    }
+    .directory-list a.is-current::before {
+      content: "";
+      position: absolute;
+      left: -20px;
+      top: 50%;
+      width: 0;
+      height: 0;
+      transform: translateY(-50%);
+      border-top: 6px solid transparent;
+      border-bottom: 6px solid transparent;
+      border-left: 10px solid var(--accent);
+    }
+    .directory-list a.is-current {
+      color: var(--accent);
+    }
+    .directory-list a.is-current,
+    .directory-list a.is-current span,
+    .directory-list a.is-current strong,
+    .directory-list a.is-current em {
+      color: var(--accent);
+    }
 
     /* Experience */
     .experience-inner {
@@ -143,23 +291,70 @@
       line-height: 1.75;
       color: #3d3832;
     }
-    .experience-list {
-      margin-top: auto;
-      border-top: 1px solid var(--line-strong);
+    .school-project-panel {
+      width: min(760px, 94%);
+      margin-top: clamp(10px, 2vh, 22px);
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
     }
-    .experience-row {
-      display: grid;
-      grid-template-columns: .38fr 1.3fr .8fr;
+    .school-project-panel[hidden] {
+      display: none;
+    }
+    .school-project-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
       gap: 18px;
-      align-items: center;
-      min-height: clamp(48px, 7vh, 72px);
-      border-bottom: 1px dotted var(--line);
-      font-size: clamp(12px, .9vw, 16px);
+      margin-bottom: clamp(14px, 2vh, 22px);
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line-strong);
     }
-    .experience-row span:first-child,
-    .experience-row span:last-child {
+    .school-project-kicker {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font: 700 11px/1 ui-monospace, monospace;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .school-project-head h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(24px, 2.2vw, 40px);
+      line-height: 1.05;
+      letter-spacing: -.04em;
+    }
+    .school-project-hint {
+      margin: 0;
       color: var(--muted);
-      font: 500 .78em/1.4 ui-monospace, monospace;
+      font: 500 11px/1.4 ui-monospace, monospace;
+      text-align: right;
+      white-space: nowrap;
+    }
+    .school-project-media {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(8px, 1vw, 14px);
+      max-height: min(54vh, 580px);
+      overflow: auto;
+      padding: 0 clamp(5px, .5vw, 8px) 0 0;
+    }
+    .school-project-media img,
+    .school-project-media video {
+      width: 100%;
+      height: clamp(132px, 16vh, 210px);
+      display: block;
+      object-fit: cover;
+      border-radius: 0;
+      background: transparent;
+      border: 0;
+    }
+    .school-project-media .wide {
+      grid-column: 1 / -1;
+      height: clamp(190px, 26vh, 330px);
+      object-fit: contain;
     }
     .island-area {
       position: absolute;
@@ -177,6 +372,24 @@
     }
 
     /* Skills */
+    #skills {
+      --spotlight-x: 50%;
+      --spotlight-y: 50%;
+      --spotlight-opacity: 0;
+    }
+    #skills::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background: transparent;
+      opacity: 0;
+      -webkit-mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), transparent 0, transparent 10vw, rgba(0, 0, 0, .2) 18vw, rgba(0, 0, 0, .76) 27vw, #000 36vw);
+      mask-image: radial-gradient(circle at var(--spotlight-x) var(--spotlight-y), transparent 0, transparent 10vw, rgba(0, 0, 0, .2) 18vw, rgba(0, 0, 0, .76) 27vw, #000 36vw);
+      transition: opacity .78s cubic-bezier(.19, 1, .22, 1);
+    }
+    #skills.is-spotlight-on::after { opacity: 0; }
     .skills-heading {
       position: absolute;
       left: clamp(28px, 7vw, 132px);
@@ -184,41 +397,322 @@
       z-index: 3;
     }
     .skills-heading .meta { margin-top: 16px; }
-    .skill-pills {
+    .skill-map {
       position: absolute;
-      left: 35%;
-      right: 7%;
-      top: 19%;
+      inset: clamp(128px, 16vh, 172px) clamp(28px, 3vw, 68px) clamp(58px, 8vh, 96px) clamp(46px, 4vw, 92px);
+      z-index: 4;
+      pointer-events: none;
+    }
+    .skill-cloud-zone {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(14px, 1.45vw, 22px);
+      width: var(--zone-width, clamp(360px, 30vw, 620px));
+      min-height: var(--zone-height, clamp(180px, 24vh, 310px));
+      padding: clamp(28px, 3vh, 46px) clamp(26px, 2.8vw, 54px);
+      text-align: center;
+      pointer-events: auto;
+      isolation: isolate;
+      --zone-scale: 1;
+      --zone-rotate: 0deg;
+      transform: rotate(var(--zone-rotate)) scale(var(--zone-scale));
+      transform-origin: center;
+      opacity: .58;
+      filter: grayscale(.82) brightness(.78) saturate(.32);
+      transition: transform .72s cubic-bezier(.19, 1, .22, 1), filter .72s ease, opacity .72s ease;
+    }
+    .skill-cloud-zone::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 118%;
+      height: 154%;
+      transform: translate(-50%, -50%);
+      background: var(--skill-cloud-image) center / contain no-repeat;
+      opacity: .78;
+      filter: drop-shadow(0 18px 32px rgba(68, 62, 55, .035)) saturate(.98);
+      pointer-events: none;
+      z-index: 0;
+      transition: opacity .72s ease, filter .72s ease, transform .72s cubic-bezier(.19, 1, .22, 1);
+    }
+    .skill-cloud-zone.is-active {
+      --zone-scale: 1.045;
+      z-index: 6;
+      opacity: 1;
+      filter: grayscale(0) brightness(1) saturate(1);
+    }
+    .skill-cloud-zone.is-viewed {
+      opacity: 1;
+      filter: grayscale(0) brightness(1) saturate(1);
+    }
+    .skill-cloud-zone.is-active::before {
+      opacity: .86;
+      filter: drop-shadow(0 22px 38px rgba(68, 62, 55, .045)) saturate(1);
+      transform: translate(-50%, -50%) scale(1.015);
+    }
+    .skill-cloud-zone.is-viewed::before { opacity: .82; }
+    .skill-cloud-zone.think {
+      --skill-cloud-image: url("../assets/skill-cloud-think.png");
+      --zone-width: clamp(542px, 41.58vw, 869px);
+      --zone-height: clamp(258px, 34.02vh, 416px);
+      --zone-rotate: -1.8deg;
+      left: calc(25% - 200px);
+      top: calc(8% - 10px);
+    }
+    .skill-cloud-zone.ai {
+      --skill-cloud-image: url("../assets/skill-cloud-ai.png");
+      --zone-width: clamp(470px, 36vw, 760px);
+      --zone-height: clamp(215px, 29vh, 350px);
+      --zone-rotate: 1.2deg;
+      right: calc(3% + 150px);
+      top: calc(8% - 20px);
+    }
+    .skill-cloud-zone.tool {
+      --skill-cloud-image: url("../assets/skill-cloud-tool.png");
+      --zone-width: clamp(554px, 41.9vw, 878px);
+      --zone-height: clamp(264px, 35.1vh, 432px);
+      --zone-rotate: .8deg;
+      left: calc(20% - 400px);
+      top: calc(48% + 70px);
+    }
+    .skill-cloud-zone.energy {
+      --skill-cloud-image: url("../assets/skill-cloud-energy.png");
+      --zone-width: clamp(492px, 37.2vw, 780px);
+      --zone-height: clamp(226px, 30vh, 378px);
+      --zone-rotate: -.8deg;
+      right: calc(28% + 50px);
+      bottom: calc(4% + 40px);
+    }
+    .skill-cloud-zone.ai::before { width: 122%; height: 160%; opacity: .84; }
+    .skill-cloud-zone.tool::before { width: 116%; height: 146%; opacity: .78; }
+    .skill-cloud-zone.energy::before { width: 118%; height: 152%; opacity: .8; }
+    .skill-zone-title {
+      position: relative;
+      z-index: 1;
+      margin: 0 0 1px;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 10px;
+      color: var(--accent);
+    }
+    .skill-zone-title strong {
+      font: 700 clamp(22px, 2.6vw, 46px)/.92 Georgia, "Times New Roman", serif;
+      letter-spacing: -.035em;
+    }
+    .skill-zone-title span {
+      font: 700 clamp(12.1px, .8712vw, 15.73px)/1.2 ui-monospace, monospace;
+      color: var(--accent);
+      opacity: .72;
+    }
+    .skill-cloud-zone.tool .skill-zone-title,
+    .skill-cloud-zone.tool .skill-cloud-items {
+      transform: translateX(-50px);
+    }
+    .skill-cloud-items {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-wrap: wrap;
+      align-items: flex-start;
       justify-content: center;
-      align-content: flex-start;
-      gap: clamp(9px, 1.1vw, 18px);
-      z-index: 4;
+      gap: 14px 18px;
+      max-width: min(92%, 500px);
+      margin-top: 10px;
     }
-    .skill-pill {
-      min-height: 44px;
-      padding: 0 clamp(14px, 1.4vw, 24px);
-      border: 1px solid var(--line-strong);
+    .skill-cloud-zone.tool .skill-cloud-items { max-width: min(82%, 390px); }
+    .skill-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: clamp(34px, 4vh, 44px);
+      padding: 0 clamp(16px, 1.32vw, 25px);
+      border: 1px solid rgba(255, 255, 255, .76);
       border-radius: 999px;
-      background: transparent;
-      color: var(--ink);
-      font: 500 clamp(11px, .82vw, 15px)/42px ui-monospace, monospace;
+      background: rgba(232, 232, 228, .46);
+      color: rgba(42, 38, 34, .72);
+      font: 500 clamp(12px, .9vw, 15px)/1.1 Arial, "Noto Sans SC", sans-serif;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .86), 0 6px 14px rgba(31, 28, 24, .04);
+      cursor: pointer;
+      transform: translate(var(--float-x, 0px), var(--float-y, 0px)) rotate(var(--float-r, 0deg));
+      transition: transform .28s cubic-bezier(.19, 1, .22, 1), background-color .28s ease, border-color .28s ease, color .28s ease, box-shadow .28s ease;
     }
+    .skill-chip::before {
+      content: "";
+      width: 5px;
+      height: 5px;
+      margin-right: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      opacity: 0;
+      transform: scale(.6);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    .skill-chip:nth-child(2n) { --float-y: 7px; }
+    .skill-chip:nth-child(3n) { --float-y: -5px; --float-x: 3px; }
+    .skill-chip:nth-child(4n) { --float-x: -4px; --float-r: -.6deg; }
+    .skill-chip:hover,
+    .skill-chip:focus-visible {
+      transform: translate(var(--float-x, 0px), calc(var(--float-y, 0px) - 3px)) rotate(var(--float-r, 0deg)) scale(1.045);
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, .7);
+      color: var(--accent);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .94), 0 8px 18px rgba(31, 28, 24, .055);
+      outline: none;
+    }
+    .skill-chip:hover::before,
+    .skill-chip:focus-visible::before {
+      opacity: .95;
+      transform: scale(1);
+    }
+    .skill-chip.is-viewed {
+      border-color: var(--accent);
+      background: rgba(255, 255, 255, .62);
+      color: rgba(42, 38, 34, .82);
+    }
+    .skill-chip.is-viewed:hover,
+    .skill-chip.is-viewed:focus-visible {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .skill-cloud-zone.is-active .skill-chip {
+      animation: chip-welcome .94s ease-in-out infinite;
+      animation-delay: var(--shake-delay, 0s);
+    }
+    @keyframes chip-welcome {
+      0%, 100% {
+        transform: translate(var(--float-x, 0px), var(--float-y, 0px)) rotate(var(--float-r, 0deg));
+      }
+      42% {
+        transform: translate(calc(var(--float-x, 0px) + var(--shake-x, 2px)), calc(var(--float-y, 0px) + var(--shake-y, -2px))) rotate(var(--shake-r, 1deg));
+      }
+      72% {
+        transform: translate(calc(var(--float-x, 0px) + var(--shake-x2, -2px)), calc(var(--float-y, 0px) + var(--shake-y2, 1px))) rotate(var(--shake-r2, -1deg));
+      }
+    }
+    .skill-detail-dialog {
+      width: min(1180px, calc(100vw - 72px));
+      max-height: calc(100svh - 72px);
+      padding: 0;
+      border: 0;
+      border-radius: 22px;
+      background: rgba(246, 246, 242, .88);
+      color: var(--ink);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 18px 46px rgba(29, 24, 18, .14);
+    }
+    .skill-detail-dialog::backdrop {
+      background: rgba(238, 238, 238, .48);
+      backdrop-filter: blur(3px);
+    }
+    .skill-detail-panel {
+      min-height: min(760px, calc(100svh - 96px));
+      padding: clamp(22px, 3vw, 34px);
+      display: flex;
+      flex-direction: column;
+    }
+    .skill-detail-panel header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+    }
+    .skill-detail-panel h3 {
+      margin: 0;
+      font-size: clamp(26px, 3vw, 44px);
+      line-height: .96;
+      letter-spacing: -.035em;
+      font-weight: 500;
+    }
+    .skill-detail-kicker {
+      margin: 0 0 10px;
+      font: 500 11px/1.2 ui-monospace, monospace;
+      color: var(--accent);
+    }
+    .skill-detail-close {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(29, 24, 18, .08);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    .skill-detail-body {
+      margin: 20px 0 0;
+      font-size: clamp(14px, 1vw, 16px);
+      line-height: 1.75;
+      color: #3d3832;
+    }
+    .skill-detail-proof {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(29, 24, 18, .14);
+      display: grid;
+      gap: 8px;
+      font: 500 clamp(11px, .8vw, 13px)/1.55 ui-monospace, monospace;
+      color: rgba(82, 77, 70, .86);
+    }
+    .skill-detail-dialog.is-media-only .skill-detail-panel header > div,
+    .skill-detail-dialog.is-media-only .skill-detail-body {
+      display: none;
+    }
+    .skill-detail-dialog.is-media-only .skill-detail-panel {
+      position: relative;
+      padding: clamp(16px, 2vw, 26px);
+    }
+    .skill-detail-dialog.is-media-only .skill-detail-close {
+      display: grid;
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 4;
+      background: rgba(246,246,242,.72);
+      backdrop-filter: blur(12px);
+    }
+    .skill-detail-dialog.is-media-only .skill-detail-proof {
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .skill-proof-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: clamp(14px, 1.6vw, 22px);
+      height: 100%;
+    }
+    .skill-proof-gallery img,
+    .skill-proof-gallery video {
+      width: 100%;
+      height: 100%;
+      min-height: min(62vh, 620px);
+      object-fit: contain;
+      border-radius: 18px;
+      background: rgba(255,255,255,.52);
+      border: 1px solid rgba(255,255,255,.72);
+    }
+    .skill-proof-gallery video { cursor: pointer; }
     .cloud {
       position: absolute;
-      left: 10%;
-      right: -4%;
-      bottom: -9%;
-      height: 47%;
-      border-radius: 52% 48% 0 0;
-      background: var(--placeholder);
-    }
-    .cloud-copy {
-      position: absolute;
-      left: 18%;
-      bottom: 18%;
-      z-index: 3;
+      left: auto;
+      right: -120px;
+      bottom: calc(.5% - 30px);
+      width: 120.12%;
+      height: 94.71%;
+      object-fit: contain;
+      object-position: right bottom;
+      pointer-events: none;
+      z-index: 1;
+      opacity: .98;
+      filter: drop-shadow(0 28px 52px rgba(36, 32, 28, .08));
     }
     .character {
       position: absolute;
@@ -289,16 +783,57 @@
       .global-utility a:not(:last-child) { display: none; }
       .resume-inner,
       .experience-inner { inset-left: 18px; inset-right: 18px; }
-      .resume-content { grid-template-columns: 1fr; }
-      .resume-document { display: none; }
+      .resume-inner {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        overflow: hidden;
+      }
+      .resume-document {
+        width: max-content;
+        max-width: 100%;
+        height: 42vh;
+        min-height: 42vh;
+      }
+      .resume-document img {
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+      }
+      .resume-tools {
+        left: 0;
+        right: auto;
+        top: -40px;
+        flex-direction: row;
+      }
+      .resume-directory { justify-content: flex-start; padding-top: 0; }
+      .resume-directory .section-title { font-size: clamp(42px, 14vw, 74px); }
+      .directory-list a { grid-template-columns: 38px 1fr; }
+      .directory-list em { display: none; }
       .experience-copy { inset: 0; padding-top: 28vh; }
       .experience-intro { display: none; }
+      .school-project-panel { width: 100%; }
+      .school-project-media { max-height: 36vh; }
       .island-area { top: 0; right: 22%; width: 56%; height: 25vh; }
       .island-label { top: 25vh; right: 20%; bottom: auto; width: 60%; }
+      #skills::after { display: none; }
       .skills-heading { left: 22px; top: 70px; }
-      .skill-pills { left: 22px; right: 22px; top: 29%; }
-      .skill-pill { font-size: 10px; padding: 0 12px; }
-      .cloud { left: -10%; right: -20%; height: 38%; }
+      .skill-map { inset: 188px 18px 120px 18px; }
+      .skill-cloud-zone {
+        position: relative;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        width: min(100%, 560px);
+        min-height: 156px;
+        padding: 22px 20px;
+        transform: none !important;
+        margin-bottom: 18px;
+      }
+      .skill-cloud-zone::before { width: 116%; height: 138%; }
+      .skill-cloud-items { max-width: none; }
+      .skill-chip { font-size: 11px; padding: 0 12px; }
+      .cloud { left: calc(10% - 210px); right: auto; bottom: 0px; width: 108.9%; height: 67.76%; }
       .character { right: 11%; bottom: 8%; }
       .destination-title { font-size: clamp(42px, 13vw, 74px); }
     }
@@ -318,24 +853,33 @@
     <div class="placeholder" style="width:100%;height:100%">正在载入已确认首页…</div>
   </section>
 
-  <section id="resume" class="stage" aria-label="简历页">
-    <p class="page-index">02 · 简历页</p>
+  <section id="resume" class="stage" aria-label="目录页">
+    <p class="page-index">02 · 目录页</p>
     <div class="resume-inner">
-      <header class="resume-heading">
-        <h2 class="section-title">xxx简历页标题xxx</h2>
-        <p class="meta">完整履历<br>xxx更新时间xxx</p>
-      </header>
-      <div class="resume-content">
-        <div class="resume-rows">
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx实习经历名称xxx</span><span>北京</span></div>
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx实习经历名称xxx</span><span>深圳</span></div>
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx实习经历名称xxx</span><span>上海</span></div>
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx实习经历名称xxx</span><span>杭州</span></div>
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx学校项目名称xxx</span><span>xxx地点xxx</span></div>
-          <div class="resume-row"><span>xxxx—xxxx</span><span>xxx个人 AI 实践名称xxx</span><span>xxx地点xxx</span></div>
+      <figure class="resume-document" aria-label="完整简历图片">
+        <img src="../assets/resume-gxt-2026-08-06.png" alt="官晓彤简历">
+        <div class="resume-tools" aria-label="简历工具">
+          <a class="resume-tool" href="../assets/resume-gxt-2026-08-06.png" download>
+            <svg class="resume-download-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v10"></path>
+              <path d="m8 10 4 4 4-4"></path>
+              <path d="M5 18h14"></path>
+            </svg>
+            <span>下载</span>
+          </a>
         </div>
-        <div class="resume-document placeholder">xxx完整 PDF 简历版式占位xxx</div>
-      </div>
+      </figure>
+      <aside class="resume-directory" aria-label="网站目录">
+        <p class="directory-current">CURRENT · 02 / 目录页</p>
+        <h2 class="section-title">目录</h2>
+        <nav class="directory-list" aria-label="作品集页面目录">
+          <a href="#home"><span>01</span><strong>首页</strong><em>个人信息</em></a>
+          <a href="#resume" class="is-current"><span>02</span><strong>目录页</strong><em>简历总览</em></a>
+          <a href="#experience"><span>03</span><strong>经历岛</strong><em>经历与项目</em></a>
+          <a href="#skills"><span>04</span><strong>技能云海</strong><em>能力地图</em></a>
+          <a href="#destination"><span>05</span><strong>终点页</strong><em>联系与收束</em></a>
+        </nav>
+      </aside>
     </div>
     <div class="next-cue">继续向下 · 进入经历岛</div>
   </section>
@@ -346,12 +890,16 @@
       <div class="experience-copy">
         <h2 class="section-title">我做过什么</h2>
         <p class="experience-intro">xxx当前分类或经历的具体信息介绍xxx</p>
-        <div class="experience-list">
-          <div class="experience-row"><span>01</span><span>xxx经历名称xxx</span><span>查看详情 →</span></div>
-          <div class="experience-row"><span>02</span><span>xxx经历名称xxx</span><span>查看详情 →</span></div>
-          <div class="experience-row"><span>03</span><span>xxx经历名称xxx</span><span>查看详情 →</span></div>
-          <div class="experience-row"><span>04</span><span>xxx经历名称xxx</span><span>查看详情 →</span></div>
-        </div>
+        <article class="school-project-panel" data-school-project-panel hidden aria-live="polite">
+          <header class="school-project-head">
+            <div>
+              <p class="school-project-kicker">SCHOOL PROJECT</p>
+              <h3 data-school-project-title>学校项目</h3>
+            </div>
+            <p class="school-project-hint">点击学校子岛部件切换资料</p>
+          </header>
+          <div class="school-project-media" data-school-project-media></div>
+        </article>
       </div>
       <div class="island-area placeholder">经历岛插画占位<br>右侧约 30% 画幅</div>
       <p class="island-label meta">拖动旋转 · 点击选择<br>实习 / 学校 / 个人 AI 实践</p>
@@ -365,20 +913,63 @@
       <h2 class="section-title">我擅长什么</h2>
       <p class="meta">xxx技能页补充介绍xxx</p>
     </header>
-    <div class="skill-pills" aria-label="技能占位">
-      <button class="skill-pill">AI 产品策划</button>
-      <button class="skill-pill">用户洞察</button>
-      <button class="skill-pill">产品分析与需求定义</button>
-      <button class="skill-pill">AI 视觉与创意表达</button>
-      <button class="skill-pill">Prompt 与工作流设计</button>
-      <button class="skill-pill">Agent 产品思维</button>
-      <button class="skill-pill">原型设计</button>
-      <button class="skill-pill">Vibe Coding</button>
+    <div class="skill-map" aria-label="技能云团分区">
+      <section class="skill-cloud-zone think" aria-label="Think 产品能力">
+        <h3 class="skill-zone-title"><strong>Think</strong><span>产品能力</span></h3>
+        <div class="skill-cloud-items">
+          <button class="skill-chip" data-zone="Think" data-skill="需求洞察">需求洞察</button>
+          <button class="skill-chip" data-zone="Think" data-skill="产品规划">产品规划</button>
+          <button class="skill-chip" data-zone="Think" data-skill="数据分析">数据分析</button>
+          <button class="skill-chip" data-zone="Think" data-skill="项目协作">项目协作</button>
+        </div>
+      </section>
+      <section class="skill-cloud-zone ai" aria-label="AI 理解">
+        <h3 class="skill-zone-title"><strong>AI</strong><span>AI 理解</span></h3>
+        <div class="skill-cloud-items">
+          <button class="skill-chip" data-zone="AI" data-skill="评测与迭代">评测与迭代</button>
+          <button class="skill-chip" data-zone="AI" data-skill="AI 产品设计">AI 产品设计</button>
+          <button class="skill-chip" data-zone="AI" data-skill="AI 实践探索">AI 实践探索</button>
+          <button class="skill-chip" data-zone="AI" data-skill="Prompt 工程">Prompt 工程</button>
+        </div>
+      </section>
+      <section class="skill-cloud-zone tool" aria-label="Tool 软件工具">
+        <h3 class="skill-zone-title"><strong>Tool</strong><span>软件工具</span></h3>
+        <div class="skill-cloud-items">
+          <button class="skill-chip" data-zone="Tool" data-skill="设计与可视化">设计与可视化</button>
+          <button class="skill-chip" data-zone="Tool" data-skill="多模态生成">多模态生成</button>
+          <button class="skill-chip" data-zone="Tool" data-skill="代码基础">代码基础</button>
+          <button class="skill-chip" data-zone="Tool" data-skill="AI 辅助办公">AI 辅助办公</button>
+        </div>
+      </section>
+      <section class="skill-cloud-zone energy" aria-label="Energy 个性能量">
+        <h3 class="skill-zone-title"><strong>Energy</strong><span>个性能量</span></h3>
+        <div class="skill-cloud-items">
+          <button class="skill-chip" data-zone="Energy" data-skill="象棋">象棋</button>
+          <button class="skill-chip" data-zone="Energy" data-skill="羽毛球">羽毛球</button>
+          <button class="skill-chip" data-zone="Energy" data-skill="吉他">吉他</button>
+          <button class="skill-chip" data-zone="Energy" data-skill="健身">健身</button>
+          <button class="skill-chip" data-zone="Energy" data-skill="听播客">听播客</button>
+          <button class="skill-chip" data-zone="Energy" data-skill="看书">看书</button>
+        </div>
+      </section>
     </div>
-    <div class="cloud placeholder" aria-label="云海插画占位"></div>
-    <p class="cloud-copy meta">xxx技能证据卡片占位xxx</p>
-    <div class="character placeholder">人物占位<br>底部偏右</div>
-    <div class="next-cue">继续向下 · 穿过云层</div>
+    <img class="cloud" src="../assets/skill-cloud-character.png" alt="技能云海人物与云团背景">
+    <dialog class="skill-detail-dialog" aria-label="技能详情窗口">
+      <article class="skill-detail-panel">
+        <header>
+          <div>
+            <p class="skill-detail-kicker">SKILL DETAIL</p>
+            <h3 data-skill-title>需求洞察</h3>
+          </div>
+          <button class="skill-detail-close" type="button" aria-label="关闭技能详情">×</button>
+        </header>
+        <p class="skill-detail-body" data-skill-body>点击任意技能单元后，这里弹出该能力的说明与佐证资料。</p>
+        <div class="skill-detail-proof" data-skill-proof>
+          <span>佐证 01 · xxx项目 / xxx经历</span>
+          <span>佐证 02 · xxx产出 / xxx方法</span>
+        </div>
+      </article>
+    </dialog>    <div class="next-cue">继续向下 · 穿过云层</div>
   </section>
 
   <section id="destination" class="stage" aria-label="抵达终点">
@@ -400,7 +991,224 @@
   </section>
 
   <script>
-    fetch('/files/homepage-viewport-fit-v5.html')
+    (function () {
+      var skills = document.getElementById('skills');
+      if (!skills) return;
+
+      var chips = Array.prototype.slice.call(skills.querySelectorAll('.skill-chip'));
+      chips.forEach(function (chip, index) {
+        var sign = index % 2 === 0 ? 1 : -1;
+        var x = (1.2 + Math.random() * 2.8) * sign;
+        var y = -2.8 + Math.random() * 5.6;
+        var r = (.45 + Math.random() * 1.4) * sign;
+        chip.style.setProperty('--shake-x', x.toFixed(2) + 'px');
+        chip.style.setProperty('--shake-y', y.toFixed(2) + 'px');
+        chip.style.setProperty('--shake-x2', (-x * .72).toFixed(2) + 'px');
+        chip.style.setProperty('--shake-y2', (-y * .58).toFixed(2) + 'px');
+        chip.style.setProperty('--shake-r', r.toFixed(2) + 'deg');
+        chip.style.setProperty('--shake-r2', (-r * .8).toFixed(2) + 'deg');
+        chip.style.setProperty('--shake-delay', (index * .055).toFixed(3) + 's');
+      });
+
+      var zones = Array.prototype.slice.call(skills.querySelectorAll('.skill-cloud-zone'));
+      var viewedKey = 'portfolio.skillCloud.viewed.v1';
+      var viewed = {};
+      try {
+        viewed = JSON.parse(localStorage.getItem(viewedKey) || '{}') || {};
+      } catch (error) {
+        viewed = {};
+      }
+
+      function saveViewed() {
+        try {
+          localStorage.setItem(viewedKey, JSON.stringify(viewed));
+        } catch (error) {}
+      }
+
+      function applyViewedState() {
+        chips.forEach(function (chip) {
+          var skill = chip.getAttribute('data-skill');
+          chip.classList.toggle('is-viewed', Boolean(viewed[skill]));
+        });
+        zones.forEach(function (zone) {
+          var hasViewedSkill = Array.prototype.some.call(zone.querySelectorAll('.skill-chip'), function (chip) {
+            return Boolean(viewed[chip.getAttribute('data-skill')]);
+          });
+          zone.classList.toggle('is-viewed', hasViewedSkill);
+        });
+      }
+
+      function markSkillViewed(chip) {
+        var skill = chip.getAttribute('data-skill');
+        if (!skill) return;
+        viewed[skill] = true;
+        saveViewed();
+        applyViewedState();
+      }
+
+      applyViewedState();
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () { markSkillViewed(chip); });
+      });
+
+      var rect = skills.getBoundingClientRect();
+      var targetX = rect.width / 2;
+      var targetY = rect.height / 2;
+      var currentX = targetX;
+      var currentY = targetY;
+      var targetOpacity = 0;
+      var currentOpacity = 0;
+      var frame = 0;
+
+      function paintSpotlight() {
+        currentX += (targetX - currentX) * .18;
+        currentY += (targetY - currentY) * .18;
+        currentOpacity += (targetOpacity - currentOpacity) * .12;
+        skills.style.setProperty('--spotlight-x', currentX.toFixed(1) + 'px');
+        skills.style.setProperty('--spotlight-y', currentY.toFixed(1) + 'px');
+        skills.style.setProperty('--spotlight-opacity', currentOpacity.toFixed(3));
+
+        if (Math.abs(targetX - currentX) > .25 || Math.abs(targetY - currentY) > .25 || Math.abs(targetOpacity - currentOpacity) > .006) {
+          frame = requestAnimationFrame(paintSpotlight);
+        } else {
+          frame = 0;
+        }
+      }
+
+      function startSpotlight() {
+        if (!frame) frame = requestAnimationFrame(paintSpotlight);
+      }
+
+      function setActive(zone) {
+        zones.forEach(function (item) {
+          item.classList.toggle('is-active', item === zone);
+        });
+      }
+
+      skills.addEventListener('pointermove', function (event) {
+        var bounds = skills.getBoundingClientRect();
+        targetX = event.clientX - bounds.left;
+        targetY = event.clientY - bounds.top;
+        targetOpacity = .98;
+        skills.classList.add('is-spotlight-on');
+        startSpotlight();
+      });
+
+      skills.addEventListener('pointerleave', function () {
+        targetOpacity = 0;
+        skills.classList.remove('is-spotlight-on');
+        zones.forEach(function (zone) { zone.classList.remove('is-active'); });
+        startSpotlight();
+      });
+
+      zones.forEach(function (zone) {
+        zone.addEventListener('pointerenter', function () {
+          setActive(zone);
+        });
+        zone.addEventListener('pointerleave', function () {
+          zone.classList.remove('is-active');
+        });
+        zone.addEventListener('focusin', function () {
+          var bounds = skills.getBoundingClientRect();
+          var zoneBounds = zone.getBoundingClientRect();
+          targetX = zoneBounds.left + zoneBounds.width / 2 - bounds.left;
+          targetY = zoneBounds.top + zoneBounds.height / 2 - bounds.top;
+          targetOpacity = .98;
+          skills.classList.add('is-spotlight-on');
+          setActive(zone);
+          startSpotlight();
+        });
+        zone.addEventListener('focusout', function (event) {
+          if (!zone.contains(event.relatedTarget)) zone.classList.remove('is-active');
+        });
+      });
+    }());
+
+    (function () {
+      var dialog = document.querySelector('.skill-detail-dialog');
+      if (!dialog) return;
+      var title = dialog.querySelector('[data-skill-title]');
+      var body = dialog.querySelector('[data-skill-body]');
+      var proof = dialog.querySelector('[data-skill-proof]');
+      var close = dialog.querySelector('.skill-detail-close');
+      var copy = {
+        '需求洞察': ['通过用户访谈、竞品拆解和场景观察，把模糊需求翻译成清晰问题。', ['佐证 01 · xxx用户研究材料', '佐证 02 · xxx需求定义文档']],
+        '产品规划': ['围绕目标、路径、优先级与节奏，拆出可落地的产品方案。', ['佐证 01 · xxx产品方案', '佐证 02 · xxx版本规划']],
+        '数据分析': ['用数据验证判断，关注指标变化背后的用户行为和业务含义。', ['佐证 01 · xxx数据分析', '佐证 02 · xxx复盘结论']],
+        '项目协作': ['推动多角色同步信息、确认边界，并把计划推进到结果。', ['佐证 01 · xxx项目推进', '佐证 02 · xxx跨团队协作']],
+        '评测与迭代': ['围绕真实任务设计评测标准，持续发现模型体验中的问题。', ['佐证 01 · xxx评测表', '佐证 02 · xxx迭代记录']],
+        'AI 产品设计': ['理解模型能力与产品目标之间的关系，设计可被用户感知的 AI 体验。', ['佐证 01 · xxxAI产品设计', '佐证 02 · xxx交互方案']],
+        'AI 实践探索': ['主动尝试 Agent、RAG、多模态与工作流，把新技术转成可演示原型。', ['佐证 01 · xxx实践Demo', '佐证 02 · xxx探索记录']],
+        'Prompt 工程': ['通过结构化提示词、上下文组织和约束设计，提高输出稳定性。', ['佐证 01 · xxxPrompt方案', '佐证 02 · xxx工作流']],
+        '设计与可视化': ['使用 Figma、Axure、PS 等工具表达流程、页面与信息结构。', ['佐证 01 · xxx原型图', '佐证 02 · xxx视觉稿']],
+        '多模态生成': ['使用图像、视频与多模态生成工具辅助创意表达和内容生产。', ['佐证 01 · xxx生成案例', '佐证 02 · xxx视觉探索']],
+        '代码基础': ['具备 Python / C++ 基础，能理解技术实现并完成轻量原型。', ['佐证 01 · xxx代码项目', '佐证 02 · xxx脚本工具']],
+        'AI 辅助办公': ['熟悉 Codex、Claude、Cursor、Coze 等工具，提高研究、写作与原型效率。', ['佐证 01 · xxx效率工作流', '佐证 02 · xxxAI工具使用']],
+        '象棋': ['训练推演、布局和局势判断。', ['佐证 01 · xxx兴趣记录']],
+        '羽毛球': ['保持反应速度、体能和竞技状态。', ['佐证 01 · xxx兴趣记录']],
+        '吉他': ['通过音乐保持感受力和表达欲。', ['佐证 01 · xxx兴趣记录']],
+        '健身': ['高精力来自稳定的身体状态。', ['佐证 01 · xxx兴趣记录']],
+        '听播客': ['持续吸收产品、商业和科技语境。', ['佐证 01 · xxx播客清单']],
+        '看书': ['用阅读建立长期思考材料库。', ['佐证 01 · xxx阅读清单']]
+      };
+      var energyDetails = {
+        '象棋': {
+          body: '象棋是我的推演训练：在有限信息里判断局势、预判对手意图，并持续修正自己的策略。',
+          media: [
+            { type: 'image', src: '../assets/energy/xiangqi.jpg', alt: '象棋兴趣记录' }
+          ]
+        },
+        '羽毛球': {
+          body: '羽毛球代表反应速度、节奏感和持续行动力。它让我在高强度对抗里保持专注，也训练快速调整状态。',
+          media: [
+            { type: 'image', src: '../assets/energy/badminton-01.jpg', alt: '羽毛球训练记录一' },
+            { type: 'image', src: '../assets/energy/badminton-02.png', alt: '羽毛球训练记录二' }
+          ]
+        },
+        '吉他': {
+          body: '吉他是感受力和表达欲的出口：从节奏、旋律到练习反馈，保持对细节和情绪的敏感。',
+          media: [
+            { type: 'video', src: '../assets/energy/guitar.mp4', alt: '吉他练习视频' }
+          ]
+        },
+        '健身': {
+          body: '健身是高精力的底层系统。稳定训练让我保持更强的体能、恢复力和长期执行力。',
+          media: [
+            { type: 'image', src: '../assets/energy/fitness-01.jpg', alt: '健身记录一' },
+            { type: 'image', src: '../assets/energy/fitness-02.jpg', alt: '健身记录二' }
+          ]
+        }
+      };
+      function renderProof(item) {
+        if (!item || !item.media) return '<span>佐证 01 · xxx资料</span>';
+        return '<div class="skill-proof-gallery">' + item.media.map(function (asset) {
+          if (asset.type === 'video') {
+            return '<video src="' + asset.src + '" controls playsinline preload="metadata" aria-label="' + asset.alt + '"></video>';
+          }
+          return '<img src="' + asset.src + '" alt="' + asset.alt + '">';
+        }).join('') + '</div>';
+      }
+      document.querySelectorAll('.skill-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var skill = chip.getAttribute('data-skill');
+          var detail = energyDetails[skill];
+          var item = detail || copy[skill] || ['xxx技能说明xxx', ['佐证 01 · xxx资料']];
+          dialog.classList.toggle('is-media-only', Boolean(detail));
+          title.textContent = skill;
+          body.textContent = detail ? detail.body : item[0];
+          proof.innerHTML = detail ? renderProof(detail) : item[1].map(function (line) { return '<span>' + line + '</span>'; }).join('');
+          if (typeof dialog.showModal === 'function') dialog.showModal();
+          else dialog.setAttribute('open', '');
+        });
+      });
+      close.addEventListener('click', function () { dialog.close(); });
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) dialog.close();
+      });
+    }());
+  </script>
+  <script>
+    fetch('./homepage-viewport-fit-v5.html')
       .then(function (response) {
         if (!response.ok) throw new Error('首页资源载入失败');
         return response.text();

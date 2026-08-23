@@ -11495,13 +11495,13 @@ var Mesh = class extends Object3D {
   }
 };
 function checkIntersection$1(object, material, raycaster, ray, pA, pB, pC, point) {
-  let intersect;
+  let intersect2;
   if (material.side === BackSide) {
-    intersect = ray.intersectTriangle(pC, pB, pA, true, point);
+    intersect2 = ray.intersectTriangle(pC, pB, pA, true, point);
   } else {
-    intersect = ray.intersectTriangle(pA, pB, pC, material.side === FrontSide, point);
+    intersect2 = ray.intersectTriangle(pA, pB, pC, material.side === FrontSide, point);
   }
-  if (intersect === null) return null;
+  if (intersect2 === null) return null;
   _intersectionPointWorld.copy(point);
   _intersectionPointWorld.applyMatrix4(object.matrixWorld);
   const distance = raycaster.ray.origin.distanceTo(_intersectionPointWorld);
@@ -13715,10 +13715,10 @@ var InstancedMesh = class extends Mesh {
       _mesh$1.matrixWorld = _instanceWorldMatrix;
       _mesh$1.raycast(raycaster, _instanceIntersects);
       for (let i = 0, l = _instanceIntersects.length; i < l; i++) {
-        const intersect = _instanceIntersects[i];
-        intersect.instanceId = instanceId;
-        intersect.object = this;
-        intersects.push(intersect);
+        const intersect2 = _instanceIntersects[i];
+        intersect2.instanceId = instanceId;
+        intersect2.object = this;
+        intersects.push(intersect2);
       }
       _instanceIntersects.length = 0;
     }
@@ -14320,32 +14320,32 @@ var Line = class extends Object3D {
       for (let i = start, l = end - 1; i < l; i += step) {
         const a = index.getX(i);
         const b = index.getX(i + 1);
-        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, i);
-        if (intersect) {
-          intersects.push(intersect);
+        const intersect2 = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, i);
+        if (intersect2) {
+          intersects.push(intersect2);
         }
       }
       if (this.isLineLoop) {
         const a = index.getX(end - 1);
         const b = index.getX(start);
-        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, end - 1);
-        if (intersect) {
-          intersects.push(intersect);
+        const intersect2 = checkIntersection(this, raycaster, _ray$1, localThresholdSq, a, b, end - 1);
+        if (intersect2) {
+          intersects.push(intersect2);
         }
       }
     } else {
       const start = Math.max(0, drawRange.start);
       const end = Math.min(positionAttribute.count, drawRange.start + drawRange.count);
       for (let i = start, l = end - 1; i < l; i += step) {
-        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, i, i + 1, i);
-        if (intersect) {
-          intersects.push(intersect);
+        const intersect2 = checkIntersection(this, raycaster, _ray$1, localThresholdSq, i, i + 1, i);
+        if (intersect2) {
+          intersects.push(intersect2);
         }
       }
       if (this.isLineLoop) {
-        const intersect = checkIntersection(this, raycaster, _ray$1, localThresholdSq, end - 1, start, end - 1);
-        if (intersect) {
-          intersects.push(intersect);
+        const intersect2 = checkIntersection(this, raycaster, _ray$1, localThresholdSq, end - 1, start, end - 1);
+        if (intersect2) {
+          intersects.push(intersect2);
         }
       }
     }
@@ -17882,6 +17882,145 @@ PropertyBinding.prototype.SetterByBindingTypeAndVersioning = [
   ]
 ];
 var _controlInterpolantsResultBuffer = new Float32Array(1);
+var _matrix = /* @__PURE__ */ new Matrix4();
+var Raycaster = class {
+  /**
+   * Constructs a new raycaster.
+   *
+   * @param {Vector3} origin - The origin vector where the ray casts from.
+   * @param {Vector3} direction - The (normalized) direction vector that gives direction to the ray.
+   * @param {number} [near=0] - All results returned are further away than near. Near can't be negative.
+   * @param {number} [far=Infinity] - All results returned are closer than far. Far can't be lower than near.
+   */
+  constructor(origin, direction, near = 0, far = Infinity) {
+    this.ray = new Ray(origin, direction);
+    this.near = near;
+    this.far = far;
+    this.camera = null;
+    this.layers = new Layers();
+    this.params = {
+      Mesh: {},
+      Line: { threshold: 1 },
+      LOD: {},
+      Points: { threshold: 1 },
+      Sprite: {}
+    };
+  }
+  /**
+   * Updates the ray with a new origin and direction by copying the values from the arguments.
+   *
+   * @param {Vector3} origin - The origin vector where the ray casts from.
+   * @param {Vector3} direction - The (normalized) direction vector that gives direction to the ray.
+   */
+  set(origin, direction) {
+    this.ray.set(origin, direction);
+  }
+  /**
+   * Uses the given coordinates and camera to compute a new origin and direction for the internal ray.
+   *
+   * @param {Vector2} coords - 2D coordinates of the mouse, in normalized device coordinates (NDC).
+   * X and Y components should be between `-1` and `1`.
+   * @param {Camera} camera - The camera from which the ray should originate.
+   */
+  setFromCamera(coords, camera) {
+    if (camera.isPerspectiveCamera) {
+      this.ray.origin.setFromMatrixPosition(camera.matrixWorld);
+      this.ray.direction.set(coords.x, coords.y, 0.5).unproject(camera).sub(this.ray.origin).normalize();
+      this.camera = camera;
+    } else if (camera.isOrthographicCamera) {
+      this.ray.origin.set(coords.x, coords.y, (camera.near + camera.far) / (camera.near - camera.far)).unproject(camera);
+      this.ray.direction.set(0, 0, -1).transformDirection(camera.matrixWorld);
+      this.camera = camera;
+    } else {
+      console.error("THREE.Raycaster: Unsupported camera type: " + camera.type);
+    }
+  }
+  /**
+   * Uses the given WebXR controller to compute a new origin and direction for the internal ray.
+   *
+   * @param {WebXRController} controller - The controller to copy the position and direction from.
+   * @return {Raycaster} A reference to this raycaster.
+   */
+  setFromXRController(controller) {
+    _matrix.identity().extractRotation(controller.matrixWorld);
+    this.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    this.ray.direction.set(0, 0, -1).applyMatrix4(_matrix);
+    return this;
+  }
+  /**
+   * The intersection point of a raycaster intersection test.
+   * @typedef {Object} Raycaster~Intersection
+   * @property {number} distance - The distance from the ray's origin to the intersection point.
+   * @property {number} distanceToRay -  Some 3D objects e.g. {@link Points} provide the distance of the
+   * intersection to the nearest point on the ray. For other objects it will be `undefined`.
+   * @property {Vector3} point - The intersection point, in world coordinates.
+   * @property {Object} face - The face that has been intersected.
+   * @property {number} faceIndex - The face index.
+   * @property {Object3D} object - The 3D object that has been intersected.
+   * @property {Vector2} uv - U,V coordinates at point of intersection.
+   * @property {Vector2} uv1 - Second set of U,V coordinates at point of intersection.
+   * @property {Vector3} uv1 - Interpolated normal vector at point of intersection.
+   * @property {number} instanceId - The index number of the instance where the ray
+   * intersects the {@link InstancedMesh}.
+   */
+  /**
+   * Checks all intersection between the ray and the object with or without the
+   * descendants. Intersections are returned sorted by distance, closest first.
+   *
+   * `Raycaster` delegates to the `raycast()` method of the passed 3D object, when
+   * evaluating whether the ray intersects the object or not. This allows meshes to respond
+   * differently to ray casting than lines or points.
+   *
+   * Note that for meshes, faces must be pointed towards the origin of the ray in order
+   * to be detected; intersections of the ray passing through the back of a face will not
+   * be detected. To raycast against both faces of an object, you'll want to set  {@link Material#side}
+   * to `THREE.DoubleSide`.
+   *
+   * @param {Object3D} object - The 3D object to check for intersection with the ray.
+   * @param {boolean} [recursive=true] - If set to `true`, it also checks all descendants.
+   * Otherwise it only checks intersection with the object.
+   * @param {Array<Raycaster~Intersection>} [intersects=[]] The target array that holds the result of the method.
+   * @return {Array<Raycaster~Intersection>} An array holding the intersection points.
+   */
+  intersectObject(object, recursive = true, intersects = []) {
+    intersect(object, this, intersects, recursive);
+    intersects.sort(ascSort);
+    return intersects;
+  }
+  /**
+   * Checks all intersection between the ray and the objects with or without
+   * the descendants. Intersections are returned sorted by distance, closest first.
+   *
+   * @param {Array<Object3D>} objects - The 3D objects to check for intersection with the ray.
+   * @param {boolean} [recursive=true] - If set to `true`, it also checks all descendants.
+   * Otherwise it only checks intersection with the object.
+   * @param {Array<Raycaster~Intersection>} [intersects=[]] The target array that holds the result of the method.
+   * @return {Array<Raycaster~Intersection>} An array holding the intersection points.
+   */
+  intersectObjects(objects, recursive = true, intersects = []) {
+    for (let i = 0, l = objects.length; i < l; i++) {
+      intersect(objects[i], this, intersects, recursive);
+    }
+    intersects.sort(ascSort);
+    return intersects;
+  }
+};
+function ascSort(a, b) {
+  return a.distance - b.distance;
+}
+function intersect(object, raycaster, intersects, recursive) {
+  let propagate = true;
+  if (object.layers.test(raycaster.layers)) {
+    const result = object.raycast(raycaster, intersects);
+    if (result === false) propagate = false;
+  }
+  if (propagate === true && recursive === true) {
+    const children = object.children;
+    for (let i = 0, l = children.length; i < l; i++) {
+      intersect(children[i], raycaster, intersects, true);
+    }
+  }
+}
 var Spherical = class {
   /**
    * Constructs a new spherical.
@@ -31720,9 +31859,52 @@ function interceptControlUp(event) {
   }
 }
 
+// src/experience-island-zoom.js
+function experienceIslandZoomRange(fitDistance) {
+  if (!Number.isFinite(fitDistance) || fitDistance <= 0) {
+    throw new RangeError("fitDistance must be a finite positive number");
+  }
+  return {
+    minDistance: fitDistance / 1.5,
+    initialDistance: fitDistance / 1.3,
+    maxDistance: fitDistance
+  };
+}
+
 // src/portfolio-island.js
 var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 var activeMount = null;
+var SCHOOL_PROJECTS = {
+  uiux: {
+    title: "UIUX",
+    media: [
+      { type: "image", src: "assets/school-projects/uiux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
+    ]
+  },
+  apex: {
+    title: "APEX",
+    media: [
+      { type: "video", src: "assets/school-projects/apex-demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
+      { type: "image", src: "assets/school-projects/apex-cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
+      { type: "image", src: "assets/school-projects/apex-section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
+    ]
+  },
+  cell: {
+    title: "\u7EC6\u80DE\u5DE5\u5382",
+    media: [
+      { type: "image", src: "assets/school-projects/cell-factory-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
+      { type: "image", src: "assets/school-projects/cell-factory-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
+      { type: "image", src: "assets/school-projects/cell-factory-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
+      { type: "video", src: "assets/school-projects/cell-factory-innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u521B\u65B0\u8D5B\u89C6\u9891", wide: true },
+      { type: "video", src: "assets/school-projects/cell-factory-live.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u5B9E\u62CD\u89C6\u9891", wide: true }
+    ]
+  }
+};
+var PROJECT_ANCHORS = {
+  uiux: { x: 0.24, y: 0.64, z: 0.62 },
+  apex: { x: 0.5, y: 0.76, z: 0.68 },
+  cell: { x: 0.72, y: 0.67, z: 0.7 }
+};
 function loadModel(loader, onProgress) {
   return new Promise((resolve, reject) => {
     loader.load(MODEL_URL, resolve, onProgress, reject);
@@ -31734,6 +31916,28 @@ function modelDistance(camera, radius) {
   const limitingFov = Math.max(Math.min(vertical, horizontal), 0.2);
   return radius / Math.sin(limitingFov / 2) * 1.08;
 }
+function mediaMarkup(asset) {
+  const wide = asset.wide ? ' class="wide"' : "";
+  if (asset.type === "video") {
+    return `<video${wide} src="${asset.src}" controls playsinline preload="metadata" aria-label="${asset.alt}"></video>`;
+  }
+  return `<img${wide} src="${asset.src}" alt="${asset.alt}">`;
+}
+function showSchoolProject(projectKey) {
+  const project = SCHOOL_PROJECTS[projectKey];
+  const panel = document.querySelector("[data-school-project-panel]");
+  if (!project || !panel) return;
+  const title = panel.querySelector("[data-school-project-title]");
+  const media = panel.querySelector("[data-school-project-media]");
+  if (title) title.textContent = project.title;
+  if (media) media.innerHTML = project.media.map(mediaMarkup).join("");
+  panel.hidden = false;
+  document.querySelectorAll("[data-school-project-trigger]").forEach((trigger) => {
+    const active = trigger.dataset.schoolProjectTrigger === projectKey;
+    trigger.classList.toggle("is-active", active);
+    trigger.setAttribute("aria-pressed", String(active));
+  });
+}
 async function mountExperienceIsland(container) {
   if (!(container instanceof HTMLElement) || activeMount) return activeMount;
   activeMount = (async () => {
@@ -31741,7 +31945,7 @@ async function mountExperienceIsland(container) {
     const status = area?.querySelector(".island-loading");
     const retry = area?.querySelector(".island-retry");
     const scene = new Scene();
-    const camera = new PerspectiveCamera(32, 1, 0.1, 1e3);
+    const camera = new PerspectiveCamera(32, 1, 0.01, 1e4);
     let renderer;
     try {
       renderer = new WebGLRenderer({ antialias: true, alpha: true });
@@ -31766,17 +31970,45 @@ async function mountExperienceIsland(container) {
     controls.minPolarAngle = Math.PI * 0.18;
     controls.maxPolarAngle = Math.PI * 0.82;
     let model = null;
+    let modelBounds = null;
+    let modelSize = new Vector3(1, 1, 1);
     let radius = 4;
     let frame = 0;
     let running = false;
     let loading2 = false;
+    let pointerDown = null;
+    const pointer = new Vector2();
+    const raycaster = new Raycaster();
+    const projectedAnchor = new Vector3();
+    const updateProjectLabels = () => {
+      if (!model || !modelBounds) return;
+      area?.querySelectorAll("[data-school-project-trigger]").forEach((trigger) => {
+        const anchor = PROJECT_ANCHORS[trigger.dataset.schoolProjectTrigger];
+        if (!anchor) return;
+        projectedAnchor.set(
+          MathUtils.lerp(modelBounds.min.x, modelBounds.max.x, anchor.x),
+          MathUtils.lerp(modelBounds.min.y, modelBounds.max.y, anchor.y),
+          MathUtils.lerp(modelBounds.min.z, modelBounds.max.z, anchor.z)
+        );
+        model.localToWorld(projectedAnchor);
+        projectedAnchor.project(camera);
+        trigger.style.left = `${(projectedAnchor.x * 0.5 + 0.5) * container.clientWidth}px`;
+        trigger.style.top = `${(-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight}px`;
+        trigger.style.transform = "translate(-50%, -50%)";
+        trigger.hidden = projectedAnchor.z < -1 || projectedAnchor.z > 1;
+      });
+    };
+    area?.querySelectorAll("[data-school-project-trigger]").forEach((trigger) => {
+      trigger.addEventListener("click", () => showSchoolProject(trigger.dataset.schoolProjectTrigger));
+    });
     const fitModel = () => {
       if (!model) return;
       const distance = modelDistance(camera, radius);
-      camera.position.copy(new Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(distance));
+      const zoomRange = experienceIslandZoomRange(distance);
+      camera.position.copy(new Vector3(1.45, 0.95, 1.65).normalize().multiplyScalar(zoomRange.initialDistance));
       controls.target.set(0, 0, 0);
-      controls.minDistance = distance * 0.58;
-      controls.maxDistance = distance * 1.75;
+      controls.minDistance = zoomRange.minDistance;
+      controls.maxDistance = zoomRange.maxDistance;
       controls.update();
     };
     const resize = () => {
@@ -31793,6 +32025,7 @@ async function mountExperienceIsland(container) {
     const render = () => {
       if (!running) return;
       controls.update();
+      updateProjectLabels();
       renderer.render(scene, camera);
       frame = requestAnimationFrame(render);
     };
@@ -31807,7 +32040,45 @@ async function mountExperienceIsland(container) {
     };
     const syncVisibility = () => document.hidden ? stop() : start();
     document.addEventListener("visibilitychange", syncVisibility);
+    controls.addEventListener("change", updateProjectLabels);
     const loader = new GLTFLoader();
+    const projectFromIntersection = (intersection) => {
+      if (!model || !modelBounds || !intersection?.point) return null;
+      const local = model.worldToLocal(intersection.point.clone());
+      const nx = MathUtils.clamp((local.x - modelBounds.min.x) / modelSize.x, 0, 1);
+      const ny = MathUtils.clamp((local.y - modelBounds.min.y) / modelSize.y, 0, 1);
+      if (ny < 0.42) return null;
+      if (nx < 0.43) return "uiux";
+      if (nx < 0.58) return "apex";
+      return "cell";
+    };
+    const pickSchoolProject = (event) => {
+      if (!model) return null;
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = (event.clientX - rect.left) / rect.width * 2 - 1;
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hit = raycaster.intersectObject(model, true).find((item) => item.object?.isMesh);
+      return projectFromIntersection(hit);
+    };
+    renderer.domElement.addEventListener("pointerdown", (event) => {
+      pointerDown = { x: event.clientX, y: event.clientY };
+    });
+    renderer.domElement.addEventListener("pointermove", (event) => {
+      renderer.domElement.style.cursor = pickSchoolProject(event) ? "pointer" : "grab";
+    });
+    renderer.domElement.addEventListener("pointerleave", () => {
+      renderer.domElement.style.cursor = "grab";
+    });
+    renderer.domElement.addEventListener("click", (event) => {
+      if (pointerDown) {
+        const moved = Math.hypot(event.clientX - pointerDown.x, event.clientY - pointerDown.y);
+        pointerDown = null;
+        if (moved > 8) return;
+      }
+      const project = pickSchoolProject(event);
+      if (project) showSchoolProject(project);
+    });
     const loadScene = async () => {
       if (loading2 || model) return Boolean(model);
       loading2 = true;
@@ -31822,6 +32093,8 @@ async function mountExperienceIsland(container) {
         model = gltf.scene;
         const bounds = new Box3().setFromObject(model);
         const sphere = bounds.getBoundingSphere(new Sphere());
+        modelBounds = bounds.clone();
+        modelSize = bounds.getSize(new Vector3());
         model.position.sub(sphere.center);
         radius = Math.max(sphere.radius, 0.1);
         scene.add(model);

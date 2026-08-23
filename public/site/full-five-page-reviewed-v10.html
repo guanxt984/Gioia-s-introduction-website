@@ -47,17 +47,19 @@
 
     /* Comment 1: expose the complete next-page title inside the home viewport. */
     #home .next-title {
-      top: 84.5% !important;
-      font-size: clamp(48px, 6.3vw, 116px) !important;
-      line-height: .94 !important;
+      top: 82.5% !important;
+      font-size: clamp(28px, 3.3vw, 64px) !important;
+      line-height: 1.28 !important;
     }
-    #home .intro { top: 77.5% !important; }
 
     /* Comment 3: lower the pale background lettering so its shapes read. */
     #home .ghost-script {
-      inset: 2.5vh -3vw auto -3vw !important;
+      inset: calc(2.5vh - 20px) calc(-3vw - 76px) auto calc(-3vw + 76px) !important;
       height: 52vh !important;
       color: rgba(255,255,255,.76) !important;
+    }
+    #home .ghost-script .accent {
+      color: rgba(254, 84, 22, .8) !important;
     }
 
     /* Comment 4: the PDF sheet stands independently on the left. */
@@ -86,7 +88,8 @@
       width: min(100%, 430px);
       height: 100%;
       justify-self: start;
-      transform: rotate(-.8deg) !important;
+      transform: scale(1.8) !important;
+      transform-origin: center;
     }
     #resume .resume-rows {
       grid-column: 2;
@@ -120,10 +123,9 @@
         flex-basis: 32px;
       }
       #home .next-title {
-        top: 85.5% !important;
-        font-size: clamp(42px, 13vw, 68px) !important;
+        top: 79% !important;
+        font-size: clamp(24px, 7.2vw, 40px) !important;
       }
-      #home .intro { top: 78% !important; }
       #resume .resume-inner {
         inset: 70px 18px 42px !important;
         display: grid !important;

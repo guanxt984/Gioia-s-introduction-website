@@ -13,9 +13,19 @@
     }
   </style>
   <style id="island-3d-integration">
+    #experience.stage {
+      overflow: visible !important;
+      clip-path: none !important;
+      mask: none !important;
+      -webkit-mask: none !important;
+    }
     .island-area.is-3d {
       display: block;
-      overflow: visible;
+      overflow: visible !important;
+      clip-path: none !important;
+      mask: none !important;
+      -webkit-mask: none !important;
+      contain: none !important;
       border-radius: 0 !important;
       background: transparent !important;
       box-shadow: none !important;
@@ -24,7 +34,16 @@
     .island-area.is-3d::after { display: none !important; }
     .island-canvas {
       position: absolute;
-      inset: -6%;
+      inset: auto;
+      left: 50%;
+      top: 50%;
+      width: 70vw;
+      height: 110vh;
+      overflow: visible !important;
+      clip-path: none !important;
+      mask: none !important;
+      -webkit-mask: none !important;
+      transform: translate(calc(-50% - 20px), -50%);
       min-width: 1px;
       min-height: 1px;
       touch-action: none;
@@ -35,6 +54,48 @@
       display: block;
       width: 100%;
       height: 100%;
+      overflow: visible !important;
+      clip-path: none !important;
+      mask: none !important;
+      -webkit-mask: none !important;
+      outline: none;
+    }
+    .island-project-labels {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+    .island-project-label {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 9px;
+      border: 0;
+      background: rgba(238, 238, 238, .82);
+      color: var(--ink);
+      font: 700 clamp(9px, .65vw, 11px)/1 ui-monospace, monospace;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      cursor: pointer;
+      pointer-events: auto;
+      backdrop-filter: blur(8px);
+      transition: color .18s ease, transform .18s ease;
+    }
+    .island-project-label::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(254, 84, 22, .14);
+    }
+    .island-project-label:hover,
+    .island-project-label:focus-visible,
+    .island-project-label.is-active {
+      color: var(--accent);
+      transform: translateY(-2px);
       outline: none;
     }
     .island-loading {
@@ -68,8 +129,16 @@
     .island-retry[hidden] { display: none; }
     .webgl-unavailable .island-canvas { display: none; }
     @media (max-width: 760px) {
-      .island-canvas { inset: -10% -8% -4%; }
+      .island-canvas {
+        inset: auto;
+        left: 50%;
+        top: 50%;
+        width: 110vw;
+        height: 70vh;
+        transform: translate(calc(-50% - 20px), -50%);
+      }
       .island-loading { bottom: -20px; font-size: 9px; }
+      .island-project-label { padding: 5px 7px; font-size: 8px; }
     }
   </style>
 </head>
@@ -134,15 +203,216 @@
         islandArea.classList.remove('placeholder');
         islandArea.classList.add('is-3d');
         islandArea.innerHTML = [
-          '<div class="island-canvas" aria-label="\u53ef\u65cb\u8f6c\u7684 3D \u7ecf\u5386\u5c9b"></div>',
+          '<div class="island-canvas" aria-label="\u53ef\u65cb\u8f6c\u7684 3D \u7ecf\u5386\u5c9b">',
+          '<div class="island-project-labels" aria-label="\u5b66\u6821\u9879\u76ee\u90e8\u4ef6\u6807\u7b7e">',
+          '<button class="island-project-label" type="button" data-school-project-trigger="uiux">UIUX</button>',
+          '<button class="island-project-label" type="button" data-school-project-trigger="apex">APEX</button>',
+          '<button class="island-project-label" type="button" data-school-project-trigger="cell">\u7ec6\u80de\u5de5\u5382</button>',
+          '</div>',
+          '</div>',
           '<p class="island-loading" role="status">\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026</p>',
           '<button class="island-retry" type="button" hidden>\u91cd\u65b0\u52a0\u8f7d\u6a21\u578b</button>'
         ].join('');
       }
+      initSkillCloudInteractions();
       window.dispatchEvent(new Event('portfolio:ready'));
     }).catch(function (error) {
       document.getElementById('render-root').textContent = error.message;
     });
+
+    function initSkillCloudInteractions() {
+      var skills = document.getElementById('skills');
+      if (!skills) return;
+
+      var chips = Array.prototype.slice.call(skills.querySelectorAll('.skill-chip'));
+      chips.forEach(function (chip, index) {
+        var sign = index % 2 === 0 ? 1 : -1;
+        var x = (1.2 + Math.random() * 2.8) * sign;
+        var y = -2.8 + Math.random() * 5.6;
+        var r = (.45 + Math.random() * 1.4) * sign;
+        chip.style.setProperty('--shake-x', x.toFixed(2) + 'px');
+        chip.style.setProperty('--shake-y', y.toFixed(2) + 'px');
+        chip.style.setProperty('--shake-x2', (-x * .72).toFixed(2) + 'px');
+        chip.style.setProperty('--shake-y2', (-y * .58).toFixed(2) + 'px');
+        chip.style.setProperty('--shake-r', r.toFixed(2) + 'deg');
+        chip.style.setProperty('--shake-r2', (-r * .8).toFixed(2) + 'deg');
+        chip.style.setProperty('--shake-delay', (index * .055).toFixed(3) + 's');
+      });
+
+      var zones = Array.prototype.slice.call(skills.querySelectorAll('.skill-cloud-zone'));
+      var viewedKey = 'portfolio.skillCloud.viewed.v1';
+      var viewed = {};
+      try {
+        viewed = JSON.parse(localStorage.getItem(viewedKey) || '{}') || {};
+      } catch (error) {
+        viewed = {};
+      }
+
+      function saveViewed() {
+        try {
+          localStorage.setItem(viewedKey, JSON.stringify(viewed));
+        } catch (error) {}
+      }
+
+      function applyViewedState() {
+        chips.forEach(function (chip) {
+          var skill = chip.getAttribute('data-skill');
+          chip.classList.toggle('is-viewed', Boolean(viewed[skill]));
+        });
+        zones.forEach(function (zone) {
+          var hasViewedSkill = Array.prototype.some.call(zone.querySelectorAll('.skill-chip'), function (chip) {
+            return Boolean(viewed[chip.getAttribute('data-skill')]);
+          });
+          zone.classList.toggle('is-viewed', hasViewedSkill);
+        });
+      }
+
+      function markSkillViewed(chip) {
+        var skill = chip.getAttribute('data-skill');
+        if (!skill) return;
+        viewed[skill] = true;
+        saveViewed();
+        applyViewedState();
+      }
+
+      applyViewedState();
+
+      var rect = skills.getBoundingClientRect();
+      var targetX = rect.width / 2;
+      var targetY = rect.height / 2;
+      var currentX = targetX;
+      var currentY = targetY;
+      var targetOpacity = 0;
+      var currentOpacity = 0;
+      var frame = 0;
+
+      function paintSpotlight() {
+        currentX += (targetX - currentX) * .18;
+        currentY += (targetY - currentY) * .18;
+        currentOpacity += (targetOpacity - currentOpacity) * .12;
+        skills.style.setProperty('--spotlight-x', currentX.toFixed(1) + 'px');
+        skills.style.setProperty('--spotlight-y', currentY.toFixed(1) + 'px');
+        skills.style.setProperty('--spotlight-opacity', currentOpacity.toFixed(3));
+
+        if (Math.abs(targetX - currentX) > .25 || Math.abs(targetY - currentY) > .25 || Math.abs(targetOpacity - currentOpacity) > .006) {
+          frame = requestAnimationFrame(paintSpotlight);
+        } else {
+          frame = 0;
+        }
+      }
+
+      function startSpotlight() {
+        if (!frame) frame = requestAnimationFrame(paintSpotlight);
+      }
+
+      function setActive(zone) {
+        zones.forEach(function (item) {
+          item.classList.toggle('is-active', item === zone);
+        });
+      }
+
+      skills.addEventListener('pointermove', function (event) {
+        var bounds = skills.getBoundingClientRect();
+        targetX = event.clientX - bounds.left;
+        targetY = event.clientY - bounds.top;
+        targetOpacity = .98;
+        skills.classList.add('is-spotlight-on');
+        startSpotlight();
+      });
+
+      skills.addEventListener('pointerleave', function () {
+        targetOpacity = 0;
+        skills.classList.remove('is-spotlight-on');
+        zones.forEach(function (zone) { zone.classList.remove('is-active'); });
+        startSpotlight();
+      });
+
+      zones.forEach(function (zone) {
+        zone.addEventListener('pointerenter', function () {
+          setActive(zone);
+        });
+        zone.addEventListener('pointerleave', function () {
+          zone.classList.remove('is-active');
+        });
+        zone.addEventListener('focusin', function () {
+          var bounds = skills.getBoundingClientRect();
+          var zoneBounds = zone.getBoundingClientRect();
+          targetX = zoneBounds.left + zoneBounds.width / 2 - bounds.left;
+          targetY = zoneBounds.top + zoneBounds.height / 2 - bounds.top;
+          targetOpacity = .98;
+          skills.classList.add('is-spotlight-on');
+          setActive(zone);
+          startSpotlight();
+        });
+        zone.addEventListener('focusout', function (event) {
+          if (!zone.contains(event.relatedTarget)) zone.classList.remove('is-active');
+        });
+      });
+
+      var dialog = document.querySelector('.skill-detail-dialog');
+      if (!dialog) return;
+      var title = dialog.querySelector('[data-skill-title]');
+      var body = dialog.querySelector('[data-skill-body]');
+      var proof = dialog.querySelector('[data-skill-proof]');
+      var close = dialog.querySelector('.skill-detail-close');
+      var energyDetails = {
+        '象棋': {
+          body: '象棋是我的推演训练：在有限信息里判断局势、预判对手意图，并持续修正自己的策略。',
+          media: [
+            { type: 'image', src: 'assets/energy/xiangqi.jpg', alt: '象棋兴趣记录' }
+          ]
+        },
+        '羽毛球': {
+          body: '羽毛球代表反应速度、节奏感和持续行动力。它让我在高强度对抗里保持专注，也训练快速调整状态。',
+          media: [
+            { type: 'image', src: 'assets/energy/badminton-01.jpg', alt: '羽毛球训练记录一' },
+            { type: 'image', src: 'assets/energy/badminton-02.png', alt: '羽毛球训练记录二' }
+          ]
+        },
+        '吉他': {
+          body: '吉他是感受力和表达欲的出口：从节奏、旋律到练习反馈，保持对细节和情绪的敏感。',
+          media: [
+            { type: 'video', src: 'assets/energy/guitar.mp4', alt: '吉他练习视频' }
+          ]
+        },
+        '健身': {
+          body: '健身是高精力的底层系统。稳定训练让我保持更强的体能、恢复力和长期执行力。',
+          media: [
+            { type: 'image', src: 'assets/energy/fitness-01.jpg', alt: '健身记录一' },
+            { type: 'image', src: 'assets/energy/fitness-02.jpg', alt: '健身记录二' }
+          ]
+        }
+      };
+      function renderProof(item) {
+        if (!item || !item.media) {
+          return '<span>佐证 01 · xxx相关资料xxx</span>';
+        }
+        return '<div class="skill-proof-gallery">' + item.media.map(function (asset) {
+          if (asset.type === 'video') {
+            return '<video src="' + asset.src + '" controls playsinline preload="metadata" aria-label="' + asset.alt + '"></video>';
+          }
+          return '<img src="' + asset.src + '" alt="' + asset.alt + '">';
+        }).join('') + '</div>';
+      }
+
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var skill = chip.getAttribute('data-skill');
+          markSkillViewed(chip);
+          title.textContent = skill;
+          var item = energyDetails[skill];
+          dialog.classList.toggle('is-media-only', Boolean(item));
+          body.textContent = item ? item.body : 'xxx' + skill + '能力说明与项目佐证资料xxx';
+          proof.innerHTML = item ? renderProof(item) : '<span>佐证 01 · xxx相关项目资料xxx</span><span>佐证 02 · xxx过程产出或复盘xxx</span>';
+          if (typeof dialog.showModal === 'function') dialog.showModal();
+          else dialog.setAttribute('open', '');
+        });
+      });
+      if (close) close.addEventListener('click', function () { dialog.close(); });
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) dialog.close();
+      });
+    }
   </script>
 </body>
 </html>
