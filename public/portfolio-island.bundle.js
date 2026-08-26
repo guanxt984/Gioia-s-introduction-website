@@ -31872,39 +31872,39 @@ function experienceIslandZoomRange(fitDistance) {
 }
 
 // src/portfolio-island.js
-var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
+var MODEL_URL = "./models/experience-islands.glb";
 var activeMount = null;
 var EXPERIENCE_PROJECTS = [
-  { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", anchor: { x: 0.18, y: 0.78, z: 0.66 }, media: [
+  { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", nodeName: "beijing_forbidden_city_roof", media: [
     { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "\u7406\u60F3\u6C7D\u8F66\u5B9E\u4E60\u8BC1\u660E" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u7167\u7247" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u8D44\u6599" }
   ] },
-  { key: "internship-qianchuan", category: "internship", city: "\u4E0A\u6D77", title: "\u4EDF\u4F20", enabled: true, landmark: "\u4E1C\u65B9\u660E\u73E0", anchor: { x: 0.31, y: 0.74, z: 0.62 }, media: [
+  { key: "internship-qianchuan", category: "internship", city: "\u4E0A\u6D77", title: "\u4EDF\u4F20", enabled: true, landmark: "\u4E1C\u65B9\u660E\u73E0", nodeName: "shanghai_oriental_pearl_antenna", media: [
     { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "\u4EDF\u4F20\u5B9E\u4E60\u8BC1\u660E" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "\u4EDF\u4F20\u9879\u76EE\u7167\u7247" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "\u4EDF\u4F20\u9879\u76EE\u8D44\u6599" }
   ] },
-  { key: "internship-baimi", category: "internship", city: "\u676D\u5DDE", title: "\u767D\u7C73", enabled: true, landmark: "\u897F\u6E56", anchor: { x: 0.25, y: 0.58, z: 0.72 }, media: [
+  { key: "internship-baimi", category: "internship", city: "\u676D\u5DDE", title: "\u767D\u7C73", enabled: true, landmark: "\u897F\u6E56", nodeName: "hangzhou_bridge", media: [
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "\u767D\u7C73\u9879\u76EE\u8D44\u6599" },
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "\u767D\u7C73\u9879\u76EE\u7167\u7247" },
     { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "\u767D\u7C73\u9879\u76EE\u5C55\u793A" }
   ] },
-  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", anchor: { x: 0.08, y: 0.69, z: 0.57 }, media: [
+  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", nodeName: "shenzhen_ping_an_spire", media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "\u4E5D\u74F4\u9879\u76EE\u7167\u7247" }
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, anchor: { x: 0.68, y: 0.73, z: 0.61 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, anchor: { x: 0.82, y: 0.65, z: 0.67 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, anchor: { x: 0.75, y: 0.54, z: 0.58 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, anchor: { x: 0.43, y: 0.64, z: 0.62 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, nodeName: "ai_tower_main", media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, nodeName: "ai_robot", media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, nodeName: "ai_dome", media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, nodeName: "school_worktable", media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
   ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, anchor: { x: 0.52, y: 0.76, z: 0.68 }, media: [
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, nodeName: "refined_prototype_2", media: [
     { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
   ] },
-  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, anchor: { x: 0.61, y: 0.67, z: 0.7 }, media: [
+  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, nodeName: "school_arch_curve", media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
@@ -31984,8 +31984,7 @@ async function mountExperienceIsland(container) {
     controls.minPolarAngle = Math.PI * 0.18;
     controls.maxPolarAngle = Math.PI * 0.82;
     let model = null;
-    let modelBounds = null;
-    let modelSize = new Vector3(1, 1, 1);
+    const projectNodes = /* @__PURE__ */ new Map();
     let radius = 4;
     let frame = 0;
     let running = false;
@@ -31995,17 +31994,15 @@ async function mountExperienceIsland(container) {
     const raycaster = new Raycaster();
     const projectedAnchor = new Vector3();
     const updateProjectLabels = () => {
-      if (!model || !modelBounds) return;
+      if (!model) return;
       area?.querySelectorAll("[data-experience-project]").forEach((trigger) => {
         const project = PROJECT_BY_KEY.get(trigger.dataset.experienceProject);
-        const anchor = project?.anchor;
-        if (!anchor) return;
-        projectedAnchor.set(
-          MathUtils.lerp(modelBounds.min.x, modelBounds.max.x, anchor.x),
-          MathUtils.lerp(modelBounds.min.y, modelBounds.max.y, anchor.y),
-          MathUtils.lerp(modelBounds.min.z, modelBounds.max.z, anchor.z)
-        );
-        model.localToWorld(projectedAnchor);
+        const anchor = project ? projectNodes.get(project.key) : null;
+        if (!anchor) {
+          trigger.hidden = true;
+          return;
+        }
+        anchor.getWorldPosition(projectedAnchor);
         projectedAnchor.project(camera);
         trigger.style.left = `${(projectedAnchor.x * 0.5 + 0.5) * container.clientWidth}px`;
         trigger.style.top = `${(-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight}px`;
@@ -32058,15 +32055,20 @@ async function mountExperienceIsland(container) {
     controls.addEventListener("change", updateProjectLabels);
     const loader = new GLTFLoader();
     const projectFromIntersection = (intersection) => {
-      if (!model || !modelBounds || !intersection?.point) return null;
-      const local = model.worldToLocal(intersection.point.clone());
-      const nx = MathUtils.clamp((local.x - modelBounds.min.x) / modelSize.x, 0, 1);
-      const ny = MathUtils.clamp((local.y - modelBounds.min.y) / modelSize.y, 0, 1);
-      const nz = MathUtils.clamp((local.z - modelBounds.min.z) / modelSize.z, 0, 1);
+      if (!model || !intersection?.point) return null;
+      let current = intersection.object;
+      while (current) {
+        const matched = EXPERIENCE_PROJECTS.find((project) => project.enabled && project.nodeName === current.name);
+        if (matched) return matched.key;
+        current = current.parent;
+      }
       let closest = null;
-      let distance = 0.16;
+      let distance = 0.85;
       EXPERIENCE_PROJECTS.filter((project) => project.enabled).forEach((project) => {
-        const candidate = Math.hypot(nx - project.anchor.x, ny - project.anchor.y, nz - project.anchor.z);
+        const anchor = projectNodes.get(project.key);
+        if (!anchor) return;
+        anchor.getWorldPosition(projectedAnchor);
+        const candidate = projectedAnchor.distanceTo(intersection.point);
         if (candidate < distance) {
           closest = project.key;
           distance = candidate;
@@ -32115,11 +32117,13 @@ async function mountExperienceIsland(container) {
         model = gltf.scene;
         const bounds = new Box3().setFromObject(model);
         const sphere = bounds.getBoundingSphere(new Sphere());
-        modelBounds = bounds.clone();
-        modelSize = bounds.getSize(new Vector3());
         model.position.sub(sphere.center);
         radius = Math.max(sphere.radius, 0.1);
         scene.add(model);
+        EXPERIENCE_PROJECTS.forEach((project) => {
+          const node = model.getObjectByName(project.nodeName);
+          if (node) projectNodes.set(project.key, node);
+        });
         resize();
         if (status) status.textContent = "\u62D6\u52A8\u65CB\u8F6C \xB7 \u6EDA\u8F6E\u7F29\u653E";
         syncVisibility();

@@ -67,10 +67,14 @@ assert.match(source, /querySelectorAll\(["']video["']\)[\s\S]*?pause\(\)/);
 assert.match(source, /type:\s*["']pdf["']/);
 const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
 const server = await fs.readFile("scripts/serve.mjs", "utf8");
-assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);
+assert.match(index, /rel=["']preload["'][^>]+experience-islands\.glb/);
 assert.doesNotMatch(index, /loading=["']lazy["']/);
 assert.match(index, /portfolio-island\.bundle\.js/);
-assert.match(source, /experience-island-uploaded-preview\.glb/);
+assert.match(source, /experience-islands\.glb/);
+for (const landmark of [
+  "beijing_forbidden_city_roof", "shanghai_oriental_pearl_antenna", "hangzhou_bridge", "shenzhen_ping_an_spire",
+  "ai_tower_main", "ai_robot", "ai_dome", "school_worktable", "refined_prototype_2", "school_arch_curve",
+]) assert.match(source, new RegExp(`nodeName:\\s*["']${landmark}["']`));
 assert.match(source, /export async function mountExperienceIsland/);
 assert.match(source, /enablePan\s*=\s*false/);
 assert.match(pkg.scripts["build:site"], /portfolio-island\.js/);

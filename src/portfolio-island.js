@@ -3,40 +3,40 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { experienceIslandZoomRange } from "./experience-island-zoom.js";
 
-const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
+const MODEL_URL = "./models/experience-islands.glb";
 let activeMount = null;
 
 const EXPERIENCE_PROJECTS = [
-  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", anchor: { x: 0.18, y: 0.78, z: 0.66 }, media: [
+  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", nodeName: "beijing_forbidden_city_roof", media: [
     { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "理想汽车实习证明" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "理想汽车项目照片" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "理想汽车项目资料" },
   ] },
-  { key: "internship-qianchuan", category: "internship", city: "上海", title: "仟传", enabled: true, landmark: "东方明珠", anchor: { x: 0.31, y: 0.74, z: 0.62 }, media: [
+  { key: "internship-qianchuan", category: "internship", city: "上海", title: "仟传", enabled: true, landmark: "东方明珠", nodeName: "shanghai_oriental_pearl_antenna", media: [
     { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "仟传实习证明" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "仟传项目照片" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "仟传项目资料" },
   ] },
-  { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", anchor: { x: 0.25, y: 0.58, z: 0.72 }, media: [
+  { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", nodeName: "hangzhou_bridge", media: [
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "白米项目资料" },
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "白米项目照片" },
     { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "白米项目展示" },
   ] },
-  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", anchor: { x: 0.08, y: 0.69, z: 0.57 }, media: [
+  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", nodeName: "shenzhen_ping_an_spire", media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "九瓴项目照片" },
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, anchor: { x: 0.68, y: 0.73, z: 0.61 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, anchor: { x: 0.82, y: 0.65, z: 0.67 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, anchor: { x: 0.75, y: 0.54, z: 0.58 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, anchor: { x: 0.43, y: 0.64, z: 0.62 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, nodeName: "ai_tower_main", media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, nodeName: "ai_robot", media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, nodeName: "ai_dome", media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, nodeName: "school_worktable", media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX 项目资料", wide: true },
   ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, anchor: { x: 0.52, y: 0.76, z: 0.68 }, media: [
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, nodeName: "refined_prototype_2", media: [
     { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX 项目视频", wide: true },
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX 项目图片" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX 项目长图", wide: true },
   ] },
-  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, anchor: { x: 0.61, y: 0.67, z: 0.70 }, media: [
+  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, nodeName: "school_arch_curve", media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "细胞工厂项目图片一" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "细胞工厂项目图片二" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "细胞工厂项目图片三" },
@@ -129,8 +129,7 @@ export async function mountExperienceIsland(container) {
     controls.maxPolarAngle = Math.PI * 0.82;
 
     let model = null;
-    let modelBounds = null;
-    let modelSize = new THREE.Vector3(1, 1, 1);
+    const projectNodes = new Map();
     let radius = 4;
     let frame = 0;
     let running = false;
@@ -141,17 +140,12 @@ export async function mountExperienceIsland(container) {
     const projectedAnchor = new THREE.Vector3();
 
     const updateProjectLabels = () => {
-      if (!model || !modelBounds) return;
+      if (!model) return;
       area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
         const project = PROJECT_BY_KEY.get(trigger.dataset.experienceProject);
-        const anchor = project?.anchor;
-        if (!anchor) return;
-        projectedAnchor.set(
-          THREE.MathUtils.lerp(modelBounds.min.x, modelBounds.max.x, anchor.x),
-          THREE.MathUtils.lerp(modelBounds.min.y, modelBounds.max.y, anchor.y),
-          THREE.MathUtils.lerp(modelBounds.min.z, modelBounds.max.z, anchor.z),
-        );
-        model.localToWorld(projectedAnchor);
+        const anchor = project ? projectNodes.get(project.key) : null;
+        if (!anchor) { trigger.hidden = true; return; }
+        anchor.getWorldPosition(projectedAnchor);
         projectedAnchor.project(camera);
         trigger.style.left = `${(projectedAnchor.x * 0.5 + 0.5) * container.clientWidth}px`;
         trigger.style.top = `${(-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight}px`;
@@ -209,15 +203,20 @@ export async function mountExperienceIsland(container) {
 
     const loader = new GLTFLoader();
     const projectFromIntersection = intersection => {
-      if (!model || !modelBounds || !intersection?.point) return null;
-      const local = model.worldToLocal(intersection.point.clone());
-      const nx = THREE.MathUtils.clamp((local.x - modelBounds.min.x) / modelSize.x, 0, 1);
-      const ny = THREE.MathUtils.clamp((local.y - modelBounds.min.y) / modelSize.y, 0, 1);
-      const nz = THREE.MathUtils.clamp((local.z - modelBounds.min.z) / modelSize.z, 0, 1);
+      if (!model || !intersection?.point) return null;
+      let current = intersection.object;
+      while (current) {
+        const matched = EXPERIENCE_PROJECTS.find(project => project.enabled && project.nodeName === current.name);
+        if (matched) return matched.key;
+        current = current.parent;
+      }
       let closest = null;
-      let distance = 0.16;
+      let distance = 0.85;
       EXPERIENCE_PROJECTS.filter(project => project.enabled).forEach(project => {
-        const candidate = Math.hypot(nx - project.anchor.x, ny - project.anchor.y, nz - project.anchor.z);
+        const anchor = projectNodes.get(project.key);
+        if (!anchor) return;
+        anchor.getWorldPosition(projectedAnchor);
+        const candidate = projectedAnchor.distanceTo(intersection.point);
         if (candidate < distance) {
           closest = project.key;
           distance = candidate;
@@ -269,11 +268,13 @@ export async function mountExperienceIsland(container) {
         model = gltf.scene;
         const bounds = new THREE.Box3().setFromObject(model);
         const sphere = bounds.getBoundingSphere(new THREE.Sphere());
-        modelBounds = bounds.clone();
-        modelSize = bounds.getSize(new THREE.Vector3());
         model.position.sub(sphere.center);
         radius = Math.max(sphere.radius, 0.1);
         scene.add(model);
+        EXPERIENCE_PROJECTS.forEach(project => {
+          const node = model.getObjectByName(project.nodeName);
+          if (node) projectNodes.set(project.key, node);
+        });
         resize();
         if (status) status.textContent = "\u62d6\u52a8\u65cb\u8f6c \u00b7 \u6eda\u8f6e\u7f29\u653e";
         syncVisibility();
