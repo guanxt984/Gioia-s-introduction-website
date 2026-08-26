@@ -62,26 +62,32 @@ function modelDistance(camera, radius) {
 
 function mediaMarkup(asset) {
   const wide = asset.wide ? ' class="wide"' : "";
+  if (asset.type === "pdf") {
+    return `<a class="school-project-file" href="${asset.src}" target="_blank" rel="noopener"><span>PDF</span><strong>${asset.alt}</strong><em>打开资料 →</em></a>`;
+  }
   if (asset.type === "video") {
     return `<video${wide} src="${asset.src}" controls playsinline preload="metadata" aria-label="${asset.alt}"></video>`;
   }
   return `<img${wide} src="${asset.src}" alt="${asset.alt}">`;
 }
 
-function showSchoolProject(projectKey) {
-  const project = SCHOOL_PROJECTS[projectKey];
+function showExperienceProject(projectKey) {
+  const project = PROJECT_BY_KEY.get(projectKey);
   const panel = document.querySelector("[data-school-project-panel]");
-  if (!project || !panel) return;
+  if (!project?.enabled || !panel) return;
 
   const title = panel.querySelector("[data-school-project-title]");
   const media = panel.querySelector("[data-school-project-media]");
-  if (title) title.textContent = project.title;
-  if (media) media.innerHTML = project.media.map(mediaMarkup).join("");
+  if (title) title.textContent = project.city ? `${project.city} · ${project.title}` : project.title;
+  if (media) {
+    media.querySelectorAll("video").forEach(video => video.pause());
+    media.innerHTML = project.media.map(mediaMarkup).join("");
+  }
   panel.hidden = false;
-  document.querySelectorAll("[data-school-project-trigger]").forEach(trigger => {
-    const active = trigger.dataset.schoolProjectTrigger === projectKey;
+  document.querySelectorAll("[data-experience-project]").forEach(trigger => {
+    const active = trigger.dataset.experienceProject === projectKey;
     trigger.classList.toggle("is-active", active);
-    trigger.setAttribute("aria-pressed", String(active));
+    if (trigger instanceof HTMLButtonElement) trigger.setAttribute("aria-pressed", String(active));
   });
 }
 
@@ -136,8 +142,9 @@ export async function mountExperienceIsland(container) {
 
     const updateProjectLabels = () => {
       if (!model || !modelBounds) return;
-      area?.querySelectorAll("[data-school-project-trigger]").forEach(trigger => {
-        const anchor = PROJECT_ANCHORS[trigger.dataset.schoolProjectTrigger];
+      area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
+        const project = PROJECT_BY_KEY.get(trigger.dataset.experienceProject);
+        const anchor = project?.anchor;
         if (!anchor) return;
         projectedAnchor.set(
           THREE.MathUtils.lerp(modelBounds.min.x, modelBounds.max.x, anchor.x),
@@ -153,8 +160,8 @@ export async function mountExperienceIsland(container) {
       });
     };
 
-    area?.querySelectorAll("[data-school-project-trigger]").forEach(trigger => {
-      trigger.addEventListener("click", () => showSchoolProject(trigger.dataset.schoolProjectTrigger));
+    area?.querySelectorAll("button[data-experience-project]").forEach(trigger => {
+      trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
     });
 
     const fitModel = () => {
@@ -206,14 +213,20 @@ export async function mountExperienceIsland(container) {
       const local = model.worldToLocal(intersection.point.clone());
       const nx = THREE.MathUtils.clamp((local.x - modelBounds.min.x) / modelSize.x, 0, 1);
       const ny = THREE.MathUtils.clamp((local.y - modelBounds.min.y) / modelSize.y, 0, 1);
-
-      if (ny < 0.42) return null;
-      if (nx < 0.43) return "uiux";
-      if (nx < 0.58) return "apex";
-      return "cell";
+      const nz = THREE.MathUtils.clamp((local.z - modelBounds.min.z) / modelSize.z, 0, 1);
+      let closest = null;
+      let distance = 0.16;
+      EXPERIENCE_PROJECTS.filter(project => project.enabled).forEach(project => {
+        const candidate = Math.hypot(nx - project.anchor.x, ny - project.anchor.y, nz - project.anchor.z);
+        if (candidate < distance) {
+          closest = project.key;
+          distance = candidate;
+        }
+      });
+      return closest;
     };
 
-    const pickSchoolProject = event => {
+    const pickExperienceProject = event => {
       if (!model) return null;
       const rect = renderer.domElement.getBoundingClientRect();
       pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
@@ -227,7 +240,7 @@ export async function mountExperienceIsland(container) {
       pointerDown = { x: event.clientX, y: event.clientY };
     });
     renderer.domElement.addEventListener("pointermove", event => {
-      renderer.domElement.style.cursor = pickSchoolProject(event) ? "pointer" : "grab";
+      renderer.domElement.style.cursor = pickExperienceProject(event) ? "pointer" : "grab";
     });
     renderer.domElement.addEventListener("pointerleave", () => {
       renderer.domElement.style.cursor = "grab";
@@ -238,8 +251,8 @@ export async function mountExperienceIsland(container) {
         pointerDown = null;
         if (moved > 8) return;
       }
-      const project = pickSchoolProject(event);
-      if (project) showSchoolProject(project);
+      const project = pickExperienceProject(event);
+      if (project) showExperienceProject(project);
     });
 
     const loadScene = async () => {
