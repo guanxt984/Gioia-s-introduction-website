@@ -29,6 +29,38 @@ assert.match(structure, /\.directory-list a\.is-current::before[\s\S]*?border-le
 assert.match(structure, /\.school-project-panel\s*\{[\s\S]*?border:\s*0/);
 
 const source = await fs.readFile("src/portfolio-island.js", "utf8");
+const experienceAssets = [
+  "school/apex/demo.mp4",
+  "school/apex/cover.jpg",
+  "school/apex/section.png",
+  "school/uiux/ux.png",
+  "school/cell-factory/photo-01.jpg",
+  "school/cell-factory/photo-02.jpg",
+  "school/cell-factory/photo-03.jpg",
+  "school/cell-factory/innovation.mp4",
+  "school/cell-factory/live.mp4",
+  "internship/jiuling/photo.jpg",
+  "internship/qianchuan/certificate.pdf",
+  "internship/qianchuan/photo.jpg",
+  "internship/qianchuan/project.png",
+  "internship/lixiang/certificate.png",
+  "internship/lixiang/photo.jpg",
+  "internship/lixiang/project.png",
+  "internship/baimi/photo-01.png",
+  "internship/baimi/photo-02.jpg",
+  "internship/baimi/project.png",
+];
+for (const key of [
+  "school-apex", "school-uiux", "school-cell-factory",
+  "internship-jiuling", "internship-qianchuan", "internship-lixiang", "internship-baimi",
+  "personal-claude-translator", "personal-squirrel-docs", "personal-fullydancy",
+]) {
+  assert.match(source, new RegExp(`key:\\s*["']${key}["']`));
+}
+for (const [city, title] of [["深圳", "九瓴"], ["上海", "仟传"], ["北京", "理想"], ["杭州", "白米"]]) {
+  assert.match(source, new RegExp(`city:\\s*["']${city}["'][\\s\\S]*?title:\\s*["']${title}["']`));
+}
+for (const file of experienceAssets) await fs.access(`public/assets/experience-projects/${file}`);
 const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
 const server = await fs.readFile("scripts/serve.mjs", "utf8");
 assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);

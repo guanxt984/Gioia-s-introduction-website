@@ -31874,37 +31874,45 @@ function experienceIslandZoomRange(fitDistance) {
 // src/portfolio-island.js
 var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 var activeMount = null;
-var SCHOOL_PROJECTS = {
-  uiux: {
-    title: "UIUX",
-    media: [
-      { type: "image", src: "assets/school-projects/uiux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
-    ]
-  },
-  apex: {
-    title: "APEX",
-    media: [
-      { type: "video", src: "assets/school-projects/apex-demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
-      { type: "image", src: "assets/school-projects/apex-cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
-      { type: "image", src: "assets/school-projects/apex-section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
-    ]
-  },
-  cell: {
-    title: "\u7EC6\u80DE\u5DE5\u5382",
-    media: [
-      { type: "image", src: "assets/school-projects/cell-factory-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
-      { type: "image", src: "assets/school-projects/cell-factory-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
-      { type: "image", src: "assets/school-projects/cell-factory-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
-      { type: "video", src: "assets/school-projects/cell-factory-innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u521B\u65B0\u8D5B\u89C6\u9891", wide: true },
-      { type: "video", src: "assets/school-projects/cell-factory-live.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u5B9E\u62CD\u89C6\u9891", wide: true }
-    ]
-  }
-};
-var PROJECT_ANCHORS = {
-  uiux: { x: 0.24, y: 0.64, z: 0.62 },
-  apex: { x: 0.5, y: 0.76, z: 0.68 },
-  cell: { x: 0.72, y: 0.67, z: 0.7 }
-};
+var EXPERIENCE_PROJECTS = [
+  { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", anchor: { x: 0.18, y: 0.78, z: 0.66 }, media: [
+    { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "\u7406\u60F3\u6C7D\u8F66\u5B9E\u4E60\u8BC1\u660E" },
+    { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u7167\u7247" },
+    { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u8D44\u6599" }
+  ] },
+  { key: "internship-qianchuan", category: "internship", city: "\u4E0A\u6D77", title: "\u4EDF\u4F20", enabled: true, landmark: "\u4E1C\u65B9\u660E\u73E0", anchor: { x: 0.31, y: 0.74, z: 0.62 }, media: [
+    { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "\u4EDF\u4F20\u5B9E\u4E60\u8BC1\u660E" },
+    { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "\u4EDF\u4F20\u9879\u76EE\u7167\u7247" },
+    { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "\u4EDF\u4F20\u9879\u76EE\u8D44\u6599" }
+  ] },
+  { key: "internship-baimi", category: "internship", city: "\u676D\u5DDE", title: "\u767D\u7C73", enabled: true, landmark: "\u897F\u6E56", anchor: { x: 0.25, y: 0.58, z: 0.72 }, media: [
+    { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "\u767D\u7C73\u9879\u76EE\u8D44\u6599" },
+    { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "\u767D\u7C73\u9879\u76EE\u7167\u7247" },
+    { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "\u767D\u7C73\u9879\u76EE\u5C55\u793A" }
+  ] },
+  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", anchor: { x: 0.08, y: 0.69, z: 0.57 }, media: [
+    { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "\u4E5D\u74F4\u9879\u76EE\u7167\u7247" }
+  ] },
+  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, anchor: { x: 0.68, y: 0.73, z: 0.61 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, anchor: { x: 0.82, y: 0.65, z: 0.67 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, anchor: { x: 0.75, y: 0.54, z: 0.58 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, anchor: { x: 0.43, y: 0.64, z: 0.62 }, media: [
+    { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
+  ] },
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, anchor: { x: 0.52, y: 0.76, z: 0.68 }, media: [
+    { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
+    { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
+    { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
+  ] },
+  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, anchor: { x: 0.61, y: 0.67, z: 0.7 }, media: [
+    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
+    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
+    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
+    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u521B\u65B0\u8D5B\u89C6\u9891", wide: true },
+    { type: "video", src: "assets/experience-projects/school/cell-factory/live.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u5B9E\u62CD\u89C6\u9891", wide: true }
+  ] }
+];
+var PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map((project) => [project.key, project]));
 function loadModel(loader, onProgress) {
   return new Promise((resolve, reject) => {
     loader.load(MODEL_URL, resolve, onProgress, reject);
