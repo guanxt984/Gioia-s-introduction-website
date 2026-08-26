@@ -241,7 +241,7 @@ git add src/portfolio-island.js public/index.html public/portfolio-island.bundle
 git commit -m "feat: bind project labels to island landmarks"
 ```
 
-### Task 4: 完成指示牌视觉与简历调整
+### Task 4: 完成显眼趣味的指示牌视觉与简历调整
 
 **Files:**
 - Modify: `public/index.html`
@@ -249,14 +249,15 @@ git commit -m "feat: bind project labels to island landmarks"
 - Test: `scripts/check-portfolio-site.mjs`
 
 **Interfaces:**
-- Consumes: Task 3 的 10 个标签元素。
-- Produces: 可点击橙色指示牌、不可点击紫蓝虚线指示牌、160% 且右移 20px 的简历。
+- Consumes: Task 3 的 10 个标签元素和 `is-active` / `is-disabled` 状态类。
+- Produces: 可点击的高对比景区路标、不可点击的紫蓝虚线路标、160% 且右移 20px 的简历。
 
 - [ ] **Step 1: 写入视觉与简历断言并验证失败**
 
 ```js
 assert.match(index, /\.experience-project-label::after[\s\S]*border/);
 assert.match(index, /\.experience-project-label\.is-disabled/);
+assert.match(index, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 assert.match(reviewed, /transform:\s*translateX\(20px\)\s*scale\(1\.6\)\s*!important/);
 assert.match(reviewed, /transform-origin:\s*center/);
 ```
@@ -267,7 +268,7 @@ Expected: FAIL，因为标签仍是旧样式且简历仍为 180%。
 
 - [ ] **Step 2: 实现微缩景区指示牌样式**
 
-可点击标签使用橙色旗点、短引线、粗体标题；实习标签文本为 `城市 · 公司`。悬停、焦点和选中态提高橙色对比并轻微抬升。个人标签使用紫蓝虚线、`COMING SOON` 小字、`cursor: default` 与 `pointer-events: none`。
+可点击标签使用高对比橙色旗面、锚点圆点、短引线与粗体标题；实习标签文本为 `城市 · 公司`，学校标签带与实习项目不同的辅助色或小型几何记号。通过轻微错位、切角旗面和不同方向的引线增加趣味性，但不使用白色胶囊或卡片外观。悬停、焦点和选中态提高橙色对比、轻微抬升，并同步强化引线与锚点环。个人标签使用紫蓝虚线、`COMING SOON` 小字、`cursor: default` 与 `pointer-events: none`。所有正文与背景对比度至少为 4.5:1；`prefers-reduced-motion` 下取消抬升与强调环动画，但保留颜色与引线。
 
 - [ ] **Step 3: 调整简历变换**
 
