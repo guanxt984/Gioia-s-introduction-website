@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AI Product Manager Portfolio</title>
-  <link rel="preload" href="./models/experience-islands.glb" as="fetch" crossorigin>
+  <link rel="preload" href="./models/experience-island-uploaded-preview.glb" as="fetch" crossorigin>
   <script type="module" src="./portfolio-island.bundle.js"></script>
   <style id="final-removal">
     .global-utility,
@@ -70,69 +70,63 @@
       position: absolute;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      min-height: 28px;
-      padding: 6px 10px 6px 8px;
-      border: 1px solid currentColor;
-      border-radius: 7px 2px 7px 2px;
-      background: #fffdf8;
-      color: #932900;
-      font: 800 clamp(9px, .65vw, 11px)/1.05 Arial, "Noto Sans SC", sans-serif;
-      letter-spacing: .02em;
+      gap: 5px;
+      min-height: 22px;
+      padding: 4px 7px;
+      border: 1px solid rgba(38, 36, 31, .48);
+      border-radius: 2px;
+      background: rgba(255, 253, 248, .88);
+      color: var(--ink);
+      font: 600 clamp(9px, .62vw, 10px)/1.2 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: .01em;
       white-space: nowrap;
       cursor: pointer;
       pointer-events: auto;
-      box-shadow: 0 3px 0 currentColor;
-      transition: color .18s ease, background-color .18s ease, translate .18s cubic-bezier(.16, 1, .3, 1), box-shadow .18s ease;
+      transform: translate(8px, calc(-100% - 8px));
+      transition: background-color .18s ease, border-color .18s ease, translate .18s cubic-bezier(.16, 1, .3, 1);
     }
     .experience-project-label::before {
       content: "";
-      width: 9px;
-      height: 9px;
-      flex: 0 0 9px;
+      width: 5px;
+      height: 5px;
+      flex: 0 0 5px;
       border-radius: 50%;
-      background: currentColor;
-      box-shadow: 0 0 0 3px #fffdf8, 0 0 0 5px currentColor;
+      background: var(--ink);
+      box-shadow: 0 0 0 2px rgba(255, 253, 248, .88);
     }
     .experience-project-label::after {
       content: "";
       position: absolute;
-      left: 16px;
+      left: 10px;
       top: 100%;
-      width: 18px;
-      height: 13px;
-      border-left: 2px solid currentColor;
-      border-bottom: 2px solid currentColor;
-      transform: skewX(-28deg);
+      width: 12px;
+      height: 8px;
+      border-left: 1px solid rgba(38, 36, 31, .48);
+      border-bottom: 1px solid rgba(38, 36, 31, .48);
       pointer-events: none;
     }
-    .experience-project-label.is-internship { color: #9a2b00; }
-    .experience-project-label.is-school { color: #075f83; border-radius: 2px 7px 2px 7px; }
-    .experience-project-label.is-school::before { border-radius: 2px; rotate: 45deg; }
     .experience-project-label.is-disabled {
-      color: #4e3d91;
+      color: var(--muted);
       border-style: dashed;
-      background: #f7f3ff;
+      background: rgba(255, 253, 248, .72);
       cursor: default;
       pointer-events: none;
-      box-shadow: none;
     }
     .experience-project-label small {
-      padding-left: 5px;
-      border-left: 1px dashed currentColor;
-      font: 800 7px/1 ui-monospace, monospace;
-      letter-spacing: .08em;
+      margin-left: 2px;
+      color: var(--muted);
+      font: 500 7px/1 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: .05em;
     }
     .experience-project-label:hover,
     .experience-project-label:focus-visible,
     .experience-project-label.is-active {
-      color: #d43d00;
-      background: #fff2eb;
-      translate: 0 -4px;
-      box-shadow: 0 5px 0 currentColor;
+      background: rgba(255, 253, 248, .98);
+      border-color: var(--ink);
+      translate: 0 -2px;
       outline: none;
     }
-    .experience-project-label.is-active::before { box-shadow: 0 0 0 3px #fff2eb, 0 0 0 7px currentColor; }
+    .experience-project-label.is-active::before { background: var(--accent); }
     .island-loading {
       position: absolute;
       left: 50%;

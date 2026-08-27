@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
+import { selectFrontIsland, selectVisibleProjects } from "../src/experience-island-visibility.js";
 
 const index = await fs.readFile("public/index.html", "utf8");
 const required = [
@@ -67,14 +68,12 @@ assert.match(source, /querySelectorAll\(["']video["']\)[\s\S]*?pause\(\)/);
 assert.match(source, /type:\s*["']pdf["']/);
 const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
 const server = await fs.readFile("scripts/serve.mjs", "utf8");
-assert.match(index, /rel=["']preload["'][^>]+experience-islands\.glb/);
+assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);
 assert.doesNotMatch(index, /loading=["']lazy["']/);
 assert.match(index, /portfolio-island\.bundle\.js/);
-assert.match(source, /experience-islands\.glb/);
-for (const landmark of [
-  "beijing_forbidden_city_roof", "shanghai_oriental_pearl_antenna", "hangzhou_bridge", "shenzhen_ping_an_spire",
-  "ai_tower_main", "ai_robot", "ai_dome", "school_worktable", "refined_prototype_2", "school_arch_curve",
-]) assert.match(source, new RegExp(`nodeName:\\s*["']${landmark}["']`));
+assert.match(source, /experience-island-uploaded-preview\.glb/);
+assert.equal((source.match(/meshName:\s*["'][^"']+["'],\s*anchor:\s*\{/g) || []).length, 10);
+assert.doesNotMatch(source, /nodeName:\s*["']/);
 assert.match(source, /export async function mountExperienceIsland/);
 assert.match(source, /enablePan\s*=\s*false/);
 assert.match(pkg.scripts["build:site"], /portfolio-island\.js/);
@@ -84,6 +83,23 @@ assert.equal((index.match(/data-experience-project=/g) || []).length, 10);
 assert.match(index, /COMING SOON/);
 assert.match(index, /\.experience-project-label::after[\s\S]*border/);
 assert.match(index, /\.experience-project-label\.is-disabled/);
+assert.match(index, /background:\s*rgba\(255,\s*253,\s*248,\s*\.88\)/);
+assert.doesNotMatch(index, /box-shadow:\s*0 3px 0 currentColor/);
+assert.equal(selectFrontIsland([
+  { category: "internship", depth: -2.4 },
+  { category: "personal", depth: -1.2 },
+  { category: "school", depth: -3.1 },
+]), "personal");
+assert.deepEqual(selectVisibleProjects([
+  { key: "i-far", category: "internship", depth: -3.2, inView: true },
+  { key: "s-near", category: "school", depth: -0.8, inView: true },
+  { key: "s-mid", category: "school", depth: -1.1, inView: true },
+  { key: "s-back", category: "school", depth: -1.7, inView: true },
+  { key: "s-out", category: "school", depth: -0.2, inView: false },
+  { key: "s-hidden", category: "school", depth: -2.2, inView: true },
+], "school", 3), ["s-near", "s-mid", "s-back"]);
+assert.match(source, /data-front-island/);
+assert.match(source, /prefers-reduced-motion/);
 assert.match(index, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 assert.match(reviewed, /transform:\s*translateX\(20px\)\s*scale\(1\.6\)\s*!important/);
 assert.match(reviewed, /transform-origin:\s*center/);

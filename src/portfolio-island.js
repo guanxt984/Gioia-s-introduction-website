@@ -2,41 +2,48 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { experienceIslandZoomRange } from "./experience-island-zoom.js";
+import { selectFrontIsland, selectVisibleProjects } from "./experience-island-visibility.js";
 
-const MODEL_URL = "./models/experience-islands.glb";
+const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
+const LABEL_LIMIT = 3;
+const SUB_ISLANDS = [
+  { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
+  { category: "personal", anchor: { x: -0.005, y: 0.12, z: -0.28 } },
+  { category: "school", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
+];
 let activeMount = null;
 
 const EXPERIENCE_PROJECTS = [
-  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", nodeName: "beijing_forbidden_city_roof", media: [
+  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
     { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "理想汽车实习证明" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "理想汽车项目照片" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "理想汽车项目资料" },
   ] },
-  { key: "internship-qianchuan", category: "internship", city: "上海", title: "仟传", enabled: true, landmark: "东方明珠", nodeName: "shanghai_oriental_pearl_antenna", media: [
+  { key: "internship-qianchuan", category: "internship", city: "上海", title: "仟传", enabled: true, landmark: "东方明珠", meshName: "tripo_part_6", anchor: { x: -0.04, y: 0.69, z: 0.10 }, media: [
     { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "仟传实习证明" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "仟传项目照片" },
     { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "仟传项目资料" },
   ] },
-  { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", nodeName: "hangzhou_bridge", media: [
+  { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", meshName: "tripo_part_7", anchor: { x: -0.15, y: 0.40, z: 0.19 }, media: [
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "白米项目资料" },
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "白米项目照片" },
     { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "白米项目展示" },
   ] },
-  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", nodeName: "shenzhen_ping_an_spire", media: [
+  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_12", anchor: { x: -0.04, y: 0.44, z: 0.34 }, media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "九瓴项目照片" },
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, nodeName: "ai_tower_main", media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, nodeName: "ai_robot", media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, nodeName: "ai_dome", media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, nodeName: "school_worktable", media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX 项目资料", wide: true },
   ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, nodeName: "refined_prototype_2", media: [
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [
     { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX 项目视频", wide: true },
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX 项目图片" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX 项目长图", wide: true },
   ] },
-  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, nodeName: "school_arch_curve", media: [
+  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_15", anchor: { x: 0.455, y: 0.11, z: 0.04 }, media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "细胞工厂项目图片一" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "细胞工厂项目图片二" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "细胞工厂项目图片三" },
@@ -129,28 +136,71 @@ export async function mountExperienceIsland(container) {
     controls.maxPolarAngle = Math.PI * 0.82;
 
     let model = null;
-    const projectNodes = new Map();
     let radius = 4;
     let frame = 0;
     let running = false;
     let loading = false;
     let pointerDown = null;
+    let activeCategory = null;
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const projectedAnchor = new THREE.Vector3();
+    const cameraAnchor = new THREE.Vector3();
+    const highlightColor = new THREE.Color(0xfe5416);
+    const highlightedMaterials = new Map();
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const updateProjectLabels = () => {
       if (!model) return;
-      area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
-        const project = PROJECT_BY_KEY.get(trigger.dataset.experienceProject);
-        const anchor = project ? projectNodes.get(project.key) : null;
-        if (!anchor) { trigger.hidden = true; return; }
-        anchor.getWorldPosition(projectedAnchor);
+      const islandDepths = SUB_ISLANDS.map(island => {
+        cameraAnchor.set(island.anchor.x, island.anchor.y, island.anchor.z);
+        model.localToWorld(cameraAnchor);
+        camera.worldToLocal(cameraAnchor);
+        return { category: island.category, depth: cameraAnchor.z };
+      });
+      activeCategory = selectFrontIsland(islandDepths);
+      area?.setAttribute("data-front-island", activeCategory ?? "");
+
+      const projectPositions = EXPERIENCE_PROJECTS.map(project => {
+        projectedAnchor.set(project.anchor.x, project.anchor.y, project.anchor.z);
+        model.localToWorld(projectedAnchor);
+        cameraAnchor.copy(projectedAnchor);
+        camera.worldToLocal(cameraAnchor);
         projectedAnchor.project(camera);
-        trigger.style.left = `${(projectedAnchor.x * 0.5 + 0.5) * container.clientWidth}px`;
-        trigger.style.top = `${(-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight}px`;
-        trigger.style.transform = "translate(-50%, -50%)";
-        trigger.hidden = projectedAnchor.z < -1 || projectedAnchor.z > 1;
+        return {
+          key: project.key,
+          category: project.category,
+          depth: cameraAnchor.z,
+          inView: projectedAnchor.z >= -1 && projectedAnchor.z <= 1
+            && Math.abs(projectedAnchor.x) <= 1.04 && Math.abs(projectedAnchor.y) <= 1.04,
+          x: (projectedAnchor.x * 0.5 + 0.5) * container.clientWidth,
+          y: (-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight,
+        };
+      });
+      const visibleKeys = new Set(selectVisibleProjects(projectPositions, activeCategory, LABEL_LIMIT));
+      const positionsByKey = new Map(projectPositions.map(position => [position.key, position]));
+
+      area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
+        const key = trigger.dataset.experienceProject;
+        const position = positionsByKey.get(key);
+        if (!position) { trigger.hidden = true; return; }
+        trigger.style.left = `${position.x}px`;
+        trigger.style.top = `${position.y}px`;
+        trigger.hidden = !visibleKeys.has(key);
+      });
+    };
+
+    const updateBuildingHighlights = time => {
+      EXPERIENCE_PROJECTS.forEach((project, index) => {
+        const active = project.enabled && project.category === activeCategory;
+        const pulse = reducedMotion.matches
+          ? 0.12
+          : 0.11 + Math.sin(time * 0.003 + index * 0.72) * 0.035;
+        (highlightedMaterials.get(project.key) || []).forEach(record => {
+          record.material.emissive.copy(record.baseEmissive);
+          record.material.emissive.lerp(highlightColor, active ? 0.34 : 0);
+          record.material.emissiveIntensity = record.baseIntensity + (active ? pulse : 0);
+        });
       });
     };
 
@@ -181,10 +231,11 @@ export async function mountExperienceIsland(container) {
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
 
-    const render = () => {
+    const render = time => {
       if (!running) return;
       controls.update();
       updateProjectLabels();
+      updateBuildingHighlights(time || 0);
       renderer.render(scene, camera);
       frame = requestAnimationFrame(render);
     };
@@ -206,17 +257,16 @@ export async function mountExperienceIsland(container) {
       if (!model || !intersection?.point) return null;
       let current = intersection.object;
       while (current) {
-        const matched = EXPERIENCE_PROJECTS.find(project => project.enabled && project.nodeName === current.name);
+        const matched = EXPERIENCE_PROJECTS.find(project => project.enabled
+          && project.category === activeCategory && project.meshName === current.name);
         if (matched) return matched.key;
         current = current.parent;
       }
       let closest = null;
-      let distance = 0.85;
-      EXPERIENCE_PROJECTS.filter(project => project.enabled).forEach(project => {
-        const anchor = projectNodes.get(project.key);
-        if (!anchor) return;
-        anchor.getWorldPosition(projectedAnchor);
-        const candidate = projectedAnchor.distanceTo(intersection.point);
+      let distance = 0.14;
+      const localPoint = model.worldToLocal(intersection.point.clone());
+      EXPERIENCE_PROJECTS.filter(project => project.enabled && project.category === activeCategory).forEach(project => {
+        const candidate = localPoint.distanceTo(new THREE.Vector3(project.anchor.x, project.anchor.y, project.anchor.z));
         if (candidate < distance) {
           closest = project.key;
           distance = candidate;
@@ -270,11 +320,27 @@ export async function mountExperienceIsland(container) {
         const sphere = bounds.getBoundingSphere(new THREE.Sphere());
         model.position.sub(sphere.center);
         radius = Math.max(sphere.radius, 0.1);
-        scene.add(model);
         EXPERIENCE_PROJECTS.forEach(project => {
-          const node = model.getObjectByName(project.nodeName);
-          if (node) projectNodes.set(project.key, node);
+          const node = model.getObjectByName(project.meshName);
+          if (!node) return;
+          const records = [];
+          node.traverse(child => {
+            if (!child.isMesh) return;
+            const materials = Array.isArray(child.material) ? child.material : [child.material];
+            const cloned = materials.map(material => material.clone());
+            child.material = Array.isArray(child.material) ? cloned : cloned[0];
+            cloned.forEach(material => {
+              if (!material.emissive) return;
+              records.push({
+                material,
+                baseEmissive: material.emissive.clone(),
+                baseIntensity: material.emissiveIntensity || 0,
+              });
+            });
+          });
+          highlightedMaterials.set(project.key, records);
         });
+        scene.add(model);
         resize();
         if (status) status.textContent = "\u62d6\u52a8\u65cb\u8f6c \u00b7 \u6eda\u8f6e\u7f29\u653e";
         syncVisibility();
