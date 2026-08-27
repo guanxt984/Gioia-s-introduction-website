@@ -30,6 +30,7 @@ assert.match(structure, /\.directory-list a\.is-current::before[\s\S]*?border-le
 assert.match(structure, /\.school-project-panel\s*\{[\s\S]*?border:\s*0/);
 
 const source = await fs.readFile("src/portfolio-island.js", "utf8");
+const projectMesh = key => source.match(new RegExp(`key:\\s*["']${key}["'][\\s\\S]*?meshName:\\s*["']([^"']+)["']`))?.[1];
 const experienceAssets = [
   "school/apex/demo.mp4",
   "school/apex/cover.jpg",
@@ -73,6 +74,16 @@ assert.doesNotMatch(index, /loading=["']lazy["']/);
 assert.match(index, /portfolio-island\.bundle\.js/);
 assert.match(source, /experience-island-uploaded-preview\.glb/);
 assert.equal((source.match(/meshName:\s*["'][^"']+["'],\s*anchor:\s*\{/g) || []).length, 10);
+assert.equal(projectMesh("internship-jiuling"), "tripo_part_5");
+assert.equal(projectMesh("internship-lixiang"), "tripo_part_3");
+assert.equal(projectMesh("personal-claude-translator"), "tripo_part_0");
+assert.equal(projectMesh("personal-fullydancy"), "tripo_part_8");
+assert.equal(projectMesh("personal-squirrel-docs"), "tripo_part_9");
+assert.equal(projectMesh("school-uiux"), "tripo_part_4");
+assert.equal(projectMesh("school-apex"), "tripo_part_14");
+assert.equal(projectMesh("school-cell-factory"), "tripo_part_20");
+assert.match(source, /category:\s*["']personal["'],\s*anchor:\s*\{\s*x:\s*0\.25,\s*y:\s*0\.12,\s*z:\s*0\.065\s*\}/);
+assert.match(source, /category:\s*["']school["'],\s*anchor:\s*\{\s*x:\s*-0\.005,\s*y:\s*0\.12,\s*z:\s*-0\.28\s*\}/);
 assert.doesNotMatch(source, /nodeName:\s*["']/);
 assert.match(source, /export async function mountExperienceIsland/);
 assert.match(source, /enablePan\s*=\s*false/);

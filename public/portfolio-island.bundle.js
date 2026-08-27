@@ -31887,12 +31887,12 @@ var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 var LABEL_LIMIT = 3;
 var SUB_ISLANDS = [
   { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
-  { category: "personal", anchor: { x: -5e-3, y: 0.12, z: -0.28 } },
-  { category: "school", anchor: { x: 0.25, y: 0.12, z: 0.065 } }
+  { category: "personal", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
+  { category: "school", anchor: { x: -5e-3, y: 0.12, z: -0.28 } }
 ];
 var activeMount = null;
 var EXPERIENCE_PROJECTS = [
-  { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
+  { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", meshName: "tripo_part_3", anchor: { x: -0.21, y: 0.51, z: -0.105 }, media: [
     { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "\u7406\u60F3\u6C7D\u8F66\u5B9E\u4E60\u8BC1\u660E" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u7167\u7247" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u8D44\u6599" }
@@ -31907,21 +31907,21 @@ var EXPERIENCE_PROJECTS = [
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "\u767D\u7C73\u9879\u76EE\u7167\u7247" },
     { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "\u767D\u7C73\u9879\u76EE\u5C55\u793A" }
   ] },
-  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", meshName: "tripo_part_12", anchor: { x: -0.04, y: 0.44, z: 0.34 }, media: [
+  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "\u4E5D\u74F4\u9879\u76EE\u7167\u7247" }
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, meshName: "tripo_part_0", anchor: { x: 0.25, y: 0.71, z: 0.065 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
   ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
     { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
   ] },
-  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_15", anchor: { x: 0.455, y: 0.11, z: 0.04 }, media: [
+  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },

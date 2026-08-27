@@ -8,13 +8,13 @@ const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 const LABEL_LIMIT = 3;
 const SUB_ISLANDS = [
   { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
-  { category: "personal", anchor: { x: -0.005, y: 0.12, z: -0.28 } },
-  { category: "school", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
+  { category: "personal", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
+  { category: "school", anchor: { x: -0.005, y: 0.12, z: -0.28 } },
 ];
 let activeMount = null;
 
 const EXPERIENCE_PROJECTS = [
-  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
+  { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", meshName: "tripo_part_3", anchor: { x: -0.21, y: 0.51, z: -0.105 }, media: [
     { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "理想汽车实习证明" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "理想汽车项目照片" },
     { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "理想汽车项目资料" },
@@ -29,21 +29,21 @@ const EXPERIENCE_PROJECTS = [
     { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "白米项目照片" },
     { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "白米项目展示" },
   ] },
-  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_12", anchor: { x: -0.04, y: 0.44, z: 0.34 }, media: [
+  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "九瓴项目照片" },
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, meshName: "tripo_part_0", anchor: { x: 0.25, y: 0.71, z: 0.065 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX 项目资料", wide: true },
   ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
     { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX 项目视频", wide: true },
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX 项目图片" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX 项目长图", wide: true },
   ] },
-  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_15", anchor: { x: 0.455, y: 0.11, z: 0.04 }, media: [
+  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "细胞工厂项目图片一" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "细胞工厂项目图片二" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "细胞工厂项目图片三" },
