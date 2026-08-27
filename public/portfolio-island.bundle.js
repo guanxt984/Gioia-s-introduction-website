@@ -32013,6 +32013,8 @@ async function mountExperienceIsland(container) {
     const cameraAnchor = new Vector3();
     const highlightColor = new Color(16667670);
     const highlightedMaterials = /* @__PURE__ */ new Map();
+    const clickableMeshes = [];
+    const clickableProjectKeys = /* @__PURE__ */ new WeakMap();
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updateProjectLabels = () => {
       if (!model) return;
@@ -32024,6 +32026,9 @@ async function mountExperienceIsland(container) {
       });
       activeCategory = selectFrontIsland(islandDepths);
       area?.setAttribute("data-front-island", activeCategory ?? "");
+      area?.querySelectorAll("[data-experience-island]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
+      });
       const projectPositions = EXPERIENCE_PROJECTS.map((project) => {
         projectedAnchor.set(project.anchor.x, project.anchor.y, project.anchor.z);
         model.localToWorld(projectedAnchor);
@@ -32066,6 +32071,29 @@ async function mountExperienceIsland(container) {
     };
     area?.querySelectorAll("button[data-experience-project]").forEach((trigger) => {
       trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
+    });
+    const focusIsland = (category) => {
+      if (!model) return;
+      const island = SUB_ISLANDS.find((candidate) => candidate.category === category);
+      if (!island) return;
+      const islandWorld = new Vector3(island.anchor.x, island.anchor.y, island.anchor.z);
+      model.localToWorld(islandWorld);
+      const horizontalDirection = new Vector2(islandWorld.x - controls.target.x, islandWorld.z - controls.target.z);
+      if (horizontalDirection.lengthSq() < 1e-4) return;
+      horizontalDirection.normalize();
+      const distance = camera.position.distanceTo(controls.target);
+      const relativeY = camera.position.y - controls.target.y;
+      const horizontalDistance = Math.sqrt(Math.max(distance * distance - relativeY * relativeY, 0.01));
+      camera.position.set(
+        controls.target.x + horizontalDirection.x * horizontalDistance,
+        camera.position.y,
+        controls.target.z + horizontalDirection.y * horizontalDistance
+      );
+      controls.update();
+      updateProjectLabels();
+    };
+    area?.querySelectorAll("button[data-experience-island]").forEach((button) => {
+      button.addEventListener("click", () => focusIsland(button.dataset.experienceIsland));
     });
     const fitModel = () => {
       if (!model) return;
@@ -32110,24 +32138,9 @@ async function mountExperienceIsland(container) {
     controls.addEventListener("change", updateProjectLabels);
     const loader = new GLTFLoader();
     const projectFromIntersection = (intersection) => {
-      if (!model || !intersection?.point) return null;
-      let current = intersection.object;
-      while (current) {
-        const matched = EXPERIENCE_PROJECTS.find((project) => project.enabled && project.category === activeCategory && project.meshName === current.name);
-        if (matched) return matched.key;
-        current = current.parent;
-      }
-      let closest = null;
-      let distance = 0.14;
-      const localPoint = model.worldToLocal(intersection.point.clone());
-      EXPERIENCE_PROJECTS.filter((project) => project.enabled && project.category === activeCategory).forEach((project) => {
-        const candidate = localPoint.distanceTo(new Vector3(project.anchor.x, project.anchor.y, project.anchor.z));
-        if (candidate < distance) {
-          closest = project.key;
-          distance = candidate;
-        }
-      });
-      return closest;
+      const key = intersection?.object ? clickableProjectKeys.get(intersection.object) : null;
+      const project = key ? PROJECT_BY_KEY.get(key) : null;
+      return project?.enabled && project.category === activeCategory ? key : null;
     };
     const pickExperienceProject = (event) => {
       if (!model) return null;
@@ -32135,13 +32148,16 @@ async function mountExperienceIsland(container) {
       pointer.x = (event.clientX - rect.left) / rect.width * 2 - 1;
       pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(pointer, camera);
-      const hit = raycaster.intersectObject(model, true).find((item) => item.object?.isMesh);
+      const hit = raycaster.intersectObjects(clickableMeshes, false)[0];
       return projectFromIntersection(hit);
     };
     renderer.domElement.addEventListener("pointerdown", (event) => {
       pointerDown = { x: event.clientX, y: event.clientY };
     });
+    let lastHoverPick = 0;
     renderer.domElement.addEventListener("pointermove", (event) => {
+      if (event.timeStamp - lastHoverPick < 50) return;
+      lastHoverPick = event.timeStamp;
       renderer.domElement.style.cursor = pickExperienceProject(event) ? "pointer" : "grab";
     });
     renderer.domElement.addEventListener("pointerleave", () => {
@@ -32178,6 +32194,10 @@ async function mountExperienceIsland(container) {
           const records = [];
           node.traverse((child) => {
             if (!child.isMesh) return;
+            if (project.enabled) {
+              clickableMeshes.push(child);
+              clickableProjectKeys.set(child, project.key);
+            }
             const materials = Array.isArray(child.material) ? child.material : [child.material];
             const cloned = materials.map((material) => material.clone());
             child.material = Array.isArray(child.material) ? cloned : cloned[0];

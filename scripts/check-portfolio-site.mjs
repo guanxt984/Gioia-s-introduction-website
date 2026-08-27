@@ -100,6 +100,10 @@ assert.deepEqual(selectVisibleProjects([
 ], "school", 3), ["s-near", "s-mid", "s-back"]);
 assert.match(source, /data-front-island/);
 assert.match(source, /prefers-reduced-motion/);
+assert.equal((index.match(/data-experience-island=/g) || []).length, 3);
+assert.match(source, /intersectObjects\(clickableMeshes,\s*false\)/);
+assert.doesNotMatch(source, /distance\s*=\s*0\.14/);
+assert.match(source, /focusIsland/);
 assert.match(index, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 assert.match(reviewed, /transform:\s*translateX\(20px\)\s*scale\(1\.6\)\s*!important/);
 assert.match(reviewed, /transform-origin:\s*center/);

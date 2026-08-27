@@ -127,6 +127,34 @@
       outline: none;
     }
     .experience-project-label.is-active::before { background: var(--accent); }
+    .island-switcher {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      z-index: 5;
+      display: flex;
+      gap: 4px;
+      transform: translateX(-50%);
+    }
+    .island-switcher button {
+      min-height: 26px;
+      padding: 5px 9px;
+      border: 1px solid rgba(38, 36, 31, .35);
+      border-radius: 2px;
+      background: rgba(255, 253, 248, .82);
+      color: var(--muted);
+      font: 600 9px/1 Arial, "Noto Sans SC", sans-serif;
+      cursor: pointer;
+    }
+    .island-switcher button:hover,
+    .island-switcher button:focus-visible,
+    .island-switcher button[aria-pressed="true"] {
+      border-color: var(--ink);
+      background: rgba(255, 253, 248, .98);
+      color: var(--ink);
+      outline: none;
+    }
+    .island-switcher button[aria-pressed="true"] { box-shadow: inset 0 -2px 0 var(--accent); }
     .island-loading {
       position: absolute;
       left: 50%;
@@ -253,6 +281,11 @@
           '<button class="experience-project-label is-school" type="button" data-experience-project="school-cell-factory" aria-pressed="false">细胞工厂</button>',
           '</div>',
           '</div>',
+          '<nav class="island-switcher" aria-label="切换经历子岛">',
+          '<button type="button" data-experience-island="internship" aria-pressed="false">实习岛</button>',
+          '<button type="button" data-experience-island="personal" aria-pressed="false">个人岛</button>',
+          '<button type="button" data-experience-island="school" aria-pressed="false">学校岛</button>',
+          '</nav>',
           '<p class="island-loading" role="status">\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026</p>',
           '<button class="island-retry" type="button" hidden>\u91cd\u65b0\u52a0\u8f7d\u6a21\u578b</button>'
         ].join('');
