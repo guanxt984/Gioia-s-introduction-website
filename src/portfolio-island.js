@@ -2,10 +2,9 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { experienceIslandZoomRange } from "./experience-island-zoom.js";
-import { selectFrontIsland, selectVisibleProjects } from "./experience-island-visibility.js";
+import { labelLimitForCategory, selectFrontIsland, selectVisibleProjects } from "./experience-island-visibility.js";
 
 const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
-const LABEL_LIMIT = 3;
 const SUB_ISLANDS = [
   { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
   { category: "personal", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
@@ -32,10 +31,10 @@ const EXPERIENCE_PROJECTS = [
   { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "九瓴项目照片" },
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: false, meshName: "tripo_part_0", anchor: { x: 0.25, y: 0.71, z: 0.065 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: false, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX 项目资料", wide: true },
   ] },
   { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
@@ -43,7 +42,7 @@ const EXPERIENCE_PROJECTS = [
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX 项目图片" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX 项目长图", wide: true },
   ] },
-  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [
+  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "细胞工厂项目图片一" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "细胞工厂项目图片二" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "细胞工厂项目图片三" },
@@ -53,6 +52,11 @@ const EXPERIENCE_PROJECTS = [
 ];
 
 const PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map(project => [project.key, project]));
+const CURRENT_ISLAND_LABELS = {
+  internship: "实习经历岛",
+  school: "学校项目岛",
+  personal: "个人 AI 实践岛",
+};
 
 function loadModel(loader, onProgress) {
   return new Promise((resolve, reject) => {
@@ -65,6 +69,73 @@ function modelDistance(camera, radius) {
   const horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect);
   const limitingFov = Math.max(Math.min(vertical, horizontal), 0.2);
   return radius / Math.sin(limitingFov / 2) * 1.08;
+}
+
+function extractConnectedComponentGeometry(mesh, modelAnchor) {
+  const source = mesh.geometry;
+  const position = source.getAttribute("position");
+  const index = source.index;
+  if (!position || !index) return null;
+
+  mesh.updateWorldMatrix(true, false);
+  const target = mesh.worldToLocal(modelAnchor.clone());
+  let nearest = 0;
+  let nearestDistance = Infinity;
+  const vertex = new THREE.Vector3();
+  for (let i = 0; i < position.count; i += 1) {
+    vertex.fromBufferAttribute(position, i);
+    const distance = vertex.distanceToSquared(target);
+    if (distance < nearestDistance) {
+      nearest = i;
+      nearestDistance = distance;
+    }
+  }
+
+  const parents = new Int32Array(position.count);
+  for (let i = 0; i < parents.length; i += 1) parents[i] = i;
+  const find = value => {
+    let root = value;
+    while (parents[root] !== root) root = parents[root];
+    while (parents[value] !== value) {
+      const next = parents[value];
+      parents[value] = root;
+      value = next;
+    }
+    return root;
+  };
+  const join = (left, right) => {
+    const a = find(left);
+    const b = find(right);
+    if (a !== b) parents[b] = a;
+  };
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+    join(a, b);
+    join(b, c);
+  }
+
+  const selectedRoot = find(nearest);
+  const points = [];
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+    if (find(a) !== selectedRoot) continue;
+    [a, b, c].forEach(vertexIndex => {
+      points.push(position.getX(vertexIndex), position.getY(vertexIndex), position.getZ(vertexIndex));
+    });
+  }
+  if (!points.length) return null;
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(points, 3));
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+  const size = geometry.boundingBox.getSize(new THREE.Vector3());
+  geometry.translate(-center.x, -center.y, -center.z);
+  return { geometry, center, size };
 }
 
 function mediaMarkup(asset) {
@@ -88,7 +159,9 @@ function showExperienceProject(projectKey) {
   if (title) title.textContent = project.city ? `${project.city} · ${project.title}` : project.title;
   if (media) {
     media.querySelectorAll("video").forEach(video => video.pause());
-    media.innerHTML = project.media.map(mediaMarkup).join("");
+    media.innerHTML = project.media.length
+      ? project.media.map(mediaMarkup).join("")
+      : '<p class="project-coming-soon">项目资料整理中，敬请期待。</p>';
   }
   panel.hidden = false;
   document.querySelectorAll("[data-experience-project]").forEach(trigger => {
@@ -105,6 +178,7 @@ export async function mountExperienceIsland(container) {
     const area = container.closest(".island-area");
     const status = area?.querySelector(".island-loading");
     const retry = area?.querySelector(".island-retry");
+    const currentIslandLabel = document.querySelector("[data-current-island]");
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.01, 10000);
     let renderer;
@@ -146,8 +220,9 @@ export async function mountExperienceIsland(container) {
     const raycaster = new THREE.Raycaster();
     const projectedAnchor = new THREE.Vector3();
     const cameraAnchor = new THREE.Vector3();
-    const highlightColor = new THREE.Color(0xfe5416);
-    const highlightedMaterials = new Map();
+    const highlightColor = new THREE.Color(0xff6a1a);
+    const highlightShells = new Map();
+    const visibleProjectKeys = new Set();
     const clickableMeshes = [];
     const clickableProjectKeys = new WeakMap();
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -162,6 +237,9 @@ export async function mountExperienceIsland(container) {
       });
       activeCategory = selectFrontIsland(islandDepths);
       area?.setAttribute("data-front-island", activeCategory ?? "");
+      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
+        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      }
       area?.querySelectorAll("[data-experience-island]").forEach(button => {
         button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
       });
@@ -182,7 +260,13 @@ export async function mountExperienceIsland(container) {
           y: (-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight,
         };
       });
-      const visibleKeys = new Set(selectVisibleProjects(projectPositions, activeCategory, LABEL_LIMIT));
+      const visibleKeys = new Set(selectVisibleProjects(
+        projectPositions,
+        activeCategory,
+        labelLimitForCategory(activeCategory),
+      ));
+      visibleProjectKeys.clear();
+      visibleKeys.forEach(key => visibleProjectKeys.add(key));
       const positionsByKey = new Map(projectPositions.map(position => [position.key, position]));
 
       area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
@@ -197,45 +281,20 @@ export async function mountExperienceIsland(container) {
 
     const updateBuildingHighlights = time => {
       EXPERIENCE_PROJECTS.forEach((project, index) => {
-        const active = project.enabled && project.category === activeCategory;
+        const active = project.enabled && visibleProjectKeys.has(project.key);
         const pulse = reducedMotion.matches
-          ? 0.12
-          : 0.11 + Math.sin(time * 0.003 + index * 0.72) * 0.035;
-        (highlightedMaterials.get(project.key) || []).forEach(record => {
-          record.material.emissive.copy(record.baseEmissive);
-          record.material.emissive.lerp(highlightColor, active ? 0.34 : 0);
-          record.material.emissiveIntensity = record.baseIntensity + (active ? pulse : 0);
+          ? 1
+          : 1 + Math.sin(time * 0.002 + index * 0.72) * 0.012;
+        (highlightShells.get(project.key) || []).forEach(record => {
+          record.shell.visible = active;
+          record.material.opacity = 1;
+          record.shell.scale.setScalar(record.baseScale * pulse);
         });
       });
     };
 
     area?.querySelectorAll("button[data-experience-project]").forEach(trigger => {
       trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
-    });
-
-    const focusIsland = category => {
-      if (!model) return;
-      const island = SUB_ISLANDS.find(candidate => candidate.category === category);
-      if (!island) return;
-      const islandWorld = new THREE.Vector3(island.anchor.x, island.anchor.y, island.anchor.z);
-      model.localToWorld(islandWorld);
-      const horizontalDirection = new THREE.Vector2(islandWorld.x - controls.target.x, islandWorld.z - controls.target.z);
-      if (horizontalDirection.lengthSq() < 0.0001) return;
-      horizontalDirection.normalize();
-      const distance = camera.position.distanceTo(controls.target);
-      const relativeY = camera.position.y - controls.target.y;
-      const horizontalDistance = Math.sqrt(Math.max(distance * distance - relativeY * relativeY, 0.01));
-      camera.position.set(
-        controls.target.x + horizontalDirection.x * horizontalDistance,
-        camera.position.y,
-        controls.target.z + horizontalDirection.y * horizontalDistance,
-      );
-      controls.update();
-      updateProjectLabels();
-    };
-
-    area?.querySelectorAll("button[data-experience-island]").forEach(button => {
-      button.addEventListener("click", () => focusIsland(button.dataset.experienceIsland));
     });
 
     const fitModel = () => {
@@ -286,7 +345,7 @@ export async function mountExperienceIsland(container) {
     const projectFromIntersection = intersection => {
       const key = intersection?.object ? clickableProjectKeys.get(intersection.object) : null;
       const project = key ? PROJECT_BY_KEY.get(key) : null;
-      return project?.enabled && project.category === activeCategory ? key : null;
+      return project?.enabled && visibleProjectKeys.has(key) ? key : null;
     };
 
     const pickExperienceProject = event => {
@@ -326,7 +385,10 @@ export async function mountExperienceIsland(container) {
       loading = true;
       area?.classList.remove("model-load-error");
       if (retry) retry.hidden = true;
-      if (status) status.textContent = "\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026";
+      if (status) {
+        status.hidden = false;
+        status.textContent = "\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026";
+      }
       try {
         const gltf = await loadModel(loader, event => {
           if (!status || !event.total) return;
@@ -340,35 +402,135 @@ export async function mountExperienceIsland(container) {
         EXPERIENCE_PROJECTS.forEach(project => {
           const node = model.getObjectByName(project.meshName);
           if (!node) return;
-          const records = [];
+          if (project.highlightMode === "component") {
+            const componentAnchor = project.componentAnchor || project.anchor;
+            const modelAnchor = new THREE.Vector3(componentAnchor.x, componentAnchor.y, componentAnchor.z);
+            model.localToWorld(modelAnchor);
+            const component = extractConnectedComponentGeometry(node, modelAnchor);
+            if (!component) return;
+            const edgeGeometry = new THREE.EdgesGeometry(component.geometry, 28);
+            const material = new THREE.LineBasicMaterial({
+              color: highlightColor,
+              transparent: false,
+              opacity: 1,
+              depthWrite: false,
+              toneMapped: false,
+            });
+            const shell = new THREE.LineSegments(edgeGeometry, material);
+            shell.position.copy(component.center);
+            shell.scale.setScalar(1.015);
+            shell.renderOrder = 4;
+            shell.visible = false;
+            shell.raycast = () => {};
+            node.add(shell);
+            highlightShells.set(project.key, [{ shell, material, baseScale: 1.015 }]);
+
+            const hitbox = new THREE.Mesh(
+              new THREE.BoxGeometry(
+                Math.max(component.size.x, 0.07),
+                Math.max(component.size.y, 0.06),
+                Math.max(component.size.z, 0.07),
+              ),
+              new THREE.MeshBasicMaterial({ visible: false }),
+            );
+            hitbox.position.set(componentAnchor.x, componentAnchor.y, componentAnchor.z);
+            model.add(hitbox);
+            clickableMeshes.push(hitbox);
+            clickableProjectKeys.set(hitbox, project.key);
+            return;
+          }
+          if (project.highlightMode === "local") {
+            const material = new THREE.MeshBasicMaterial({
+              color: highlightColor,
+              transparent: false,
+              opacity: 1,
+              side: THREE.BackSide,
+              depthWrite: false,
+              toneMapped: false,
+            });
+            const localOutline = new THREE.Group();
+            if (project.highlightShape === "arch") {
+              const pillarGeometry = new THREE.BoxGeometry(0.024, 0.105, 0.035);
+              [-0.052, 0.052].forEach(x => {
+                const pillar = new THREE.Mesh(pillarGeometry, material);
+                pillar.position.set(x, -0.02, 0);
+                localOutline.add(pillar);
+              });
+              const cap = new THREE.Mesh(new THREE.TorusGeometry(0.052, 0.012, 8, 24, Math.PI), material);
+              cap.position.y = 0.032;
+              localOutline.add(cap);
+            } else {
+              const body = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.11, 0.06), material);
+              const crown = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.035, 0.045), material);
+              crown.position.y = 0.07;
+              localOutline.add(body, crown);
+            }
+            const highlightAnchor = project.highlightAnchor || project.anchor;
+            localOutline.position.set(highlightAnchor.x, highlightAnchor.y, highlightAnchor.z);
+            localOutline.scale.setScalar(1.018);
+            localOutline.visible = false;
+            localOutline.traverse(child => { child.raycast = () => {}; });
+            model.add(localOutline);
+            highlightShells.set(project.key, [{ shell: localOutline, material, baseScale: 1.018 }]);
+
+            const hitbox = new THREE.Mesh(
+              new THREE.BoxGeometry(0.12, 0.12, 0.08),
+              new THREE.MeshBasicMaterial({ visible: false }),
+            );
+            hitbox.position.set(highlightAnchor.x, highlightAnchor.y, highlightAnchor.z);
+            model.add(hitbox);
+            clickableMeshes.push(hitbox);
+            clickableProjectKeys.set(hitbox, project.key);
+            return;
+          }
+          const projectMeshes = [];
           node.traverse(child => {
             if (!child.isMesh) return;
+            projectMeshes.push(child);
+          });
+          const records = [];
+          projectMeshes.forEach(child => {
             if (project.enabled) {
               clickableMeshes.push(child);
               clickableProjectKeys.set(child, project.key);
             }
-            const materials = Array.isArray(child.material) ? child.material : [child.material];
-            const cloned = materials.map(material => material.clone());
-            child.material = Array.isArray(child.material) ? cloned : cloned[0];
-            cloned.forEach(material => {
-              if (!material.emissive) return;
-              records.push({
-                material,
-                baseEmissive: material.emissive.clone(),
-                baseIntensity: material.emissiveIntensity || 0,
+            [
+              { scale: 1.018 },
+            ].forEach(config => {
+              const material = new THREE.MeshBasicMaterial({
+                color: highlightColor,
+                transparent: false,
+                opacity: 1,
+                side: THREE.BackSide,
+                depthWrite: false,
+                toneMapped: false,
               });
+              const shellMaterials = Array.isArray(child.material)
+                ? child.material.map(() => material)
+                : material;
+              const shell = new THREE.Mesh(child.geometry, shellMaterials);
+              shell.name = `${child.name || project.meshName}_project_glow`;
+              shell.scale.setScalar(config.scale);
+              shell.renderOrder = 3;
+              shell.visible = false;
+              shell.raycast = () => {};
+              child.add(shell);
+              records.push({ shell, material, baseScale: config.scale });
             });
           });
-          highlightedMaterials.set(project.key, records);
+          highlightShells.set(project.key, records);
         });
         scene.add(model);
         resize();
-        if (status) status.textContent = "\u62d6\u52a8\u65cb\u8f6c \u00b7 \u6eda\u8f6e\u7f29\u653e";
+        if (status) status.hidden = true;
         syncVisibility();
         return true;
       } catch {
         area?.classList.add("model-load-error");
-        if (status) status.textContent = "\u6a21\u578b\u52a0\u8f7d\u5931\u8d25";
+        if (status) {
+          status.hidden = false;
+          status.textContent = "\u6a21\u578b\u52a0\u8f7d\u5931\u8d25";
+        }
         if (retry) retry.hidden = false;
         return false;
       } finally {

@@ -88,9 +88,64 @@
       width: min(100%, 430px);
       height: 100%;
       justify-self: start;
-      transform: translateX(20px) scale(1.6) !important;
+      transform: translateX(110px) scale(1.68) !important;
       transform-origin: center;
     }
+    #resume .resume-directory .section-title {
+      font-size: clamp(33px, 4.864vw, 81px) !important;
+      font-family: var(--font-emotional) !important;
+      font-style: italic;
+      font-weight: 400 !important;
+      letter-spacing: -.025em !important;
+    }
+    #experience .experience-copy { right: calc(34% - 150px) !important; }
+    #experience .experience-title {
+      right: 0;
+      font-family: var(--font-emotional) !important;
+      font-style: italic;
+      font-weight: 400 !important;
+      letter-spacing: -.025em !important;
+      transform: translateY(-20px);
+    }
+    #experience .experience-title-prefix,
+    #experience .experience-title-main { font-weight: 400 !important; }
+    #experience .school-project-panel {
+      width: min(1190px, calc(100% + 280px));
+      margin-top: 0;
+    }
+    #experience .school-project-head h3 {
+      font-size: clamp(28.8px, 2.64vw, 48px);
+    }
+    #resume .resume-tools {
+      left: 50%;
+      top: -46px;
+      transform: translateX(-50%) scale(.6);
+      transform-origin: center bottom;
+    }
+    #resume .resume-tool {
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      min-height: 42px;
+      padding: 7px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      backdrop-filter: none;
+    }
+    #resume .resume-tool span { display: none; }
+    #resume .resume-download-icon {
+      width: 28px;
+      height: 28px;
+      flex-basis: 28px;
+      padding: 0;
+      background: transparent;
+      stroke-width: 2.4;
+    }
+    #experience .island-label { transform: translateY(100px); }
+    #resume .resume-directory > .section-title { transform: translateY(-10px); }
+    #resume .directory-list { transform: translateY(10px); }
+    #skills .skills-heading { transform: translateY(-10px); }
     #resume .resume-rows {
       grid-column: 2;
       grid-row: 2;
@@ -142,6 +197,9 @@
       #resume .resume-heading .section-title {
         font-size: clamp(30px, 8vw, 44px) !important;
       }
+      #resume .resume-directory .section-title {
+        font-size: clamp(18px, 4.864vw, 26px) !important;
+      }
       #resume .resume-document {
         display: grid !important;
         grid-column: 1;
@@ -149,6 +207,11 @@
         transform: translateX(0) scale(1) !important;
         transform-origin: center;
       }
+      #resume .resume-tools {
+        top: -40px;
+        transform: translateX(-50%) scale(1);
+      }
+      #experience .school-project-panel { width: 100%; }
       #resume .resume-rows {
         grid-column: 2;
         grid-row: 2;

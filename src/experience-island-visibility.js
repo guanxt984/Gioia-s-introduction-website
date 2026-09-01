@@ -5,6 +5,10 @@ export function selectFrontIsland(islands) {
   }, null)?.category ?? null;
 }
 
+export function labelLimitForCategory(category) {
+  return category === "internship" ? 4 : 3;
+}
+
 export function selectVisibleProjects(projects, activeCategory, limit = 3) {
   return projects
     .filter(project => project.category === activeCategory && project.inView)

@@ -86,6 +86,19 @@
     }
 
     /* Resume */
+    .directory-transition-frame-preview {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      transform: translate(80px, -50px);
+      pointer-events: none;
+      user-select: none;
+    }
+    .directory-transition-frame-preview[hidden] { display: none; }
     .resume-inner {
       position: absolute;
       inset: clamp(42px, 6vh, 72px) clamp(36px, 6vw, 112px) clamp(38px, 6vh, 70px);
@@ -280,10 +293,28 @@
     }
     .experience-copy {
       position: absolute;
-      inset: 0 34% 0 0;
+      inset: 0 calc(34% - 150px) 0 0;
       display: flex;
       flex-direction: column;
     }
+    #experience .section-title {
+      font-size: clamp(34px, 4.8vw, 77px);
+    }
+    #experience .experience-title {
+      position: absolute;
+      z-index: 4;
+      top: 0;
+      right: 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: flex-end;
+      gap: .12em;
+      text-align: right;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .experience-title-prefix { font-size: .46em; font-weight: 600; letter-spacing: -.02em; }
+    .experience-title-main { color: var(--accent); font-size: 1em; font-weight: 600; }
     .experience-intro {
       width: min(62ch, 78%);
       margin: clamp(14px, 2vh, 24px) 0 clamp(20px, 4vh, 46px);
@@ -292,7 +323,7 @@
       color: #3d3832;
     }
     .school-project-panel {
-      width: min(760px, 94%);
+      width: min(910px, 100%);
       margin-top: clamp(10px, 2vh, 22px);
       padding: 0;
       border: 0;
@@ -326,35 +357,38 @@
       line-height: 1.05;
       letter-spacing: -.04em;
     }
-    .school-project-hint {
-      margin: 0;
-      color: var(--muted);
-      font: 500 11px/1.4 ui-monospace, monospace;
-      text-align: right;
-      white-space: nowrap;
-    }
     .school-project-media {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: clamp(8px, 1vw, 14px);
-      max-height: min(54vh, 580px);
-      overflow: auto;
+      max-height: none;
+      overflow: visible;
+      align-items: start;
       padding: 0 clamp(5px, .5vw, 8px) 0 0;
     }
     .school-project-media img,
     .school-project-media video {
       width: 100%;
-      height: clamp(132px, 16vh, 210px);
+      height: auto;
       display: block;
-      object-fit: cover;
+      object-fit: contain;
       border-radius: 0;
       background: transparent;
       border: 0;
     }
     .school-project-media .wide {
       grid-column: 1 / -1;
-      height: clamp(190px, 26vh, 330px);
+      height: auto;
       object-fit: contain;
+    }
+    .project-coming-soon {
+      grid-column: 1 / -1;
+      margin: 0;
+      padding: 18px 0;
+      border-top: 1px dotted var(--line);
+      border-bottom: 1px dotted var(--line);
+      color: var(--muted);
+      font: 500 clamp(11px, .8vw, 14px)/1.6 ui-monospace, monospace;
     }
     .island-area {
       position: absolute;
@@ -370,6 +404,13 @@
       width: 30%;
       text-align: center;
     }
+    .island-label-line {
+      display: block;
+      font-family: inherit;
+      font-size: inherit;
+    }
+    .island-label-current { margin-top: 5px; }
+    .island-label-current strong { color: var(--accent); font-weight: 800; }
 
     /* Skills */
     #skills {
@@ -728,24 +769,35 @@
     /* Destination */
     .destination-copy {
       position: absolute;
+      z-index: 3;
       left: 50%;
       top: 43%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, calc(-50% - 30px));
       width: min(82vw, 1040px);
       text-align: center;
     }
     .destination-title {
       margin: 0;
-      font-size: clamp(48px, 7.6vw, 132px);
+      font-size: clamp(38.4px, 6.08vw, 105.6px);
       line-height: .95;
       letter-spacing: -.04em;
       font-weight: 500;
       text-wrap: balance;
+      white-space: nowrap;
     }
+    .destination-title-accent { color: var(--accent); }
     .destination-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
       margin-top: clamp(24px, 4vh, 46px);
       font: 500 clamp(11px, .85vw, 15px)/1.8 ui-monospace, monospace;
       color: var(--muted);
+    }
+    .destination-name {
+      color: var(--ink);
+      font: 700 clamp(18px, 1.5vw, 26px)/1.2 Arial, "Noto Sans SC", sans-serif;
     }
     .actions {
       display: flex;
@@ -778,6 +830,17 @@
       border-radius: 52% 48% 0 0;
       background: var(--placeholder);
     }
+    .destination-animation-frame-preview {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      z-index: 2;
+      display: block;
+      width: 100%;
+      height: auto;
+      pointer-events: none;
+      user-select: none;
+    }
 
     @media (max-width: 760px) {
       .global-utility a:not(:last-child) { display: none; }
@@ -809,7 +872,8 @@
       .resume-directory .section-title { font-size: clamp(42px, 14vw, 74px); }
       .directory-list a { grid-template-columns: 38px 1fr; }
       .directory-list em { display: none; }
-      .experience-copy { inset: 0; padding-top: 28vh; }
+      .experience-copy { inset: 0; padding-top: 34vh; }
+      #experience .experience-title { top: 0; right: 0; font-size: clamp(32px, 10vw, 52px); }
       .experience-intro { display: none; }
       .school-project-panel { width: 100%; }
       .school-project-media { max-height: 36vh; }
@@ -835,10 +899,11 @@
       .skill-chip { font-size: 11px; padding: 0 12px; }
       .cloud { left: calc(10% - 210px); right: auto; bottom: 0px; width: 108.9%; height: 67.76%; }
       .character { right: 11%; bottom: 8%; }
-      .destination-title { font-size: clamp(42px, 13vw, 74px); }
+      .destination-title { font-size: clamp(33.6px, 10.4vw, 59.2px); }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+      .directory-transition-frame-preview { display: none !important; }
     }
   </style>
 </head>
@@ -855,6 +920,7 @@
 
   <section id="resume" class="stage" aria-label="目录页">
     <p class="page-index">02 · 目录页</p>
+    <img class="directory-transition-frame-preview" src="../assets/directory-transition/frame_00001.png" alt="" aria-hidden="true" draggable="false">
     <div class="resume-inner">
       <figure class="resume-document" aria-label="完整简历图片">
         <img src="../assets/resume-gxt-2026-08-06.png" alt="官晓彤简历">
@@ -870,7 +936,7 @@
         </div>
       </figure>
       <aside class="resume-directory" aria-label="网站目录">
-        <p class="directory-current">CURRENT · 02 / 目录页</p>
+        <p class="directory-current">CURRENT · 02 /</p>
         <h2 class="section-title">目录</h2>
         <nav class="directory-list" aria-label="作品集页面目录">
           <a href="#home"><span>01</span><strong>首页</strong><em>个人信息</em></a>
@@ -887,22 +953,20 @@
   <section id="experience" class="stage" aria-label="经历岛">
     <p class="page-index">03 · 经历岛</p>
     <div class="experience-inner">
+      <h2 class="section-title experience-title"><span class="experience-title-prefix">我的</span><span class="experience-title-main">经历岛</span></h2>
       <div class="experience-copy">
-        <h2 class="section-title">我做过什么</h2>
-        <p class="experience-intro">xxx当前分类或经历的具体信息介绍xxx</p>
         <article class="school-project-panel" data-school-project-panel hidden aria-live="polite">
           <header class="school-project-head">
             <div>
               <p class="school-project-kicker">SCHOOL PROJECT</p>
               <h3 data-school-project-title>学校项目</h3>
             </div>
-            <p class="school-project-hint">点击学校子岛部件切换资料</p>
           </header>
           <div class="school-project-media" data-school-project-media></div>
         </article>
       </div>
       <div class="island-area placeholder">经历岛插画占位<br>右侧约 30% 画幅</div>
-      <p class="island-label meta">拖动旋转 · 点击选择<br>实习 / 学校 / 个人 AI 实践</p>
+      <p class="island-label meta"><span class="island-label-line">拖动旋转 · 滚轮缩放</span><span class="island-label-line island-label-current">你当前在 <strong data-current-island>实习经历岛</strong></span></p>
     </div>
     <div class="next-cue">继续向下 · 跳入技能云海</div>
   </section>
@@ -910,8 +974,8 @@
   <section id="skills" class="stage" aria-label="技能云海">
     <p class="page-index">04 · 技能云海</p>
     <header class="skills-heading">
-      <h2 class="section-title">我擅长什么</h2>
-      <p class="meta">xxx技能页补充介绍xxx</p>
+      <h2 class="section-title">技能云海</h2>
+      <p class="meta">欢迎点亮我的技能！</p>
     </header>
     <div class="skill-map" aria-label="技能云团分区">
       <section class="skill-cloud-zone think" aria-label="Think 产品能力">
@@ -975,10 +1039,10 @@
   <section id="destination" class="stage" aria-label="抵达终点">
     <p class="page-index">05 · 抵达终点</p>
     <div class="destination-copy">
-      <h2 class="destination-title">xxx结束语xxx</h2>
+      <h2 class="destination-title">期待<span class="destination-title-accent">与你</span>共同探索未来～</h2>
       <p class="destination-meta">
-        AI 产品经理<br>
-        18100839418 · 1042369137@qq.com
+        <strong class="destination-name">官晓彤 Gioia</strong>
+        <span>VX &amp; PHONE 18100839418 · EMAIL 1042369137@qq.com</span>
       </p>
       <div class="actions">
         <button class="action primary">联系我</button>
@@ -987,7 +1051,7 @@
         <button class="action">重新开始</button>
       </div>
     </div>
-    <div class="destination-visual placeholder">xxx终点场景插画占位xxx</div>
+    <img class="destination-animation-frame-preview" src="../assets/destination-transition/frame_00001.png" alt="" aria-hidden="true" draggable="false">
   </section>
 
   <script>

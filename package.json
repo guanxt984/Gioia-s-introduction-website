@@ -10,7 +10,7 @@
     "check:internship": "node scripts/check-internship-model.mjs",
     "check:zoom": "node scripts/check-experience-island-zoom.mjs",
     "serve": "node scripts/serve.mjs",
-    "build:site": "esbuild src/portfolio-island.js --bundle --format=esm --outfile=public/portfolio-island.bundle.js"
+    "build:site": "esbuild src/portfolio-island.js --bundle --format=esm --outfile=public/portfolio-island.bundle.js && esbuild src/home-transition.js --bundle --format=esm --outfile=public/home-transition.bundle.js"
   },
   "dependencies": {
     "@gltf-transform/core": "^4.3.0",

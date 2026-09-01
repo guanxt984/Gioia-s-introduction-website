@@ -1,5 +1,9 @@
 node_modules/
 .worktrees/
 .superpowers/sdd/
+.superpowers/brainstorm/
 tmp/
 *.log
+__pycache__/
+*.pyc
+*.blend1

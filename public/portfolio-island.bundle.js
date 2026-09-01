@@ -14619,6 +14619,99 @@ var DepthTexture = class extends Texture {
     return data;
   }
 };
+var _v0 = /* @__PURE__ */ new Vector3();
+var _v1$1 = /* @__PURE__ */ new Vector3();
+var _normal = /* @__PURE__ */ new Vector3();
+var _triangle = /* @__PURE__ */ new Triangle();
+var EdgesGeometry = class extends BufferGeometry {
+  /**
+   * Constructs a new edges geometry.
+   *
+   * @param {?BufferGeometry} [geometry=null] - The geometry.
+   * @param {number} [thresholdAngle=1] - An edge is only rendered if the angle (in degrees)
+   * between the face normals of the adjoining faces exceeds this value.
+   */
+  constructor(geometry = null, thresholdAngle = 1) {
+    super();
+    this.type = "EdgesGeometry";
+    this.parameters = {
+      geometry,
+      thresholdAngle
+    };
+    if (geometry !== null) {
+      const precisionPoints = 4;
+      const precision = Math.pow(10, precisionPoints);
+      const thresholdDot = Math.cos(DEG2RAD * thresholdAngle);
+      const indexAttr = geometry.getIndex();
+      const positionAttr = geometry.getAttribute("position");
+      const indexCount = indexAttr ? indexAttr.count : positionAttr.count;
+      const indexArr = [0, 0, 0];
+      const vertKeys = ["a", "b", "c"];
+      const hashes = new Array(3);
+      const edgeData = {};
+      const vertices = [];
+      for (let i = 0; i < indexCount; i += 3) {
+        if (indexAttr) {
+          indexArr[0] = indexAttr.getX(i);
+          indexArr[1] = indexAttr.getX(i + 1);
+          indexArr[2] = indexAttr.getX(i + 2);
+        } else {
+          indexArr[0] = i;
+          indexArr[1] = i + 1;
+          indexArr[2] = i + 2;
+        }
+        const { a, b, c } = _triangle;
+        a.fromBufferAttribute(positionAttr, indexArr[0]);
+        b.fromBufferAttribute(positionAttr, indexArr[1]);
+        c.fromBufferAttribute(positionAttr, indexArr[2]);
+        _triangle.getNormal(_normal);
+        hashes[0] = `${Math.round(a.x * precision)},${Math.round(a.y * precision)},${Math.round(a.z * precision)}`;
+        hashes[1] = `${Math.round(b.x * precision)},${Math.round(b.y * precision)},${Math.round(b.z * precision)}`;
+        hashes[2] = `${Math.round(c.x * precision)},${Math.round(c.y * precision)},${Math.round(c.z * precision)}`;
+        if (hashes[0] === hashes[1] || hashes[1] === hashes[2] || hashes[2] === hashes[0]) {
+          continue;
+        }
+        for (let j = 0; j < 3; j++) {
+          const jNext = (j + 1) % 3;
+          const vecHash0 = hashes[j];
+          const vecHash1 = hashes[jNext];
+          const v0 = _triangle[vertKeys[j]];
+          const v1 = _triangle[vertKeys[jNext]];
+          const hash = `${vecHash0}_${vecHash1}`;
+          const reverseHash = `${vecHash1}_${vecHash0}`;
+          if (reverseHash in edgeData && edgeData[reverseHash]) {
+            if (_normal.dot(edgeData[reverseHash].normal) <= thresholdDot) {
+              vertices.push(v0.x, v0.y, v0.z);
+              vertices.push(v1.x, v1.y, v1.z);
+            }
+            edgeData[reverseHash] = null;
+          } else if (!(hash in edgeData)) {
+            edgeData[hash] = {
+              index0: indexArr[j],
+              index1: indexArr[jNext],
+              normal: _normal.clone()
+            };
+          }
+        }
+      }
+      for (const key in edgeData) {
+        if (edgeData[key]) {
+          const { index0, index1 } = edgeData[key];
+          _v0.fromBufferAttribute(positionAttr, index0);
+          _v1$1.fromBufferAttribute(positionAttr, index1);
+          vertices.push(_v0.x, _v0.y, _v0.z);
+          vertices.push(_v1$1.x, _v1$1.y, _v1$1.z);
+        }
+      }
+      this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+    }
+  }
+  copy(source) {
+    super.copy(source);
+    this.parameters = Object.assign({}, source.parameters);
+    return this;
+  }
+};
 var PlaneGeometry = class _PlaneGeometry extends BufferGeometry {
   /**
    * Constructs a new plane geometry.
@@ -14688,6 +14781,82 @@ var PlaneGeometry = class _PlaneGeometry extends BufferGeometry {
    */
   static fromJSON(data) {
     return new _PlaneGeometry(data.width, data.height, data.widthSegments, data.heightSegments);
+  }
+};
+var TorusGeometry = class _TorusGeometry extends BufferGeometry {
+  /**
+   * Constructs a new torus geometry.
+   *
+   * @param {number} [radius=1] - Radius of the torus, from the center of the torus to the center of the tube.
+   * @param {number} [tube=0.4] - Radius of the tube. Must be smaller than `radius`.
+   * @param {number} [radialSegments=12] - The number of radial segments.
+   * @param {number} [tubularSegments=48] - The number of tubular segments.
+   * @param {number} [arc=Math.PI*2] - Central angle in radians.
+   */
+  constructor(radius = 1, tube = 0.4, radialSegments = 12, tubularSegments = 48, arc = Math.PI * 2) {
+    super();
+    this.type = "TorusGeometry";
+    this.parameters = {
+      radius,
+      tube,
+      radialSegments,
+      tubularSegments,
+      arc
+    };
+    radialSegments = Math.floor(radialSegments);
+    tubularSegments = Math.floor(tubularSegments);
+    const indices = [];
+    const vertices = [];
+    const normals = [];
+    const uvs = [];
+    const center = new Vector3();
+    const vertex2 = new Vector3();
+    const normal = new Vector3();
+    for (let j = 0; j <= radialSegments; j++) {
+      for (let i = 0; i <= tubularSegments; i++) {
+        const u = i / tubularSegments * arc;
+        const v = j / radialSegments * Math.PI * 2;
+        vertex2.x = (radius + tube * Math.cos(v)) * Math.cos(u);
+        vertex2.y = (radius + tube * Math.cos(v)) * Math.sin(u);
+        vertex2.z = tube * Math.sin(v);
+        vertices.push(vertex2.x, vertex2.y, vertex2.z);
+        center.x = radius * Math.cos(u);
+        center.y = radius * Math.sin(u);
+        normal.subVectors(vertex2, center).normalize();
+        normals.push(normal.x, normal.y, normal.z);
+        uvs.push(i / tubularSegments);
+        uvs.push(j / radialSegments);
+      }
+    }
+    for (let j = 1; j <= radialSegments; j++) {
+      for (let i = 1; i <= tubularSegments; i++) {
+        const a = (tubularSegments + 1) * j + i - 1;
+        const b = (tubularSegments + 1) * (j - 1) + i - 1;
+        const c = (tubularSegments + 1) * (j - 1) + i;
+        const d = (tubularSegments + 1) * j + i;
+        indices.push(a, b, d);
+        indices.push(b, c, d);
+      }
+    }
+    this.setIndex(indices);
+    this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+    this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
+    this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
+  }
+  copy(source) {
+    super.copy(source);
+    this.parameters = Object.assign({}, source.parameters);
+    return this;
+  }
+  /**
+   * Factory method for creating an instance of this class from the given
+   * JSON object.
+   *
+   * @param {Object} data - A JSON object representing the serialized geometry.
+   * @return {TorusGeometry} A new instance.
+   */
+  static fromJSON(data) {
+    return new _TorusGeometry(data.radius, data.tube, data.radialSegments, data.tubularSegments, data.arc);
   }
 };
 var MeshStandardMaterial = class extends Material {
@@ -21777,12 +21946,12 @@ function getToneMappingFunction(functionName, toneMapping) {
   }
   return "vec3 " + functionName + "( vec3 color ) { return " + toneMappingName + "ToneMapping( color ); }";
 }
-var _v0 = /* @__PURE__ */ new Vector3();
+var _v02 = /* @__PURE__ */ new Vector3();
 function getLuminanceFunction() {
-  ColorManagement.getLuminanceCoefficients(_v0);
-  const r = _v0.x.toFixed(4);
-  const g = _v0.y.toFixed(4);
-  const b = _v0.z.toFixed(4);
+  ColorManagement.getLuminanceCoefficients(_v02);
+  const r = _v02.x.toFixed(4);
+  const g = _v02.y.toFixed(4);
+  const b = _v02.z.toFixed(4);
   return [
     "float luminance( const in vec3 rgb ) {",
     `	const vec3 weights = vec3( ${r}, ${g}, ${b} );`,
@@ -31878,13 +32047,15 @@ function selectFrontIsland(islands) {
     return front;
   }, null)?.category ?? null;
 }
+function labelLimitForCategory(category) {
+  return category === "internship" ? 4 : 3;
+}
 function selectVisibleProjects(projects, activeCategory, limit = 3) {
   return projects.filter((project) => project.category === activeCategory && project.inView).sort((a, b) => b.depth - a.depth).slice(0, limit).map((project) => project.key);
 }
 
 // src/portfolio-island.js
 var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
-var LABEL_LIMIT = 3;
 var SUB_ISLANDS = [
   { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
   { category: "personal", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
@@ -31910,10 +32081,10 @@ var EXPERIENCE_PROJECTS = [
   { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
     { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "\u4E5D\u74F4\u9879\u76EE\u7167\u7247" }
   ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: false, meshName: "tripo_part_0", anchor: { x: 0.25, y: 0.71, z: 0.065 }, media: [] },
-  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: false, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.48, z: 0.23 }, media: [] },
-  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: false, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", anchor: { x: -0.01, y: 0.52, z: -0.26 }, media: [
+  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
+  { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
+  { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
+  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
     { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
   ] },
   { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
@@ -31921,7 +32092,7 @@ var EXPERIENCE_PROJECTS = [
     { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
     { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
   ] },
-  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_20", anchor: { x: 0.12, y: 0.43, z: -0.345 }, media: [
+  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
     { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
@@ -31930,6 +32101,11 @@ var EXPERIENCE_PROJECTS = [
   ] }
 ];
 var PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map((project) => [project.key, project]));
+var CURRENT_ISLAND_LABELS = {
+  internship: "\u5B9E\u4E60\u7ECF\u5386\u5C9B",
+  school: "\u5B66\u6821\u9879\u76EE\u5C9B",
+  personal: "\u4E2A\u4EBA AI \u5B9E\u8DF5\u5C9B"
+};
 function loadModel(loader, onProgress) {
   return new Promise((resolve, reject) => {
     loader.load(MODEL_URL, resolve, onProgress, reject);
@@ -31940,6 +32116,69 @@ function modelDistance(camera, radius) {
   const horizontal = 2 * Math.atan(Math.tan(vertical / 2) * camera.aspect);
   const limitingFov = Math.max(Math.min(vertical, horizontal), 0.2);
   return radius / Math.sin(limitingFov / 2) * 1.08;
+}
+function extractConnectedComponentGeometry(mesh, modelAnchor) {
+  const source = mesh.geometry;
+  const position = source.getAttribute("position");
+  const index = source.index;
+  if (!position || !index) return null;
+  mesh.updateWorldMatrix(true, false);
+  const target = mesh.worldToLocal(modelAnchor.clone());
+  let nearest = 0;
+  let nearestDistance = Infinity;
+  const vertex2 = new Vector3();
+  for (let i = 0; i < position.count; i += 1) {
+    vertex2.fromBufferAttribute(position, i);
+    const distance = vertex2.distanceToSquared(target);
+    if (distance < nearestDistance) {
+      nearest = i;
+      nearestDistance = distance;
+    }
+  }
+  const parents = new Int32Array(position.count);
+  for (let i = 0; i < parents.length; i += 1) parents[i] = i;
+  const find = (value) => {
+    let root = value;
+    while (parents[root] !== root) root = parents[root];
+    while (parents[value] !== value) {
+      const next = parents[value];
+      parents[value] = root;
+      value = next;
+    }
+    return root;
+  };
+  const join = (left, right) => {
+    const a = find(left);
+    const b = find(right);
+    if (a !== b) parents[b] = a;
+  };
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+    join(a, b);
+    join(b, c);
+  }
+  const selectedRoot = find(nearest);
+  const points = [];
+  for (let i = 0; i < index.count; i += 3) {
+    const a = index.getX(i);
+    const b = index.getX(i + 1);
+    const c = index.getX(i + 2);
+    if (find(a) !== selectedRoot) continue;
+    [a, b, c].forEach((vertexIndex) => {
+      points.push(position.getX(vertexIndex), position.getY(vertexIndex), position.getZ(vertexIndex));
+    });
+  }
+  if (!points.length) return null;
+  const geometry = new BufferGeometry();
+  geometry.setAttribute("position", new Float32BufferAttribute(points, 3));
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
+  const center = geometry.boundingBox.getCenter(new Vector3());
+  const size = geometry.boundingBox.getSize(new Vector3());
+  geometry.translate(-center.x, -center.y, -center.z);
+  return { geometry, center, size };
 }
 function mediaMarkup(asset) {
   const wide = asset.wide ? ' class="wide"' : "";
@@ -31960,7 +32199,7 @@ function showExperienceProject(projectKey) {
   if (title) title.textContent = project.city ? `${project.city} \xB7 ${project.title}` : project.title;
   if (media) {
     media.querySelectorAll("video").forEach((video) => video.pause());
-    media.innerHTML = project.media.map(mediaMarkup).join("");
+    media.innerHTML = project.media.length ? project.media.map(mediaMarkup).join("") : '<p class="project-coming-soon">\u9879\u76EE\u8D44\u6599\u6574\u7406\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\u3002</p>';
   }
   panel.hidden = false;
   document.querySelectorAll("[data-experience-project]").forEach((trigger) => {
@@ -31975,6 +32214,7 @@ async function mountExperienceIsland(container) {
     const area = container.closest(".island-area");
     const status = area?.querySelector(".island-loading");
     const retry = area?.querySelector(".island-retry");
+    const currentIslandLabel = document.querySelector("[data-current-island]");
     const scene = new Scene();
     const camera = new PerspectiveCamera(32, 1, 0.01, 1e4);
     let renderer;
@@ -32011,8 +32251,9 @@ async function mountExperienceIsland(container) {
     const raycaster = new Raycaster();
     const projectedAnchor = new Vector3();
     const cameraAnchor = new Vector3();
-    const highlightColor = new Color(16667670);
-    const highlightedMaterials = /* @__PURE__ */ new Map();
+    const highlightColor = new Color(16738842);
+    const highlightShells = /* @__PURE__ */ new Map();
+    const visibleProjectKeys = /* @__PURE__ */ new Set();
     const clickableMeshes = [];
     const clickableProjectKeys = /* @__PURE__ */ new WeakMap();
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -32026,6 +32267,9 @@ async function mountExperienceIsland(container) {
       });
       activeCategory = selectFrontIsland(islandDepths);
       area?.setAttribute("data-front-island", activeCategory ?? "");
+      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
+        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      }
       area?.querySelectorAll("[data-experience-island]").forEach((button) => {
         button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
       });
@@ -32044,7 +32288,13 @@ async function mountExperienceIsland(container) {
           y: (-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight
         };
       });
-      const visibleKeys = new Set(selectVisibleProjects(projectPositions, activeCategory, LABEL_LIMIT));
+      const visibleKeys = new Set(selectVisibleProjects(
+        projectPositions,
+        activeCategory,
+        labelLimitForCategory(activeCategory)
+      ));
+      visibleProjectKeys.clear();
+      visibleKeys.forEach((key) => visibleProjectKeys.add(key));
       const positionsByKey = new Map(projectPositions.map((position) => [position.key, position]));
       area?.querySelectorAll("[data-experience-project]").forEach((trigger) => {
         const key = trigger.dataset.experienceProject;
@@ -32060,40 +32310,17 @@ async function mountExperienceIsland(container) {
     };
     const updateBuildingHighlights = (time) => {
       EXPERIENCE_PROJECTS.forEach((project, index) => {
-        const active = project.enabled && project.category === activeCategory;
-        const pulse = reducedMotion.matches ? 0.12 : 0.11 + Math.sin(time * 3e-3 + index * 0.72) * 0.035;
-        (highlightedMaterials.get(project.key) || []).forEach((record) => {
-          record.material.emissive.copy(record.baseEmissive);
-          record.material.emissive.lerp(highlightColor, active ? 0.34 : 0);
-          record.material.emissiveIntensity = record.baseIntensity + (active ? pulse : 0);
+        const active = project.enabled && visibleProjectKeys.has(project.key);
+        const pulse = reducedMotion.matches ? 1 : 1 + Math.sin(time * 2e-3 + index * 0.72) * 0.012;
+        (highlightShells.get(project.key) || []).forEach((record) => {
+          record.shell.visible = active;
+          record.material.opacity = 1;
+          record.shell.scale.setScalar(record.baseScale * pulse);
         });
       });
     };
     area?.querySelectorAll("button[data-experience-project]").forEach((trigger) => {
       trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
-    });
-    const focusIsland = (category) => {
-      if (!model) return;
-      const island = SUB_ISLANDS.find((candidate) => candidate.category === category);
-      if (!island) return;
-      const islandWorld = new Vector3(island.anchor.x, island.anchor.y, island.anchor.z);
-      model.localToWorld(islandWorld);
-      const horizontalDirection = new Vector2(islandWorld.x - controls.target.x, islandWorld.z - controls.target.z);
-      if (horizontalDirection.lengthSq() < 1e-4) return;
-      horizontalDirection.normalize();
-      const distance = camera.position.distanceTo(controls.target);
-      const relativeY = camera.position.y - controls.target.y;
-      const horizontalDistance = Math.sqrt(Math.max(distance * distance - relativeY * relativeY, 0.01));
-      camera.position.set(
-        controls.target.x + horizontalDirection.x * horizontalDistance,
-        camera.position.y,
-        controls.target.z + horizontalDirection.y * horizontalDistance
-      );
-      controls.update();
-      updateProjectLabels();
-    };
-    area?.querySelectorAll("button[data-experience-island]").forEach((button) => {
-      button.addEventListener("click", () => focusIsland(button.dataset.experienceIsland));
     });
     const fitModel = () => {
       if (!model) return;
@@ -32140,7 +32367,7 @@ async function mountExperienceIsland(container) {
     const projectFromIntersection = (intersection) => {
       const key = intersection?.object ? clickableProjectKeys.get(intersection.object) : null;
       const project = key ? PROJECT_BY_KEY.get(key) : null;
-      return project?.enabled && project.category === activeCategory ? key : null;
+      return project?.enabled && visibleProjectKeys.has(key) ? key : null;
     };
     const pickExperienceProject = (event) => {
       if (!model) return null;
@@ -32177,7 +32404,10 @@ async function mountExperienceIsland(container) {
       loading2 = true;
       area?.classList.remove("model-load-error");
       if (retry) retry.hidden = true;
-      if (status) status.textContent = "\u6B63\u5728\u52A0\u8F7D\u7ECF\u5386\u5C9B\u6A21\u578B\u2026";
+      if (status) {
+        status.hidden = false;
+        status.textContent = "\u6B63\u5728\u52A0\u8F7D\u7ECF\u5386\u5C9B\u6A21\u578B\u2026";
+      }
       try {
         const gltf = await loadModel(loader, (event) => {
           if (!status || !event.total) return;
@@ -32191,35 +32421,136 @@ async function mountExperienceIsland(container) {
         EXPERIENCE_PROJECTS.forEach((project) => {
           const node = model.getObjectByName(project.meshName);
           if (!node) return;
-          const records = [];
+          if (project.highlightMode === "component") {
+            const componentAnchor = project.componentAnchor || project.anchor;
+            const modelAnchor = new Vector3(componentAnchor.x, componentAnchor.y, componentAnchor.z);
+            model.localToWorld(modelAnchor);
+            const component = extractConnectedComponentGeometry(node, modelAnchor);
+            if (!component) return;
+            const edgeGeometry = new EdgesGeometry(component.geometry, 28);
+            const material = new LineBasicMaterial({
+              color: highlightColor,
+              transparent: false,
+              opacity: 1,
+              depthWrite: false,
+              toneMapped: false
+            });
+            const shell = new LineSegments(edgeGeometry, material);
+            shell.position.copy(component.center);
+            shell.scale.setScalar(1.015);
+            shell.renderOrder = 4;
+            shell.visible = false;
+            shell.raycast = () => {
+            };
+            node.add(shell);
+            highlightShells.set(project.key, [{ shell, material, baseScale: 1.015 }]);
+            const hitbox = new Mesh(
+              new BoxGeometry(
+                Math.max(component.size.x, 0.07),
+                Math.max(component.size.y, 0.06),
+                Math.max(component.size.z, 0.07)
+              ),
+              new MeshBasicMaterial({ visible: false })
+            );
+            hitbox.position.set(componentAnchor.x, componentAnchor.y, componentAnchor.z);
+            model.add(hitbox);
+            clickableMeshes.push(hitbox);
+            clickableProjectKeys.set(hitbox, project.key);
+            return;
+          }
+          if (project.highlightMode === "local") {
+            const material = new MeshBasicMaterial({
+              color: highlightColor,
+              transparent: false,
+              opacity: 1,
+              side: BackSide,
+              depthWrite: false,
+              toneMapped: false
+            });
+            const localOutline = new Group();
+            if (project.highlightShape === "arch") {
+              const pillarGeometry = new BoxGeometry(0.024, 0.105, 0.035);
+              [-0.052, 0.052].forEach((x) => {
+                const pillar = new Mesh(pillarGeometry, material);
+                pillar.position.set(x, -0.02, 0);
+                localOutline.add(pillar);
+              });
+              const cap = new Mesh(new TorusGeometry(0.052, 0.012, 8, 24, Math.PI), material);
+              cap.position.y = 0.032;
+              localOutline.add(cap);
+            } else {
+              const body = new Mesh(new BoxGeometry(0.07, 0.11, 0.06), material);
+              const crown = new Mesh(new BoxGeometry(0.045, 0.035, 0.045), material);
+              crown.position.y = 0.07;
+              localOutline.add(body, crown);
+            }
+            const highlightAnchor = project.highlightAnchor || project.anchor;
+            localOutline.position.set(highlightAnchor.x, highlightAnchor.y, highlightAnchor.z);
+            localOutline.scale.setScalar(1.018);
+            localOutline.visible = false;
+            localOutline.traverse((child) => {
+              child.raycast = () => {
+              };
+            });
+            model.add(localOutline);
+            highlightShells.set(project.key, [{ shell: localOutline, material, baseScale: 1.018 }]);
+            const hitbox = new Mesh(
+              new BoxGeometry(0.12, 0.12, 0.08),
+              new MeshBasicMaterial({ visible: false })
+            );
+            hitbox.position.set(highlightAnchor.x, highlightAnchor.y, highlightAnchor.z);
+            model.add(hitbox);
+            clickableMeshes.push(hitbox);
+            clickableProjectKeys.set(hitbox, project.key);
+            return;
+          }
+          const projectMeshes = [];
           node.traverse((child) => {
             if (!child.isMesh) return;
+            projectMeshes.push(child);
+          });
+          const records = [];
+          projectMeshes.forEach((child) => {
             if (project.enabled) {
               clickableMeshes.push(child);
               clickableProjectKeys.set(child, project.key);
             }
-            const materials = Array.isArray(child.material) ? child.material : [child.material];
-            const cloned = materials.map((material) => material.clone());
-            child.material = Array.isArray(child.material) ? cloned : cloned[0];
-            cloned.forEach((material) => {
-              if (!material.emissive) return;
-              records.push({
-                material,
-                baseEmissive: material.emissive.clone(),
-                baseIntensity: material.emissiveIntensity || 0
+            [
+              { scale: 1.018 }
+            ].forEach((config) => {
+              const material = new MeshBasicMaterial({
+                color: highlightColor,
+                transparent: false,
+                opacity: 1,
+                side: BackSide,
+                depthWrite: false,
+                toneMapped: false
               });
+              const shellMaterials = Array.isArray(child.material) ? child.material.map(() => material) : material;
+              const shell = new Mesh(child.geometry, shellMaterials);
+              shell.name = `${child.name || project.meshName}_project_glow`;
+              shell.scale.setScalar(config.scale);
+              shell.renderOrder = 3;
+              shell.visible = false;
+              shell.raycast = () => {
+              };
+              child.add(shell);
+              records.push({ shell, material, baseScale: config.scale });
             });
           });
-          highlightedMaterials.set(project.key, records);
+          highlightShells.set(project.key, records);
         });
         scene.add(model);
         resize();
-        if (status) status.textContent = "\u62D6\u52A8\u65CB\u8F6C \xB7 \u6EDA\u8F6E\u7F29\u653E";
+        if (status) status.hidden = true;
         syncVisibility();
         return true;
       } catch {
         area?.classList.add("model-load-error");
-        if (status) status.textContent = "\u6A21\u578B\u52A0\u8F7D\u5931\u8D25";
+        if (status) {
+          status.hidden = false;
+          status.textContent = "\u6A21\u578B\u52A0\u8F7D\u5931\u8D25";
+        }
         if (retry) retry.hidden = false;
         return false;
       } finally {

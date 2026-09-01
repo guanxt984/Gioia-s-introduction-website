@@ -1,0 +1,42 @@
+{
+  "source": {
+    "url": "https://coveomusic.com/?ref=refs.gallery",
+    "extractedAt": "2026-07-22T04:58:27.274Z",
+    "extractor": "dembrandt"
+  },
+  "colors": {
+    "palette": [],
+    "cssVariables": {}
+  },
+  "typography": {
+    "headingFont": "Eiko",
+    "bodyFont": "Eiko"
+  },
+  "spacing": {
+    "scale": [
+      "1px",
+      "1.92px",
+      "2.4px",
+      "6px",
+      "8.4px",
+      "9.6px",
+      "9.96px",
+      "10px",
+      "10.2px",
+      "10.8px",
+      "12px",
+      "18px",
+      "24px",
+      "36px",
+      "48px",
+      "144px",
+      "216px"
+    ]
+  },
+  "radius": {
+    "scale": []
+  },
+  "shadows": {
+    "scale": []
+  }
+}

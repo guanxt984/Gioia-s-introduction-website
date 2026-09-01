@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>经历岛 3D 模型预览</title>
+  <style>
+    :root { color-scheme: light; font-family: Inter, "Microsoft YaHei", sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; overflow: hidden; background: #f2eee7; color: #1d1812; }
+    canvas { display: block; width: 100vw; height: 100vh; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    .panel {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 2;
+      width: min(360px, calc(100vw - 40px));
+      padding: 16px;
+      border: 1px solid rgba(29, 24, 18, .14);
+      border-radius: 18px;
+      background: rgba(242, 238, 231, .88);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 12px 40px rgba(29, 24, 18, .08);
+    }
+    h1 { margin: 0 0 6px; font-size: 18px; }
+    p { margin: 0 0 14px; color: #524d46; font-size: 13px; line-height: 1.5; }
+    .buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .buttons[hidden] { display: none; }
+    button {
+      border: 1px solid rgba(29, 24, 18, .18);
+      border-radius: 999px;
+      padding: 9px 13px;
+      background: #eee;
+      color: inherit;
+      cursor: pointer;
+      transition: .2s ease;
+    }
+    button:hover,
+    button.active { color: #fff; background: #1d1812; transform: translateY(-1px); }
+    .status { margin-top: 12px; font: 11px/1.4 ui-monospace, monospace; color: #524d46; }
+  </style>
+</head>
+<body>
+  <section class="panel">
+    <h1>经历岛 3D 模型</h1>
+    <p>拖拽旋转 · 滚轮缩放 · 点击岛屿或按钮单独放大</p>
+    <div class="buttons">
+      <button data-focus="all" class="active">完整视图</button>
+      <button data-focus="island_internship">实习岛</button>
+      <button data-focus="island_ai">AI 实践岛</button>
+      <button data-focus="island_school">学校项目岛</button>
+    </div>
+    <div class="status">正在加载模型…</div>
+  </section>
+  <script type="module" src="./viewer.bundle.js"></script>
+</body>
+</html>
