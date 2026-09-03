@@ -73,7 +73,7 @@ new GLTFLoader().load(modelFile, gltf => {
   controls.minDistance = Math.max(rootBounds.radius * .85, .5);
   controls.maxDistance = Math.max(rootBounds.radius * 8, 8);
   status.textContent = previewMode === "uploaded"
-    ? "原始模型 32 MB / 95.4 万三角面 · 可自由旋转"
+    ? "优化模型 23 MB / 95.4 万三角面 · 可自由旋转"
     : previewMode
       ? "单岛模型已加载 · 可自由旋转"
       : `模型已加载 · ${selectable.size} 个独立子岛`;
@@ -119,7 +119,7 @@ function focus(name, animate = true) {
     button.classList.toggle("active", button.dataset.focus === name);
   });
   status.textContent = previewMode === "uploaded"
-    ? "原始模型 32 MB / 95.4 万三角面 · 可自由旋转"
+    ? "优化模型 23 MB / 95.4 万三角面 · 可自由旋转"
     : name === "all"
       ? "完整视图 · 可自由旋转"
       : (targetObject.userData.label || name) + " · 独立放大展示";

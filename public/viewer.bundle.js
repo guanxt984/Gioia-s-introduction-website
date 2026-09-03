@@ -31922,7 +31922,7 @@ new GLTFLoader().load(modelFile, (gltf) => {
   const rootBounds = boundsOf(root);
   controls.minDistance = Math.max(rootBounds.radius * 0.85, 0.5);
   controls.maxDistance = Math.max(rootBounds.radius * 8, 8);
-  status.textContent = previewMode === "uploaded" ? "\u539F\u59CB\u6A21\u578B 32 MB / 95.4 \u4E07\u4E09\u89D2\u9762 \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : previewMode ? "\u5355\u5C9B\u6A21\u578B\u5DF2\u52A0\u8F7D \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : `\u6A21\u578B\u5DF2\u52A0\u8F7D \xB7 ${selectable.size} \u4E2A\u72EC\u7ACB\u5B50\u5C9B`;
+  status.textContent = previewMode === "uploaded" ? "\u4F18\u5316\u6A21\u578B 23 MB / 95.4 \u4E07\u4E09\u89D2\u9762 \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : previewMode ? "\u5355\u5C9B\u6A21\u578B\u5DF2\u52A0\u8F7D \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : `\u6A21\u578B\u5DF2\u52A0\u8F7D \xB7 ${selectable.size} \u4E2A\u72EC\u7ACB\u5B50\u5C9B`;
   focus("all", false);
 }, (progress) => {
   if (progress.total) status.textContent = `\u52A0\u8F7D\u6A21\u578B ${Math.round(progress.loaded / progress.total * 100)}%`;
@@ -31962,7 +31962,7 @@ function focus(name, animate = true) {
   document.querySelectorAll("button").forEach((button) => {
     button.classList.toggle("active", button.dataset.focus === name);
   });
-  status.textContent = previewMode === "uploaded" ? "\u539F\u59CB\u6A21\u578B 32 MB / 95.4 \u4E07\u4E09\u89D2\u9762 \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : name === "all" ? "\u5B8C\u6574\u89C6\u56FE \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : (targetObject.userData.label || name) + " \xB7 \u72EC\u7ACB\u653E\u5927\u5C55\u793A";
+  status.textContent = previewMode === "uploaded" ? "\u4F18\u5316\u6A21\u578B 23 MB / 95.4 \u4E07\u4E09\u89D2\u9762 \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : name === "all" ? "\u5B8C\u6574\u89C6\u56FE \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : (targetObject.userData.label || name) + " \xB7 \u72EC\u7ACB\u653E\u5927\u5C55\u793A";
 }
 document.querySelector(".buttons").addEventListener("click", (event) => {
   const button = event.target.closest("button[data-focus]");
