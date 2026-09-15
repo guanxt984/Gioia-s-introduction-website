@@ -1,0 +1,305 @@
+[
+  {
+    "id": "baimi",
+    "title": "白米",
+    "cover": "./assets/home-cards/baimi/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/baimi/01.webp",
+        "name": "7761daa4ba98bdc03d15de375b2a4757.jpg",
+        "width": 1702,
+        "height": 1276
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/baimi/02.webp",
+        "name": "9d8b27919720f003fbc2fe9d952ed396.jpg",
+        "width": 1702,
+        "height": 1276
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/baimi/03.webp",
+        "name": "ae26f190630748f4c7a02181e55cdbad.png",
+        "width": 2000,
+        "height": 2389
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/baimi/04.webp",
+        "name": "大图.png",
+        "width": 782,
+        "height": 742
+      }
+    ]
+  },
+  {
+    "id": "blocks",
+    "title": "方块交际",
+    "cover": "./assets/home-cards/blocks/cover.webp",
+    "media": [
+      {
+        "type": "video",
+        "src": "./assets/home-cards/blocks/01.mp4",
+        "name": "9月3日 (1).mp4"
+      }
+    ]
+  },
+  {
+    "id": "guitar",
+    "title": "吉他",
+    "cover": "./assets/home-cards/guitar/cover.webp",
+    "media": [
+      {
+        "type": "video",
+        "src": "./assets/home-cards/guitar/01.mp4",
+        "name": "f666f44dd13b3f0661483c364e7e5bc3_raw.mp4"
+      }
+    ]
+  },
+  {
+    "id": "fitness",
+    "title": "健身",
+    "cover": "./assets/home-cards/fitness/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/fitness/01.webp",
+        "name": "6ec7c054cc4578bc4fb07721fa89d01a.jpg",
+        "width": 1034,
+        "height": 1237
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/fitness/02.webp",
+        "name": "cc6cbffe2355329d3fd81d6bf71d7dac.jpg",
+        "width": 1080,
+        "height": 1080
+      }
+    ]
+  },
+  {
+    "id": "jiuling",
+    "title": "九瓴",
+    "cover": "./assets/home-cards/jiuling/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/jiuling/01.webp",
+        "name": "0b34639e2c289de34458bba2dd5dac3e.png",
+        "width": 1178,
+        "height": 1688
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/jiuling/02.webp",
+        "name": "6f1c338a89d43bbbe08dda3dd8c0c3fc.png",
+        "width": 1167,
+        "height": 2023
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/jiuling/03.webp",
+        "name": "a111c53aca8e85d6f2fe5bfb9a915d91.jpg",
+        "width": 1150,
+        "height": 1950
+      }
+    ]
+  },
+  {
+    "id": "lixiang",
+    "title": "理想汽车",
+    "cover": "./assets/home-cards/lixiang/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/01.webp",
+        "name": "1.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/02.webp",
+        "name": "2.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/03.webp",
+        "name": "3.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/04.webp",
+        "name": "4.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/05.webp",
+        "name": "5.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/06.webp",
+        "name": "6.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/07.webp",
+        "name": "7.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/08.webp",
+        "name": "8.png",
+        "width": 2000,
+        "height": 2000
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/lixiang/09.webp",
+        "name": "大图.png",
+        "width": 793,
+        "height": 540
+      }
+    ]
+  },
+  {
+    "id": "qianchuan",
+    "title": "仟传",
+    "cover": "./assets/home-cards/qianchuan/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/qianchuan/01.webp",
+        "name": "cebb6a6b4bcd5ca1d983c9fadd35d63f.jpg",
+        "width": 2000,
+        "height": 2667
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/qianchuan/02.webp",
+        "name": "大图.png",
+        "width": 796,
+        "height": 684
+      }
+    ]
+  },
+  {
+    "id": "cell",
+    "title": "细胞工厂",
+    "cover": "./assets/home-cards/cell/cover.webp",
+    "media": [
+      {
+        "type": "video",
+        "src": "./assets/home-cards/cell/01.mp4",
+        "name": "9月3日 (2).mp4"
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/cell/02.webp",
+        "name": "Group 1000002721.png",
+        "width": 1025,
+        "height": 717
+      }
+    ]
+  },
+  {
+    "id": "chess",
+    "title": "象棋",
+    "cover": "./assets/home-cards/chess/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/chess/01.webp",
+        "name": "d54978e7aa113f3459f86a98afc6d8de.jpg",
+        "width": 1248,
+        "height": 936
+      }
+    ]
+  },
+  {
+    "id": "frame",
+    "title": "艺术相框",
+    "cover": "./assets/home-cards/frame/cover.webp",
+    "media": [
+      {
+        "type": "video",
+        "src": "./assets/home-cards/frame/01.mp4",
+        "name": "9月3日.mp4"
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/frame/02.webp",
+        "name": "Group 1000002699.png",
+        "width": 1630,
+        "height": 668
+      }
+    ]
+  },
+  {
+    "id": "badminton",
+    "title": "羽毛球",
+    "cover": "./assets/home-cards/badminton/cover.webp",
+    "media": [
+      {
+        "type": "image",
+        "src": "./assets/home-cards/badminton/01.webp",
+        "name": "016b0ea6b9edd896fd9ff19348971b90.jpg",
+        "width": 2000,
+        "height": 2667
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/badminton/02.webp",
+        "name": "3613d458ea03442cc284a1657e3d9e25.png",
+        "width": 1170,
+        "height": 2532
+      }
+    ]
+  },
+  {
+    "id": "apex",
+    "title": "APEX",
+    "cover": "./assets/home-cards/apex/cover.webp",
+    "media": [
+      {
+        "type": "video",
+        "src": "./assets/home-cards/apex/01.mp4",
+        "name": "8月21日.mp4"
+      },
+      {
+        "type": "image",
+        "src": "./assets/home-cards/apex/02.webp",
+        "name": "Section 1.png",
+        "width": 2000,
+        "height": 4345
+      }
+    ]
+  },
+  {
+    "id": "memora",
+    "title": "memora",
+    "cover": "./assets/home-cards/memora/cover.webp",
+    "media": [
+      {
+        "type": "pdf",
+        "src": "./assets/home-cards/memora/01.pdf",
+        "name": "Memora-compressed.pdf"
+      }
+    ]
+  }
+]

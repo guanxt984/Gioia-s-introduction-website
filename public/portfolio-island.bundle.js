@@ -32054,6 +32054,43 @@ function selectVisibleProjects(projects, activeCategory, limit = 3) {
   return projects.filter((project) => project.category === activeCategory && project.inView).sort((a, b) => b.depth - a.depth).slice(0, limit).map((project) => project.key);
 }
 
+// public/justified-media-layout.js
+function enumeratePartitions(assets) {
+  if (!assets.length) return [[]];
+  const partitions = [];
+  const breakCount = Math.max(0, assets.length - 1);
+  for (let mask = 0; mask < 2 ** breakCount; mask += 1) {
+    const rows = [[assets[0]]];
+    for (let index = 1; index < assets.length; index += 1) {
+      if (mask & 1 << index - 1) rows.push([]);
+      rows.at(-1).push(assets[index]);
+    }
+    partitions.push(rows);
+  }
+  return partitions;
+}
+function solveJustifiedMosaic(assets, maxWidth, maxHeight, gap, candidatePartitions = enumeratePartitions(assets)) {
+  let best = null;
+  candidatePartitions.forEach((rows) => {
+    const sums = rows.map((row) => row.reduce((sum, asset) => sum + asset.aspect, 0));
+    const inverseSum = sums.reduce((sum, value) => sum + 1 / value, 0);
+    const weightedInnerGaps = rows.reduce((sum, row, index) => sum + gap * (row.length - 1) / sums[index], 0);
+    const rowGaps = gap * (rows.length - 1);
+    const width = Math.min(maxWidth, (maxHeight - rowGaps + weightedInnerGaps) / inverseSum);
+    const heights = rows.map((row, index) => (width - gap * (row.length - 1)) / sums[index]);
+    if (width <= 0 || heights.some((height2) => height2 <= 0)) return;
+    const height = heights.reduce((sum, value) => sum + value, 0) + rowGaps;
+    if (height > maxHeight + 0.5) return;
+    const mediaArea = rows.reduce((total, row, rowIndex) => total + row.reduce((sum, asset) => sum + asset.aspect * heights[rowIndex] ** 2, 0), 0);
+    const outlinePenalty = Math.abs(Math.log(width / height));
+    const meanHeight = heights.reduce((sum, value) => sum + value, 0) / heights.length;
+    const variancePenalty = heights.reduce((sum, value) => sum + Math.abs(value - meanHeight), 0) / (meanHeight * heights.length);
+    const score = mediaArea / (1 + outlinePenalty * 0.09 + variancePenalty * 0.035);
+    if (!best || score > best.score) best = { rows, width, height, heights, score, mediaArea };
+  });
+  return best;
+}
+
 // src/portfolio-island.js
 var MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 var SUB_ISLANDS = [
@@ -32064,40 +32101,29 @@ var SUB_ISLANDS = [
 var activeMount = null;
 var EXPERIENCE_PROJECTS = [
   { key: "internship-lixiang", category: "internship", city: "\u5317\u4EAC", title: "\u7406\u60F3", enabled: true, landmark: "\u6545\u5BAB", meshName: "tripo_part_3", anchor: { x: -0.21, y: 0.51, z: -0.105 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "\u7406\u60F3\u6C7D\u8F66\u5B9E\u4E60\u8BC1\u660E" },
-    { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u7167\u7247" },
-    { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "\u7406\u60F3\u6C7D\u8F66\u9879\u76EE\u8D44\u6599" }
+    { type: "image", src: "assets/experience-island-details/internship/lixiang/certificate.webp", alt: "\u7406\u60F3\u6C7D\u8F66\u79BB\u804C\u8BC1\u660E", width: 1240, height: 1753 }
   ] },
   { key: "internship-qianchuan", category: "internship", city: "\u4E0A\u6D77", title: "\u4EDF\u4F20", enabled: true, landmark: "\u4E1C\u65B9\u660E\u73E0", meshName: "tripo_part_6", anchor: { x: -0.04, y: 0.69, z: 0.1 }, media: [
-    { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "\u4EDF\u4F20\u5B9E\u4E60\u8BC1\u660E" },
-    { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "\u4EDF\u4F20\u9879\u76EE\u7167\u7247" },
-    { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "\u4EDF\u4F20\u9879\u76EE\u8D44\u6599" }
+    { type: "image", src: "assets/experience-island-details/internship/qianchuan/certificate.webp", alt: "\u4EDF\u4F20\u5B9E\u4E60\u8BC1\u660E", width: 1698, height: 2400 }
   ] },
   { key: "internship-baimi", category: "internship", city: "\u676D\u5DDE", title: "\u767D\u7C73", enabled: true, landmark: "\u897F\u6E56", meshName: "tripo_part_7", anchor: { x: -0.15, y: 0.4, z: 0.19 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "\u767D\u7C73\u9879\u76EE\u8D44\u6599" },
-    { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "\u767D\u7C73\u9879\u76EE\u7167\u7247" },
-    { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "\u767D\u7C73\u9879\u76EE\u5C55\u793A" }
+    { type: "image", src: "assets/experience-island-details/internship/baimi/proof.webp", alt: "\u767D\u7C73\u9879\u76EE\u8BC1\u660E", width: 2085, height: 2780 }
   ] },
   { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "\u4E5D\u74F4\u9879\u76EE\u7167\u7247" }
+    { type: "image", src: "assets/experience-island-details/internship/jiuling/agreement.webp", alt: "\u4E5D\u74F4\u5B9E\u4E60\u534F\u8BAE\u89E3\u9664\u8D44\u6599", width: 1698, height: 2400 }
   ] },
   { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
   { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
   { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
   { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
-    { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX \u9879\u76EE\u8D44\u6599", wide: true }
+    { type: "image", src: "assets/experience-island-details/school/uiux/ux.webp", alt: "UIUX \u9879\u76EE\u8D44\u6599", width: 2400, height: 1354 }
   ] },
   { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
-    { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891", wide: true },
-    { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX \u9879\u76EE\u56FE\u7247" },
-    { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX \u9879\u76EE\u957F\u56FE", wide: true }
+    { type: "video", src: "assets/experience-island-details/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891" },
+    { type: "image", src: "assets/experience-island-details/school/apex/section.webp", alt: "APEX \u9879\u76EE\u957F\u56FE", width: 2400, height: 5214 }
   ] },
   { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E00" },
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E8C" },
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u56FE\u7247\u4E09" },
-    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u521B\u65B0\u8D5B\u89C6\u9891", wide: true },
-    { type: "video", src: "assets/experience-projects/school/cell-factory/live.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u5B9E\u62CD\u89C6\u9891", wide: true }
+    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u89C6\u9891" }
   ] }
 ];
 var PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map((project) => [project.key, project]));
@@ -32180,28 +32206,88 @@ function extractConnectedComponentGeometry(mesh, modelAnchor) {
   geometry.translate(-center.x, -center.y, -center.z);
   return { geometry, center, size };
 }
-function mediaMarkup(asset) {
-  const wide = asset.wide ? ' class="wide"' : "";
-  if (asset.type === "pdf") {
-    return `<a class="school-project-file" href="${asset.src}" target="_blank" rel="noopener"><span>PDF</span><strong>${asset.alt}</strong><em>\u6253\u5F00\u8D44\u6599 \u2192</em></a>`;
-  }
-  if (asset.type === "video") {
-    return `<video${wide} src="${asset.src}" controls playsinline preload="metadata" aria-label="${asset.alt}"></video>`;
-  }
-  return `<img${wide} src="${asset.src}" alt="${asset.alt}">`;
+function resolveProjectAspect(asset) {
+  if (asset.width && asset.height) return Promise.resolve({ ...asset, aspect: asset.width / asset.height });
+  if (asset.type !== "video") return Promise.resolve({ ...asset, aspect: 0.707 });
+  return new Promise((resolve) => {
+    const probe = document.createElement("video");
+    const finish = () => resolve({ ...asset, aspect: probe.videoWidth && probe.videoHeight ? probe.videoWidth / probe.videoHeight : 16 / 9 });
+    probe.preload = "metadata";
+    probe.addEventListener("loadedmetadata", finish, { once: true });
+    probe.addEventListener("error", finish, { once: true });
+    probe.src = asset.src;
+  });
 }
-function showExperienceProject(projectKey) {
+function createProjectMedia(asset) {
+  const figure = document.createElement("figure");
+  figure.style.flexGrow = asset.aspect;
+  if (asset.type === "image") {
+    const link = document.createElement("a");
+    link.href = asset.src;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.setAttribute("aria-label", `${asset.alt}\uFF0C\u6253\u5F00\u539F\u56FE`);
+    const image = document.createElement("img");
+    image.src = asset.src;
+    image.alt = asset.alt;
+    image.width = asset.width;
+    image.height = asset.height;
+    link.append(image);
+    figure.append(link);
+  } else if (asset.type === "video") {
+    const video = document.createElement("video");
+    video.src = asset.src;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.setAttribute("aria-label", asset.alt);
+    figure.append(video);
+  } else {
+    const link = document.createElement("a");
+    link.href = asset.src;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "\u6253\u5F00 PDF \u2197";
+    const frame = document.createElement("iframe");
+    frame.src = asset.src;
+    frame.title = asset.alt;
+    figure.append(link, frame);
+  }
+  return figure;
+}
+async function showExperienceProject(projectKey) {
   const project = PROJECT_BY_KEY.get(projectKey);
   const panel = document.querySelector("[data-school-project-panel]");
   if (!project?.enabled || !panel) return;
   const title = panel.querySelector("[data-school-project-title]");
+  const kicker = panel.querySelector(".school-project-kicker");
   const media = panel.querySelector("[data-school-project-media]");
   if (title) title.textContent = project.city ? `${project.city} \xB7 ${project.title}` : project.title;
-  if (media) {
-    media.querySelectorAll("video").forEach((video) => video.pause());
-    media.innerHTML = project.media.length ? project.media.map(mediaMarkup).join("") : '<p class="project-coming-soon">\u9879\u76EE\u8D44\u6599\u6574\u7406\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\u3002</p>';
-  }
+  if (kicker) kicker.textContent = project.category === "internship" ? "INTERNSHIP" : project.category === "school" ? "SCHOOL PROJECT" : "PERSONAL PROJECT";
+  media?.querySelectorAll("video").forEach((video) => video.pause());
+  media?.replaceChildren();
   panel.hidden = false;
+  if (project.media.length) {
+    const assets = await Promise.all(project.media.map(resolveProjectAspect));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    const gap = window.innerWidth <= 600 ? 3 : 4;
+    const stage = panel.closest("#experience");
+    const mediaRect = media.getBoundingClientRect();
+    const stageRect = stage?.getBoundingClientRect();
+    const maxWidth = Math.max(220, Math.min(media.clientWidth || panel.clientWidth, window.innerWidth - 32));
+    const maxHeight = Math.max(180, Math.min(window.innerHeight * 0.8, (stageRect?.bottom || window.innerHeight) - mediaRect.top - 18));
+    const layout = solveJustifiedMosaic(assets, maxWidth, maxHeight, gap);
+    layout.rows.forEach((rowAssets, rowIndex) => {
+      const row = document.createElement("div");
+      row.className = "school-project-media-row";
+      row.style.width = `${layout.width}px`;
+      row.style.height = `${layout.heights[rowIndex]}px`;
+      rowAssets.forEach((asset) => row.append(createProjectMedia(asset)));
+      media.append(row);
+    });
+  } else {
+    if (media) media.innerHTML = '<p class="project-coming-soon">\u9879\u76EE\u8D44\u6599\u6574\u7406\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\u3002</p>';
+  }
   document.querySelectorAll("[data-experience-project]").forEach((trigger) => {
     const active = trigger.dataset.experienceProject === projectKey;
     trigger.classList.toggle("is-active", active);

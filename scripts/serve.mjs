@@ -9,6 +9,12 @@ const types = {
   ".js": "text/javascript; charset=utf-8",
   ".glb": "model/gltf-binary",
   ".json": "application/json",
+  ".css": "text/css; charset=utf-8",
+  ".webp": "image/webp",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".mp4": "video/mp4",
+  ".pdf": "application/pdf",
 };
 
 http.createServer((request, response) => {

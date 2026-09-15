@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { experienceIslandZoomRange } from "./experience-island-zoom.js";
 import { labelLimitForCategory, selectFrontIsland, selectVisibleProjects } from "./experience-island-visibility.js";
+import { solveJustifiedMosaic } from "../public/justified-media-layout.js";
 
 const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 const SUB_ISLANDS = [
@@ -14,40 +15,29 @@ let activeMount = null;
 
 const EXPERIENCE_PROJECTS = [
   { key: "internship-lixiang", category: "internship", city: "北京", title: "理想", enabled: true, landmark: "故宫", meshName: "tripo_part_3", anchor: { x: -0.21, y: 0.51, z: -0.105 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/lixiang/certificate.png", alt: "理想汽车实习证明" },
-    { type: "image", src: "assets/experience-projects/internship/lixiang/photo.jpg", alt: "理想汽车项目照片" },
-    { type: "image", src: "assets/experience-projects/internship/lixiang/project.png", alt: "理想汽车项目资料" },
+    { type: "image", src: "assets/experience-island-details/internship/lixiang/certificate.webp", alt: "理想汽车离职证明", width: 1240, height: 1753 },
   ] },
   { key: "internship-qianchuan", category: "internship", city: "上海", title: "仟传", enabled: true, landmark: "东方明珠", meshName: "tripo_part_6", anchor: { x: -0.04, y: 0.69, z: 0.10 }, media: [
-    { type: "pdf", src: "assets/experience-projects/internship/qianchuan/certificate.pdf", alt: "仟传实习证明" },
-    { type: "image", src: "assets/experience-projects/internship/qianchuan/photo.jpg", alt: "仟传项目照片" },
-    { type: "image", src: "assets/experience-projects/internship/qianchuan/project.png", alt: "仟传项目资料" },
+    { type: "image", src: "assets/experience-island-details/internship/qianchuan/certificate.webp", alt: "仟传实习证明", width: 1698, height: 2400 },
   ] },
   { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", meshName: "tripo_part_7", anchor: { x: -0.15, y: 0.40, z: 0.19 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/baimi/photo-01.png", alt: "白米项目资料" },
-    { type: "image", src: "assets/experience-projects/internship/baimi/photo-02.jpg", alt: "白米项目照片" },
-    { type: "image", src: "assets/experience-projects/internship/baimi/project.png", alt: "白米项目展示" },
+    { type: "image", src: "assets/experience-island-details/internship/baimi/proof.webp", alt: "白米项目证明", width: 2085, height: 2780 },
   ] },
   { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
-    { type: "image", src: "assets/experience-projects/internship/jiuling/photo.jpg", alt: "九瓴项目照片" },
+    { type: "image", src: "assets/experience-island-details/internship/jiuling/agreement.webp", alt: "九瓴实习协议解除资料", width: 1698, height: 2400 },
   ] },
   { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
   { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
   { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
   { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
-    { type: "image", src: "assets/experience-projects/school/uiux/ux.png", alt: "UIUX 项目资料", wide: true },
+    { type: "image", src: "assets/experience-island-details/school/uiux/ux.webp", alt: "UIUX 项目资料", width: 2400, height: 1354 },
   ] },
   { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
-    { type: "video", src: "assets/experience-projects/school/apex/demo.mp4", alt: "APEX 项目视频", wide: true },
-    { type: "image", src: "assets/experience-projects/school/apex/cover.jpg", alt: "APEX 项目图片" },
-    { type: "image", src: "assets/experience-projects/school/apex/section.png", alt: "APEX 项目长图", wide: true },
+    { type: "video", src: "assets/experience-island-details/school/apex/demo.mp4", alt: "APEX 项目视频" },
+    { type: "image", src: "assets/experience-island-details/school/apex/section.webp", alt: "APEX 项目长图", width: 2400, height: 5214 },
   ] },
   { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-01.jpg", alt: "细胞工厂项目图片一" },
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-02.jpg", alt: "细胞工厂项目图片二" },
-    { type: "image", src: "assets/experience-projects/school/cell-factory/photo-03.jpg", alt: "细胞工厂项目图片三" },
-    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "细胞工厂创新赛视频", wide: true },
-    { type: "video", src: "assets/experience-projects/school/cell-factory/live.mp4", alt: "细胞工厂实拍视频", wide: true },
+    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "细胞工厂项目视频" },
   ] },
 ];
 
@@ -138,32 +128,91 @@ function extractConnectedComponentGeometry(mesh, modelAnchor) {
   return { geometry, center, size };
 }
 
-function mediaMarkup(asset) {
-  const wide = asset.wide ? ' class="wide"' : "";
-  if (asset.type === "pdf") {
-    return `<a class="school-project-file" href="${asset.src}" target="_blank" rel="noopener"><span>PDF</span><strong>${asset.alt}</strong><em>打开资料 →</em></a>`;
-  }
-  if (asset.type === "video") {
-    return `<video${wide} src="${asset.src}" controls playsinline preload="metadata" aria-label="${asset.alt}"></video>`;
-  }
-  return `<img${wide} src="${asset.src}" alt="${asset.alt}">`;
+function resolveProjectAspect(asset) {
+  if (asset.width && asset.height) return Promise.resolve({ ...asset, aspect: asset.width / asset.height });
+  if (asset.type !== "video") return Promise.resolve({ ...asset, aspect: 0.707 });
+  return new Promise(resolve => {
+    const probe = document.createElement("video");
+    const finish = () => resolve({ ...asset, aspect: probe.videoWidth && probe.videoHeight ? probe.videoWidth / probe.videoHeight : 16 / 9 });
+    probe.preload = "metadata";
+    probe.addEventListener("loadedmetadata", finish, { once: true });
+    probe.addEventListener("error", finish, { once: true });
+    probe.src = asset.src;
+  });
 }
 
-function showExperienceProject(projectKey) {
+function createProjectMedia(asset) {
+  const figure = document.createElement("figure");
+  figure.style.flexGrow = asset.aspect;
+  if (asset.type === "image") {
+    const link = document.createElement("a");
+    link.href = asset.src;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.setAttribute("aria-label", `${asset.alt}，打开原图`);
+    const image = document.createElement("img");
+    image.src = asset.src;
+    image.alt = asset.alt;
+    image.width = asset.width;
+    image.height = asset.height;
+    link.append(image);
+    figure.append(link);
+  } else if (asset.type === "video") {
+    const video = document.createElement("video");
+    video.src = asset.src;
+    video.controls = true;
+    video.playsInline = true;
+    video.preload = "metadata";
+    video.setAttribute("aria-label", asset.alt);
+    figure.append(video);
+  } else {
+    const link = document.createElement("a");
+    link.href = asset.src;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "打开 PDF ↗";
+    const frame = document.createElement("iframe");
+    frame.src = asset.src;
+    frame.title = asset.alt;
+    figure.append(link, frame);
+  }
+  return figure;
+}
+
+async function showExperienceProject(projectKey) {
   const project = PROJECT_BY_KEY.get(projectKey);
   const panel = document.querySelector("[data-school-project-panel]");
   if (!project?.enabled || !panel) return;
 
   const title = panel.querySelector("[data-school-project-title]");
+  const kicker = panel.querySelector(".school-project-kicker");
   const media = panel.querySelector("[data-school-project-media]");
   if (title) title.textContent = project.city ? `${project.city} · ${project.title}` : project.title;
-  if (media) {
-    media.querySelectorAll("video").forEach(video => video.pause());
-    media.innerHTML = project.media.length
-      ? project.media.map(mediaMarkup).join("")
-      : '<p class="project-coming-soon">项目资料整理中，敬请期待。</p>';
-  }
+  if (kicker) kicker.textContent = project.category === "internship" ? "INTERNSHIP" : project.category === "school" ? "SCHOOL PROJECT" : "PERSONAL PROJECT";
+  media?.querySelectorAll("video").forEach(video => video.pause());
+  media?.replaceChildren();
   panel.hidden = false;
+  if (project.media.length) {
+    const assets = await Promise.all(project.media.map(resolveProjectAspect));
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const gap = window.innerWidth <= 600 ? 3 : 4;
+    const stage = panel.closest("#experience");
+    const mediaRect = media.getBoundingClientRect();
+    const stageRect = stage?.getBoundingClientRect();
+    const maxWidth = Math.max(220, Math.min(media.clientWidth || panel.clientWidth, window.innerWidth - 32));
+    const maxHeight = Math.max(180, Math.min(window.innerHeight * 0.80, (stageRect?.bottom || window.innerHeight) - mediaRect.top - 18));
+    const layout = solveJustifiedMosaic(assets, maxWidth, maxHeight, gap);
+    layout.rows.forEach((rowAssets, rowIndex) => {
+      const row = document.createElement("div");
+      row.className = "school-project-media-row";
+      row.style.width = `${layout.width}px`;
+      row.style.height = `${layout.heights[rowIndex]}px`;
+      rowAssets.forEach(asset => row.append(createProjectMedia(asset)));
+      media.append(row);
+    });
+  } else {
+    if (media) media.innerHTML = '<p class="project-coming-soon">项目资料整理中，敬请期待。</p>';
+  }
   document.querySelectorAll("[data-experience-project]").forEach(trigger => {
     const active = trigger.dataset.experienceProject === projectKey;
     trigger.classList.toggle("is-active", active);

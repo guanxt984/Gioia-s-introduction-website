@@ -7,7 +7,28 @@
   <link rel="preload" href="./models/experience-island-uploaded-preview.glb" as="fetch" crossorigin>
   <script type="module" src="./portfolio-island.bundle.js"></script>
   <script type="module" src="./home-transition.bundle.js"></script>
+  <script type="module" src="./home-cards.js"></script>
+  <link rel="stylesheet" href="./home-cards.css">
+  <link rel="stylesheet" href="./experience-details.css">
+  <link rel="stylesheet" href="./skillcloud-details.css">
   <style id="final-removal">
+    #home .home-scroll-cue {
+      position: absolute;
+      top: max(24px, 3svh);
+      left: 50%;
+      transform: translateX(-50%);
+      margin: 0;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: #dedede;
+      color: #626262;
+      z-index: 4;
+      font: 400 clamp(13px, 1vw, 17px)/1.5 Arial, sans-serif;
+      letter-spacing: .08em;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
     .global-utility,
     .identity-tab {
       display: none !important;
@@ -187,7 +208,8 @@
     </div>
   </main>
 
-  <script>
+  <script type="module">
+    import { skillDetails } from "./skillcloud-content.js";
     Promise.all([
       fetch('./site/homepage-viewport-fit-v5.html').then(function (response) {
         if (!response.ok) throw new Error('首页结构载入失败');
@@ -226,6 +248,10 @@
       structureBody.querySelector('#destination .actions')?.remove();
       homepagePage.querySelector('.utility')?.remove();
       homepagePage.querySelector('.confirm')?.remove();
+      var scrollCue = document.createElement('p');
+      scrollCue.className = 'home-scroll-cue';
+      scrollCue.textContent = '请缓慢下滑~';
+      homepagePage.append(scrollCue);
       structureBody.querySelector('#home').replaceChildren(homepagePage.cloneNode(true));
 
       [homepageStyle, structureStyle, coveoStyle, reviewStyle].forEach(function (sourceStyle) {
@@ -471,11 +497,28 @@
         chip.addEventListener('click', function () {
           var skill = chip.getAttribute('data-skill');
           markSkillViewed(chip);
-          title.textContent = skill;
+          var detail = skillDetails[chip.dataset.skillId];
+          dialog.classList.toggle('has-skill-content', Boolean(detail));
+          title.textContent = detail ? detail.title : skill;
           var item = energyDetails[skill];
           dialog.classList.toggle('is-media-only', Boolean(item));
-          body.textContent = item ? item.body : 'xxx' + skill + '能力说明与项目佐证资料xxx';
+          body.textContent = detail ? detail.hook : item ? item.body : 'xxx' + skill + '能力说明与项目佐证资料xxx';
           proof.innerHTML = item ? renderProof(item) : '<span>佐证 01 · xxx相关项目资料xxx</span><span>佐证 02 · xxx过程产出或复盘xxx</span>';
+          if (detail) {
+            var list = document.createElement('ol');
+            list.className = 'skill-evidence-list';
+            detail.evidence.forEach(function (evidence) {
+              var row = document.createElement('li');
+              var heading = document.createElement('h4');
+              heading.textContent = [evidence.project, evidence.title].filter(Boolean).join(' · ');
+              var text = document.createElement('p');
+              text.textContent = evidence.text;
+              row.append(heading, text);
+              list.append(row);
+            });
+            proof.replaceChildren(list);
+          }
+          dialog.scrollTop = 0;
           if (typeof dialog.showModal === 'function') dialog.showModal();
           else dialog.setAttribute('open', '');
         });
