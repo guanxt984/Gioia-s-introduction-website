@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
+import { createFrameImageCache, createFrameSequencePlayer } from "../src/frame-playback.js";
 import { createRenderScheduler } from "../src/render-scheduler.js";
 
 const frameSets = [
@@ -63,5 +64,65 @@ activeCallbacks.shift()(100);
 assert.equal(activeCallbacks.length, 1, "an active transition should keep requesting frames");
 activeScheduler.stop();
 assert.ok(cancelled.length > 0, "stopping an invisible scene should cancel its pending frame");
+
+const fakeImages = [];
+function fakeImageFactory() {
+  const listeners = { load: [], error: [] };
+  const image = {
+    complete: false,
+    naturalWidth: 0,
+    src: "",
+    addEventListener(type, listener) {
+      listeners[type]?.push(listener);
+    },
+    finish() {
+      this.complete = true;
+      this.naturalWidth = 2560;
+      listeners.load.forEach(listener => listener());
+    },
+  };
+  fakeImages.push(image);
+  return image;
+}
+
+const imageCache = createFrameImageCache({ imageFactory: fakeImageFactory });
+imageCache.preload(["frame-1.webp", "frame-2.webp"]);
+assert.equal(fakeImages.length, 2, "preloading should retain one image request per source");
+const frameReady = imageCache.load("frame-1.webp");
+assert.equal(frameReady, imageCache.load("frame-1.webp"), "repeated frame loads should share one readiness promise");
+fakeImages[0].finish();
+await frameReady;
+
+const pendingLoads = [];
+const queuedSteps = [];
+const renderedFrames = [];
+const flushMicrotasks = () => new Promise(resolve => setImmediate(resolve));
+const sequencePlayer = createFrameSequencePlayer({
+  frameCount: 2,
+  frameDuration: 0,
+  loadFrame: index => new Promise(resolve => pendingLoads.push({ index, resolve })),
+  renderFrame: index => renderedFrames.push(index),
+  schedule: callback => {
+    queuedSteps.push(callback);
+    return callback;
+  },
+  cancelSchedule: callback => {
+    const index = queuedSteps.indexOf(callback);
+    if (index >= 0) queuedSteps.splice(index, 1);
+  },
+});
+sequencePlayer.start();
+await Promise.resolve();
+assert.deepEqual(pendingLoads.map(item => item.index), [1], "animation must wait for frame 1 before requesting frame 2");
+pendingLoads.shift().resolve();
+await flushMicrotasks();
+assert.deepEqual(renderedFrames, [1], "a frame should render only after its asset is ready");
+queuedSteps.shift()();
+await flushMicrotasks();
+assert.deepEqual(pendingLoads.map(item => item.index), [2], "the next frame should request only after the previous frame rendered");
+pendingLoads.shift().resolve();
+await flushMicrotasks();
+assert.deepEqual(renderedFrames, [1, 2], "sequential playback should retain every frame in order");
+sequencePlayer.stop();
 
 console.log("PASS: animation assets and on-demand render scheduling");

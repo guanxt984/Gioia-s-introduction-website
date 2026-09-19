@@ -207,6 +207,7 @@ assert.equal(nextSequelLatched(false, .16), false);
 assert.equal(nextSequelLatched(false, 1 / 6), true);
 assert.equal(nextSequelLatched(true, .2), true);
 assert.equal(nextSequelLatched(true, 0), false);
+assert.equal(nextSequelLatched(true, .00025), false);
 assert.equal(destinationFrameIndexAtElapsed(0), 1);
 assert.equal(destinationFrameIndexAtElapsed(67), 2);
 assert.equal(destinationFrameIndexAtElapsed(16550), 249);

@@ -1,3 +1,106 @@
+// src/frame-playback.js
+function imageIsReady(image) {
+  return Boolean(image?.complete && image.naturalWidth > 0);
+}
+function waitForImageDecode(image) {
+  if (typeof image?.decode !== "function") return Promise.resolve(image);
+  return image.decode().catch(() => void 0).then(() => image);
+}
+function createFrameImageCache({ imageFactory = () => new Image() } = {}) {
+  const entries = /* @__PURE__ */ new Map();
+  function createEntry(source) {
+    const image = imageFactory();
+    image.decoding = "async";
+    let resolveReady;
+    let rejectReady;
+    let settled = false;
+    const ready = new Promise((resolve, reject) => {
+      resolveReady = resolve;
+      rejectReady = reject;
+    });
+    const resolveImage = () => {
+      if (settled) return;
+      settled = true;
+      waitForImageDecode(image).then(resolveReady);
+    };
+    const rejectImage = (error) => {
+      if (settled) return;
+      settled = true;
+      rejectReady(error || new Error(`Unable to load animation frame: ${source}`));
+    };
+    if (typeof image.addEventListener === "function") {
+      image.addEventListener("load", resolveImage, { once: true });
+      image.addEventListener("error", rejectImage, { once: true });
+    } else {
+      image.onload = resolveImage;
+      image.onerror = rejectImage;
+    }
+    image.src = source;
+    if (imageIsReady(image)) queueMicrotask(resolveImage);
+    return { image, ready };
+  }
+  function get(source) {
+    if (!entries.has(source)) entries.set(source, createEntry(source));
+    return entries.get(source);
+  }
+  return {
+    get: (source) => get(source).image,
+    load: (source) => get(source).ready,
+    preload: (sources) => {
+      for (const source of sources) get(source);
+    },
+    size: () => entries.size
+  };
+}
+function createFrameSequencePlayer({
+  frameCount,
+  frameDuration,
+  pauseDuration = 0,
+  loadFrame,
+  renderFrame,
+  schedule = setTimeout,
+  cancelSchedule = clearTimeout
+}) {
+  let running = false;
+  let nextFrame = 1;
+  let timer = null;
+  let runToken = 0;
+  function scheduleNext(token, delay) {
+    timer = schedule(() => {
+      timer = null;
+      step(token);
+    }, delay);
+  }
+  function step(token) {
+    if (!running || token !== runToken) return;
+    const frame = nextFrame;
+    Promise.resolve().then(() => loadFrame(frame)).then(() => {
+      if (!running || token !== runToken) return;
+      renderFrame(frame);
+      nextFrame = frame === frameCount ? 1 : frame + 1;
+      scheduleNext(token, frame === frameCount ? pauseDuration : frameDuration);
+    }).catch(() => {
+      if (running && token === runToken) scheduleNext(token, frameDuration);
+    });
+  }
+  return {
+    start() {
+      if (running) return;
+      running = true;
+      nextFrame = 1;
+      const token = ++runToken;
+      step(token);
+    },
+    stop() {
+      running = false;
+      runToken += 1;
+      if (timer !== null) cancelSchedule(timer);
+      timer = null;
+    },
+    isRunning: () => running
+  };
+}
+
 // src/home-transition.js
 var FRAME_COUNT = 143;
 var FRAME_END_PROGRESS = 0.5;
@@ -13,6 +116,8 @@ var DESTINATION_FRAME_COUNT = 249;
 var DESTINATION_FRAME_ROOT = "./assets/destination-transition";
 var DESTINATION_FRAME_DURATION = 1e3 / 15;
 var DESTINATION_PAUSE_DURATION = 0;
+var DIRECTORY_PROGRESS_RESET_EPSILON = 0.01;
+var animationFrameCache = createFrameImageCache();
 function frameIndexForProgress(progress) {
   const normalized = Math.min(1, Math.max(0, progress) / FRAME_END_PROGRESS);
   return Math.round(1 + normalized * (FRAME_COUNT - 1));
@@ -35,7 +140,7 @@ function sequelFrameIndexAtElapsed(elapsedMs) {
   return Math.min(SEQUEL_FRAME_COUNT, Math.floor(cycleElapsed / SEQUEL_FRAME_DURATION) + 1);
 }
 function nextSequelLatched(latched, directoryProgress) {
-  if (directoryProgress <= 0) return false;
+  if (directoryProgress <= DIRECTORY_PROGRESS_RESET_EPSILON) return false;
   if (directoryProgress >= DIRECTORY_ENTRY_END_PROGRESS) return true;
   return latched;
 }
@@ -66,35 +171,20 @@ function preloadFrames() {
   for (let index = 1; index <= FRAME_COUNT; index += 1) {
     if (!order.includes(index)) order.push(index);
   }
-  order.forEach((index) => {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = frameSource(index);
-  });
+  animationFrameCache.preload(order.map(frameSource));
 }
 function preloadDirectoryFrames() {
-  for (let index = 1; index <= DIRECTORY_FRAME_COUNT; index += 1) {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = directoryFrameSource(index);
-  }
+  animationFrameCache.preload(Array.from({ length: DIRECTORY_FRAME_COUNT }, (_, index) => directoryFrameSource(index + 1)));
 }
 function preloadSequelFrames() {
-  for (let index = 1; index <= SEQUEL_FRAME_COUNT; index += 1) {
-    const image = new Image();
-    image.decoding = "async";
-    image.src = sequelFrameSource(index);
-  }
+  animationFrameCache.preload(Array.from({ length: SEQUEL_FRAME_COUNT }, (_, index) => sequelFrameSource(index + 1)));
 }
 function preloadDestinationFrames() {
   let index = 1;
   function loadBatch() {
     const end = Math.min(DESTINATION_FRAME_COUNT, index + 7);
-    for (; index <= end; index += 1) {
-      const image = new Image();
-      image.decoding = "async";
-      image.src = destinationFrameSource(index);
-    }
+    animationFrameCache.preload(Array.from({ length: end - index + 1 }, (_, offset) => destinationFrameSource(index + offset)));
+    index = end + 1;
     if (index <= DESTINATION_FRAME_COUNT) setTimeout(loadBatch, 40);
   }
   loadBatch();
@@ -107,6 +197,9 @@ function mountHomeTransition() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const scroller = document.body.scrollHeight > document.documentElement.scrollHeight ? document.body : document.scrollingElement;
   let renderedFrame = 0;
+  let requestedFrame = 0;
+  let frameRequestToken = 0;
+  let active = false;
   let ticking = false;
   let drag = null;
   function paint() {
@@ -115,13 +208,21 @@ function mountHomeTransition() {
     const scrollTop = scrollTopFor(scroller);
     const progress = Math.min(1, Math.max(0, scrollTop / viewport));
     const frame = frameIndexForProgress(progress);
-    const active = !reducedMotion.matches && scrollTop < viewport;
+    active = !reducedMotion.matches && scrollTop < viewport;
     preview.hidden = !active;
     preview.classList.toggle("is-frame-foreground", frameIsForeground(progress));
-    if (active && frame !== renderedFrame) {
+    if (active && frame !== renderedFrame) requestFrame(frame);
+  }
+  function requestFrame(frame) {
+    if (frame === requestedFrame) return;
+    requestedFrame = frame;
+    const token = ++frameRequestToken;
+    animationFrameCache.load(frameSource(frame)).then(() => {
+      if (!active || token !== frameRequestToken || requestedFrame !== frame) return;
       preview.src = frameSource(frame);
       renderedFrame = frame;
-    }
+    }).catch(() => {
+    });
   }
   function requestPaint() {
     if (!ticking) {
@@ -179,10 +280,20 @@ function mountDirectoryTransition() {
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const scroller = document.body.scrollHeight > document.documentElement.scrollHeight ? document.body : document.scrollingElement;
   let renderedSource = "";
+  let previewRequestToken = 0;
   let ticking = false;
-  let sequelStartedAt = null;
-  let sequelAnimationFrame = 0;
   let sequelLatched = false;
+  const sequelPlayback = createFrameSequencePlayer({
+    frameCount: SEQUEL_FRAME_COUNT,
+    frameDuration: SEQUEL_FRAME_DURATION,
+    pauseDuration: SEQUEL_PAUSE_DURATION,
+    loadFrame: (frame) => animationFrameCache.load(sequelFrameSource(frame)),
+    renderFrame: (frame) => {
+      const source = sequelFrameSource(frame);
+      preview.src = source;
+      renderedSource = source;
+    }
+  });
   function state() {
     const viewport = Math.max(1, window.innerHeight);
     const scrollTop = scrollTopFor(scroller);
@@ -207,28 +318,22 @@ function mountDirectoryTransition() {
   }
   function setPreviewSource(source) {
     if (source === renderedSource) return;
-    preview.src = source;
-    renderedSource = source;
+    const token = ++previewRequestToken;
+    animationFrameCache.load(source).then(() => {
+      if (token !== previewRequestToken || sequelPlayback.isRunning()) return;
+      preview.src = source;
+      renderedSource = source;
+    }).catch(() => {
+    });
   }
   function startSequel() {
-    if (sequelStartedAt !== null) return;
-    sequelStartedAt = performance.now();
-    setPreviewSource(sequelFrameSource(1));
-    sequelAnimationFrame = requestAnimationFrame(animateSequel);
+    if (sequelPlayback.isRunning()) return;
+    previewRequestToken += 1;
+    sequelPlayback.start();
   }
   function stopSequel() {
-    if (sequelAnimationFrame) cancelAnimationFrame(sequelAnimationFrame);
-    sequelAnimationFrame = 0;
-    sequelStartedAt = null;
-  }
-  function animateSequel(timestamp) {
-    const { viewport, scrollTop, progress } = state();
-    if (reducedMotion.matches || !sequelLatched || scrollTop >= viewport * 2) {
-      stopSequel();
-      return;
-    }
-    setPreviewSource(sequelFrameSource(sequelFrameIndexAtElapsed(timestamp - sequelStartedAt)));
-    sequelAnimationFrame = requestAnimationFrame(animateSequel);
+    previewRequestToken += 1;
+    sequelPlayback.stop();
   }
   function requestPaint() {
     if (!ticking) {
@@ -250,32 +355,22 @@ function mountDestinationTransition() {
   preview.dataset.transitionMounted = "true";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   let active = false;
-  let startedAt = null;
-  let renderedFrame = 1;
-  let animationFrame = 0;
+  const destinationPlayback = createFrameSequencePlayer({
+    frameCount: DESTINATION_FRAME_COUNT,
+    frameDuration: DESTINATION_FRAME_DURATION,
+    pauseDuration: DESTINATION_PAUSE_DURATION,
+    loadFrame: (frame) => animationFrameCache.load(destinationFrameSource(frame)),
+    renderFrame: (frame) => {
+      if (!active || document.hidden || reducedMotion.matches) return;
+      preview.src = destinationFrameSource(frame);
+    }
+  });
   function stop() {
-    if (animationFrame) cancelAnimationFrame(animationFrame);
-    animationFrame = 0;
-    startedAt = null;
+    destinationPlayback.stop();
   }
   function start() {
-    if (!active || document.hidden || reducedMotion.matches || startedAt !== null) return;
-    startedAt = performance.now();
-    renderedFrame = 1;
-    preview.src = destinationFrameSource(1);
-    animationFrame = requestAnimationFrame(animate);
-  }
-  function animate(timestamp) {
-    if (!active || document.hidden || reducedMotion.matches) {
-      stop();
-      return;
-    }
-    const frame = destinationFrameIndexAtElapsed(timestamp - startedAt);
-    if (frame !== renderedFrame) {
-      preview.src = destinationFrameSource(frame);
-      renderedFrame = frame;
-    }
-    animationFrame = requestAnimationFrame(animate);
+    if (!active || document.hidden || reducedMotion.matches) return;
+    destinationPlayback.start();
   }
   const observer = new IntersectionObserver((entries) => {
     active = entries[0]?.intersectionRatio >= 0.5;
@@ -290,7 +385,10 @@ function mountDestinationTransition() {
   reducedMotion.addEventListener?.("change", () => {
     if (reducedMotion.matches) {
       stop();
-      preview.src = destinationFrameSource(1);
+      animationFrameCache.load(destinationFrameSource(1)).then(() => {
+        if (reducedMotion.matches) preview.src = destinationFrameSource(1);
+      }).catch(() => {
+      });
     } else {
       start();
     }
