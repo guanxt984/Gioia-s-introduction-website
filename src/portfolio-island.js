@@ -5,6 +5,7 @@ import { experienceIslandZoomRange, preserveOrbitDistance } from "./experience-i
 import { createIslandStabilizer, layoutProjectLabels, selectFrontIsland } from "./experience-island-visibility.js";
 import { ISLAND_CONTENT, PROJECT_CONTENT } from "./experience-island-content.js";
 import { openExperienceMediaInNewTab, renderIslandOverview, renderProjectDetail } from "./experience-island-renderers.js";
+import { createRenderScheduler } from "./render-scheduler.js";
 import {
   beginProgrammaticNavigation,
   cancelProgrammaticNavigation as cancelProgrammaticNavigationState,
@@ -14,6 +15,7 @@ import {
 } from "./experience-island-navigation.js";
 
 const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
+const PIXEL_RATIO_CAP = 1.5;
 const SUB_ISLANDS = [
   { category: "internship", anchor: { x: -0.185, y: 0.12, z: 0.08 } },
   { category: "personal", anchor: { x: 0.25, y: 0.12, z: 0.065 } },
@@ -181,7 +183,7 @@ export async function mountExperienceIsland(container) {
       throw error;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, PIXEL_RATIO_CAP));
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -201,8 +203,6 @@ export async function mountExperienceIsland(container) {
 
     let model = null;
     let radius = 4;
-    let frame = 0;
-    let running = false;
     let loading = false;
     let pointerDown = null;
     const NAVIGATION_DURATION_MS = 760;
@@ -231,6 +231,7 @@ export async function mountExperienceIsland(container) {
     let labelOffsets = new Map();
     const clickableMeshes = [];
     const clickableProjectKeys = new WeakMap();
+    let requestRender = () => {};
     const labels = [...area.querySelectorAll("button[data-experience-project]")].map(button => ({
       button, outer: button.parentElement, key: button.dataset.experienceProject,
       project: PROJECT_BY_KEY.get(button.dataset.experienceProject), width: 0, height: 0,
@@ -295,6 +296,7 @@ export async function mountExperienceIsland(container) {
       syncLabelStates();
       updateBuildingHighlights();
       renderContentForState();
+      requestRender();
     };
     const getCameraDestination = category => {
       if (!model) return null;
@@ -330,6 +332,7 @@ export async function mountExperienceIsland(container) {
         syncLabelStates();
         updateBuildingHighlights();
         renderContentForState();
+        requestRender();
         return;
       }
       const destination = getCameraDestination(category);
@@ -346,6 +349,7 @@ export async function mountExperienceIsland(container) {
       };
       syncNavigationState(beginProgrammaticNavigation(navigationState, category, projectKey));
       syncLabelStates();
+      requestRender();
     };
     const navigateToIsland = category => {
       if (!ISLAND_CONTENT[category]) return;
@@ -361,6 +365,7 @@ export async function mountExperienceIsland(container) {
         syncLabelStates();
         updateBuildingHighlights();
         renderContentForState();
+        requestRender();
         return;
       }
       startProgrammaticNavigation(project.category, projectKey);
@@ -456,10 +461,10 @@ export async function mountExperienceIsland(container) {
 
     labels.forEach(({button, key}) => {
       button.addEventListener('click', () => navigateToProject(key));
-      button.addEventListener('pointerenter', () => { pointerHoveredProjectKey = key; syncHover(); });
-      button.addEventListener('pointerleave', () => { pointerHoveredProjectKey = null; syncHover(); });
-      button.addEventListener('focus', () => { focusedProjectKey = key; syncHover(); });
-      button.addEventListener('blur', () => { focusedProjectKey = null; syncHover(); });
+      button.addEventListener('pointerenter', () => { pointerHoveredProjectKey = key; syncHover(); requestRender(); });
+      button.addEventListener('pointerleave', () => { pointerHoveredProjectKey = null; syncHover(); requestRender(); });
+      button.addEventListener('focus', () => { focusedProjectKey = key; syncHover(); requestRender(); });
+      button.addEventListener('blur', () => { focusedProjectKey = null; syncHover(); requestRender(); });
     });
 
     const overview = document.querySelector("[data-experience-overview]");
@@ -472,24 +477,28 @@ export async function mountExperienceIsland(container) {
       if (!projectButton) return;
       leftHoveredProjectKey = projectButton.dataset.navigateProject;
       syncHover();
+      requestRender();
     });
     overview?.addEventListener("pointerout", event => {
       const projectButton = event.target.closest("[data-navigate-project]");
       if (!projectButton || projectButton.contains(event.relatedTarget)) return;
       leftHoveredProjectKey = null;
       syncHover();
+      requestRender();
     });
     overview?.addEventListener("focusin", event => {
       const projectButton = event.target.closest("[data-navigate-project]");
       if (!projectButton) return;
       leftFocusedProjectKey = projectButton.dataset.navigateProject;
       syncHover();
+      requestRender();
     });
     overview?.addEventListener("focusout", event => {
       const projectButton = event.target.closest("[data-navigate-project]");
       if (!projectButton || projectButton.contains(event.relatedTarget)) return;
       leftFocusedProjectKey = null;
       syncHover();
+      requestRender();
     });
     window.experienceIslandNavigation = {
       navigateToIsland,
@@ -535,33 +544,41 @@ export async function mountExperienceIsland(container) {
       }
       measureLabelScale();
       updateProjectLabels();
+      requestRender();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
-    document.fonts.ready.then(() => { measureLabelScale(); updateProjectLabels(); });
+    document.fonts.ready.then(() => { measureLabelScale(); updateProjectLabels(); requestRender(); });
 
-    const render = time => {
-      if (!running) return;
-      controls.update();
-      updateProgrammaticNavigation(time || performance.now());
-      updateProjectLabels();
-      updateBuildingHighlights(time || 0);
-      renderer.render(scene, camera);
-      frame = requestAnimationFrame(render);
-    };
+    const renderScheduler = createRenderScheduler({
+      requestFrame: callback => requestAnimationFrame(callback),
+      cancelFrame: frameId => cancelAnimationFrame(frameId),
+      renderFrame: time => {
+        const controlsChanged = controls.update();
+        updateProgrammaticNavigation(time || performance.now());
+        updateProjectLabels();
+        updateBuildingHighlights(time || 0);
+        renderer.render(scene, camera);
+        return Boolean(navigationAnimation || controlsChanged);
+      },
+    });
+    requestRender = () => renderScheduler.invalidate();
+
+    let islandVisible = true;
     const start = () => {
-      if (running || !model) return;
-      running = true;
-      render();
+      if (!model || document.hidden || !islandVisible) return;
+      renderScheduler.start();
     };
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(frame);
-    };
-    const syncVisibility = () => document.hidden ? stop() : start();
+    const stop = () => renderScheduler.stop();
+    const syncVisibility = () => document.hidden || !islandVisible ? stop() : start();
+    const visibilityObserver = new IntersectionObserver(entries => {
+      islandVisible = Boolean(entries[0]?.isIntersecting);
+      syncVisibility();
+    }, { threshold: 0.01 });
+    visibilityObserver.observe(area || container);
     document.addEventListener("visibilitychange", syncVisibility);
-    controls.addEventListener("change", updateProjectLabels);
+    controls.addEventListener("change", requestRender);
 
     const loader = new GLTFLoader();
     const projectFromIntersection = intersection => {
@@ -591,20 +608,23 @@ export async function mountExperienceIsland(container) {
       dragging = true;
       pointerHoveredProjectKey = null;
       syncHover();
+      requestRender();
     });
-    controls.addEventListener('end', () => { dragging = false; });
+    controls.addEventListener('end', () => { dragging = false; requestRender(); });
     let lastHoverPick = 0;
     renderer.domElement.addEventListener("pointermove", event => {
       if (event.timeStamp - lastHoverPick < 50) return;
       lastHoverPick = event.timeStamp;
       pointerHoveredProjectKey = dragging ? null : pickExperienceProject(event);
       syncHover();
+      requestRender();
       renderer.domElement.style.cursor = pointerHoveredProjectKey ? "pointer" : "grab";
     });
     renderer.domElement.addEventListener("pointerleave", () => {
       renderer.domElement.style.cursor = "grab";
       pointerHoveredProjectKey = null;
       syncHover();
+      requestRender();
     });
     renderer.domElement.addEventListener("click", event => {
       if (pointerDown) {

@@ -19175,7 +19175,7 @@ function WebGLBackground(renderer2, cubemaps, cubeuvmaps, state, objects, alpha,
     }
     return background;
   }
-  function render2(scene2) {
+  function render(scene2) {
     let forceClear = false;
     const background = getBackground(scene2);
     if (background === null) {
@@ -19322,7 +19322,7 @@ function WebGLBackground(renderer2, cubemaps, cubeuvmaps, state, objects, alpha,
       clearAlpha = alpha2;
       setClear(clearColor, clearAlpha);
     },
-    render: render2,
+    render,
     addToRenderList,
     dispose
   };
@@ -19660,7 +19660,7 @@ function WebGLBufferRenderer(gl, extensions, info) {
   function setMode(value) {
     mode = value;
   }
-  function render2(start, count) {
+  function render(start, count) {
     gl.drawArrays(mode, start, count);
     info.update(count, mode, 1);
   }
@@ -19696,7 +19696,7 @@ function WebGLBufferRenderer(gl, extensions, info) {
     }
   }
   this.setMode = setMode;
-  this.render = render2;
+  this.render = render;
   this.renderInstances = renderInstances;
   this.renderMultiDraw = renderMultiDraw;
   this.renderMultiDrawInstances = renderMultiDrawInstances;
@@ -20804,7 +20804,7 @@ function WebGLIndexedBufferRenderer(gl, extensions, info) {
     type = value.type;
     bytesPerElement = value.bytesPerElement;
   }
-  function render2(start, count) {
+  function render(start, count) {
     gl.drawElements(mode, count, type, start * bytesPerElement);
     info.update(count, mode, 1);
   }
@@ -20841,7 +20841,7 @@ function WebGLIndexedBufferRenderer(gl, extensions, info) {
   }
   this.setMode = setMode;
   this.setIndex = setIndex;
-  this.render = render2;
+  this.render = render;
   this.renderInstances = renderInstances;
   this.renderMultiDraw = renderMultiDraw;
   this.renderMultiDrawInstances = renderMultiDrawInstances;
@@ -20851,7 +20851,7 @@ function WebGLInfo(gl) {
     geometries: 0,
     textures: 0
   };
-  const render2 = {
+  const render = {
     frame: 0,
     calls: 0,
     triangles: 0,
@@ -20859,22 +20859,22 @@ function WebGLInfo(gl) {
     lines: 0
   };
   function update(count, mode, instanceCount) {
-    render2.calls++;
+    render.calls++;
     switch (mode) {
       case gl.TRIANGLES:
-        render2.triangles += instanceCount * (count / 3);
+        render.triangles += instanceCount * (count / 3);
         break;
       case gl.LINES:
-        render2.lines += instanceCount * (count / 2);
+        render.lines += instanceCount * (count / 2);
         break;
       case gl.LINE_STRIP:
-        render2.lines += instanceCount * (count - 1);
+        render.lines += instanceCount * (count - 1);
         break;
       case gl.LINE_LOOP:
-        render2.lines += instanceCount * count;
+        render.lines += instanceCount * count;
         break;
       case gl.POINTS:
-        render2.points += instanceCount * count;
+        render.points += instanceCount * count;
         break;
       default:
         console.error("THREE.WebGLInfo: Unknown draw mode:", mode);
@@ -20882,14 +20882,14 @@ function WebGLInfo(gl) {
     }
   }
   function reset() {
-    render2.calls = 0;
-    render2.triangles = 0;
-    render2.points = 0;
-    render2.lines = 0;
+    render.calls = 0;
+    render.triangles = 0;
+    render.points = 0;
+    render.lines = 0;
   }
   return {
     memory,
-    render: render2,
+    render,
     programs: null,
     autoReset: true,
     reset,
@@ -31859,11 +31859,46 @@ function addPrimitiveAttributes(geometry, primitiveDef, parser) {
   });
 }
 
+// src/render-scheduler.js
+function createRenderScheduler({ requestFrame, cancelFrame, renderFrame }) {
+  let active = false;
+  let frameId = 0;
+  const schedule = () => {
+    if (!active || frameId) return;
+    frameId = requestFrame(run);
+  };
+  const run = (time) => {
+    frameId = 0;
+    if (!active) return;
+    const keepRendering = renderFrame(time) === true;
+    if (keepRendering) schedule();
+  };
+  return {
+    start() {
+      if (active) return;
+      active = true;
+      schedule();
+    },
+    stop() {
+      active = false;
+      if (frameId) {
+        cancelFrame(frameId);
+        frameId = 0;
+      }
+    },
+    invalidate() {
+      schedule();
+    },
+    isActive() {
+      return active;
+    }
+  };
+}
+
 // src/viewer.js
 var renderer = new WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
-renderer.setAnimationLoop(render);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = PCFSoftShadowMap;
 renderer.outputColorSpace = SRGBColorSpace;
@@ -31963,6 +31998,7 @@ function focus(name, animate = true) {
     button.classList.toggle("active", button.dataset.focus === name);
   });
   status.textContent = previewMode === "uploaded" ? "\u4F18\u5316\u6A21\u578B 23 MB / 95.4 \u4E07\u4E09\u89D2\u9762 \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : name === "all" ? "\u5B8C\u6574\u89C6\u56FE \xB7 \u53EF\u81EA\u7531\u65CB\u8F6C" : (targetObject.userData.label || name) + " \xB7 \u72EC\u7ACB\u653E\u5927\u5C55\u793A";
+  requestRender();
 }
 document.querySelector(".buttons").addEventListener("click", (event) => {
   const button = event.target.closest("button[data-focus]");
@@ -31979,21 +32015,32 @@ renderer.domElement.addEventListener("pointerup", (event) => {
   while (node.parent && !selectable.has(node.name)) node = node.parent;
   if (selectable.has(node.name)) focus(node.name);
 });
-function render(time) {
-  if (tween) {
-    const t = Math.min(1, (time - tween.start) / tween.duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    camera.position.lerpVectors(tween.fromCamera, tween.toCamera, eased);
-    controls.target.lerpVectors(tween.fromTarget, tween.toTarget, eased);
-    if (t === 1) tween = null;
+var renderScheduler = createRenderScheduler({
+  requestFrame: (callback) => requestAnimationFrame(callback),
+  cancelFrame: (frameId) => cancelAnimationFrame(frameId),
+  renderFrame: (time) => {
+    if (tween) {
+      const t = Math.min(1, (time - tween.start) / tween.duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      camera.position.lerpVectors(tween.fromCamera, tween.toCamera, eased);
+      controls.target.lerpVectors(tween.fromTarget, tween.toTarget, eased);
+      if (t === 1) tween = null;
+    }
+    const controlsChanged = controls.update();
+    renderer.render(scene, camera);
+    return Boolean(tween || controlsChanged);
   }
-  controls.update();
-  renderer.render(scene, camera);
-}
+});
+var requestRender = () => renderScheduler.invalidate();
+var syncVisibility = () => document.hidden ? renderScheduler.stop() : renderScheduler.start();
+controls.addEventListener("change", requestRender);
+document.addEventListener("visibilitychange", syncVisibility);
+syncVisibility();
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  requestRender();
 });
 /*! Bundled license information:
 

@@ -50,16 +50,16 @@ function scrollTopFor(scroller, viewport = window) {
   return Number.isFinite(scroller?.scrollTop) ? scroller.scrollTop : viewport.scrollY;
 }
 function frameSource(index) {
-  return `${FRAME_ROOT}/frame_${String(index).padStart(6, "0")}.png`;
+  return `${FRAME_ROOT}/frame_${String(index).padStart(6, "0")}.webp`;
 }
 function directoryFrameSource(index) {
-  return `${DIRECTORY_FRAME_ROOT}/frame_${String(index).padStart(5, "0")}.png`;
+  return `${DIRECTORY_FRAME_ROOT}/frame_${String(index).padStart(5, "0")}.webp`;
 }
 function sequelFrameSource(index) {
-  return `${SEQUEL_FRAME_ROOT}/frame_${String(index).padStart(6, "0")}.png`;
+  return `${SEQUEL_FRAME_ROOT}/frame_${String(index).padStart(6, "0")}.webp`;
 }
 function destinationFrameSource(index) {
-  return `${DESTINATION_FRAME_ROOT}/frame_${String(index).padStart(5, "0")}.png`;
+  return `${DESTINATION_FRAME_ROOT}/frame_${String(index).padStart(5, "0")}.webp`;
 }
 function preloadFrames() {
   const order = [1, 36, 72, 108, 143];

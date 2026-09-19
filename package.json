@@ -10,6 +10,7 @@
     "check:internship": "node scripts/check-internship-model.mjs",
     "check:uploaded-preview": "node scripts/check-uploaded-preview.mjs",
     "check:zoom": "node scripts/check-experience-island-zoom.mjs",
+    "check:motion-performance": "node scripts/check-motion-performance.mjs",
     "check:cloudflare-assets": "node scripts/check-cloudflare-assets.mjs",
     "serve": "node scripts/serve.mjs",
     "build:site": "esbuild src/portfolio-island.js --bundle --format=esm --outfile=public/portfolio-island.bundle.js && esbuild src/home-transition.js --bundle --format=esm --outfile=public/home-transition.bundle.js"

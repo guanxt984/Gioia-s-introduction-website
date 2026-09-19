@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { createRenderScheduler } from "./render-scheduler.js";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.setSize(innerWidth, innerHeight);
-renderer.setAnimationLoop(render);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -123,6 +123,7 @@ function focus(name, animate = true) {
     : name === "all"
       ? "完整视图 · 可自由旋转"
       : (targetObject.userData.label || name) + " · 独立放大展示";
+  requestRender();
 }
 
 document.querySelector(".buttons").addEventListener("click", event => {
@@ -142,7 +143,10 @@ renderer.domElement.addEventListener("pointerup", event => {
   if (selectable.has(node.name)) focus(node.name);
 });
 
-function render(time) {
+const renderScheduler = createRenderScheduler({
+  requestFrame: callback => requestAnimationFrame(callback),
+  cancelFrame: frameId => cancelAnimationFrame(frameId),
+  renderFrame: time => {
   if (tween) {
     const t = Math.min(1, (time - tween.start) / tween.duration);
     const eased = 1 - Math.pow(1 - t, 3);
@@ -150,12 +154,20 @@ function render(time) {
     controls.target.lerpVectors(tween.fromTarget, tween.toTarget, eased);
     if (t === 1) tween = null;
   }
-  controls.update();
+  const controlsChanged = controls.update();
   renderer.render(scene, camera);
-}
+  return Boolean(tween || controlsChanged);
+  },
+});
+const requestRender = () => renderScheduler.invalidate();
+const syncVisibility = () => document.hidden ? renderScheduler.stop() : renderScheduler.start();
+controls.addEventListener("change", requestRender);
+document.addEventListener("visibilitychange", syncVisibility);
+syncVisibility();
 
 addEventListener("resize", () => {
   camera.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
+  requestRender();
 });
