@@ -1,272 +1,294 @@
 export const skillDetails = {
   "insight": {
     "id": "insight",
-    "group": "Think",
+    "group": "PRODUCT",
+    "groupLabel": "产品能力",
     "title": "需求洞察",
-    "hook": "从真实 Query、海外内容趋势到一线设计师跟访，能快速识别高价值需求与核心痛点。",
     "evidence": [
       {
-        "project": "Pollo AI",
-        "title": "真实 Query 洞察",
-        "text": "分析近三个月字幕相关 Query、核心场景和业务影响，判断字幕属于高优需求；进一步研究 200+ 海外爆款视频，提炼字幕风格偏好。"
+        "title": "从数据里挖需求",
+        "text": "在 Pollo AI 分析近 3 个月字幕 Query 的出现频率、核心场景与业务影响，并研究 TikTok / YouTube 200+ 爆款视频。由真实用户行为判断字幕为高优需求，并筛选 12 款首发样式。",
+        "highlights": [
+          "200+ 爆款视频",
+          "12 款首发样式"
+        ]
       },
       {
-        "project": "上海仟传",
-        "title": "业务流程洞察",
-        "text": "亲自参与 AI 素材生产并跟访设计师，识别多平台切换、Prompt 反复复制、ComfyUI 使用门槛高和经验难复用等核心问题。"
+        "title": "从流程里挖需求",
+        "text": "在仟传公司拆解「需求理解—Prompt—生成—交付」完整生产流程。定位多平台切换、资产难管理、经验难复用等核心问题，并据此规划 AI 生产工作台。",
+        "highlights": []
       },
       {
-        "project": "杭州白米",
-        "title": "用户研究",
-        "text": "通过访谈、问卷、私域反馈、竞品与市场研究完成前期需求调研，为后续产品设计提供依据。"
+        "title": "从调研里挖需求",
+        "text": "在白米公司通过访谈、问卷、私域群、竞品与市场调研等多途径验证需求。累计输出 8+ 前期调研报告，为后续产品设计提供依据。",
+        "highlights": [
+          "8+ 前期调研报告"
+        ]
       }
     ]
   },
   "product-planning": {
     "id": "product-planning",
-    "group": "Think",
+    "group": "PRODUCT",
+    "groupLabel": "产品能力",
     "title": "产品规划",
-    "hook": "连续参与多类 AI 产品从需求收敛到上线落地，并独立完成个人 AI 产品 0→1。",
     "evidence": [
       {
-        "project": "Pollo AI",
-        "title": "MVP 与产品边界",
-        "text": "基于核心营销视频场景和竞品分析定义字幕 Skill MVP，并明确不做专业时间轴、自由参数编辑等能力边界。"
+        "title": "需求到产品",
+        "text": "在 Pollo AI 从真实 Query 发现字幕需求，并结合 200+ 爆款视频和 5 款竞品收敛 MVP。明确「自然语言控制 + 样式模板 + 独立版本存储」，推进 PRD 评审落地。",
+        "highlights": [
+          "200+ 爆款视频"
+        ]
       },
       {
-        "project": "上海仟传",
-        "title": "复杂流程产品化",
-        "text": "将原本分散的 LLM、ComfyUI 和本地文件流程重构为 Prompt、工作流、参数配置、结果筛选等标准产品能力。"
+        "title": "MVP 迭代规划",
+        "text": "在 Pollo AI 明确首版字幕能力的功能边界，协同研发、测试约定排期，并规划后续样式与 Agent 能力扩展。按期完成首版全量上线。",
+        "highlights": []
       },
       {
-        "project": "个人 AI 项目",
-        "title": "独立 0→1",
-        "text": "从“AI 人设易漂移、长期陪伴缺乏连续性”出发，独立完成产品概念、功能架构、PRD 与可交互 Demo。"
+        "title": "多终端系统",
+        "text": "在 MEMORA 中统筹老人、家属、志愿者、实体终端、NFC 与手机端。通过服务蓝图与触点设计，把多个角色和终端串成一套完整服务系统。",
+        "highlights": []
       }
     ]
   },
-  "data-analysis": {
-    "id": "data-analysis",
-    "group": "Think",
-    "title": "数据分析",
-    "hook": "同时做过 To C 用户行为分析与 Agent 灰度监控，用数据推动排序、运营与放量决策。",
+  "experience-design": {
+    "id": "experience-design",
+    "group": "PRODUCT",
+    "groupLabel": "产品能力",
+    "title": "体验设计",
     "evidence": [
       {
-        "project": "理想汽车",
-        "title": "行为数据驱动迭代",
-        "text": "搭建数据看板，分析模板点击、保存、设为壁纸、再次生成等行为，判断用户偏好并指导模板排序与运营迭代。"
+        "title": "专业训练",
+        "text": "工业设计专业持续接受交互设计、用户研究、产品设计、服务设计与可用性训练。通过大量项目反复练习用户流程、信息架构和原型设计。",
+        "highlights": []
       },
       {
-        "project": "Pollo AI",
-        "title": "灰度数据判断",
-        "text": "灰度阶段监控生成成功率、超时率、任务成本及核心漏斗，根据数据判断是否继续扩量并最终推动全量上线。"
+        "title": "交互落地",
+        "text": "在理想汽车独立跟进车机交互方案，从流程、低保真原型到 Claude Code Demo。最终协同设计、研发、测试落地，并完成实车 UI / UX 验收。",
+        "highlights": []
+      },
+      {
+        "title": "场景化交互",
+        "text": "在 FullyDancy 中根据练舞场景，将姿态识别转化为卡点、判定、连击、暂停和结果反馈。根据不同训练状态设计对应的交互与反馈机制。",
+        "highlights": []
       }
     ]
   },
-  "collaboration": {
-    "id": "collaboration",
-    "group": "Think",
-    "title": "项目协作",
-    "hook": "连续三段 AI 产品实习参与真实上线项目，能独立 Own 模块，也能跨设计、研发、测试推进落地。",
+  "data-driven": {
+    "id": "data-driven",
+    "group": "PRODUCT",
+    "groupLabel": "产品能力",
+    "title": "数据驱动",
     "evidence": [
       {
-        "project": "Pollo AI",
-        "title": "独立 Own 产品模块",
-        "text": "完整推进字幕 Skill 从需求分析、PRD、策略设计、测试、灰度到全量上线，承担完整模块 Owner 职责。"
+        "title": "灰度放量",
+        "text": "在 Pollo AI 制定分阶段灰度方案，持续监控成功率、超时率、任务成本与核心漏斗。上线首周任务成功率达到 86.3%，并稳定推进全量上线。",
+        "highlights": [
+          "86.3%"
+        ]
       },
       {
-        "project": "理想汽车",
-        "title": "多角色协同",
-        "text": "协同 UI、研发和测试推进车机交互方案落地，并通过实车走查完成 UI / UX 验收。"
+        "title": "产品运营",
+        "text": "在理想汽车追踪 WAU、点击、生成、设为屏保、重新生成等用户行为。根据偏好和异常数据形成运营判断，并推动模板排序等产品调整。",
+        "highlights": []
       },
       {
-        "project": "上海仟传",
-        "title": "产品与研发落地",
-        "text": "与设计师、研发协作推进 AI 工作流产品化、API 接入联调和上线验收。"
+        "title": "数据可视化",
+        "text": "学校数据可视化课程取得满绩。在理想汽车独立搭建数据看板，将核心指标组织成可持续监控、复盘和决策的可视化体系。",
+        "highlights": [
+          "满绩"
+        ]
       }
     ]
   },
-  "ai-product-design": {
-    "id": "ai-product-design",
+  "ai-product-practice": {
+    "id": "ai-product-practice",
     "group": "AI",
-    "title": "AI 产品设计",
-    "hook": "覆盖 Agent Skill、多模态内容产品与 Human-in-the-loop Workflow 三类 AI 产品形态。",
+    "groupLabel": "AI 能力",
+    "title": "AI 产品实战",
     "evidence": [
       {
-        "project": "Pollo AI",
-        "title": "Agent Skill",
-        "text": "设计“意图识别—参数补全—工具调用—异步生成—结果返回”的 Agent 链路，并设计默认、追问、推荐和异常降级策略。"
+        "title": "Agent 落地",
+        "text": "在 Pollo AI 完整参与字幕 Agent 从需求、MVP、策略、评测到灰度上线。上线首周满意度 76%，字幕任务对话占比由 11.0% 提升至 23.5%。",
+        "highlights": [
+          "76%",
+          "11.0% 提升至 23.5%"
+        ]
       },
       {
-        "project": "上海仟传",
-        "title": "AI Workflow",
-        "text": "将复杂 ComfyUI 节点和技术参数封装为少量业务参数，形成设计师可理解、可操作的 Human-in-the-loop AI Workflow。"
+        "title": "To C 产品",
+        "text": "在理想汽车参与车机 AIGC 产品「艺术相框」的交互、模型、模板和数据运营。功能上线三日渗透率 37%，平均次日留存率 35.2%。",
+        "highlights": [
+          "37%",
+          "35.2%"
+        ]
       },
       {
-        "project": "理想汽车",
-        "title": "多模态能力产品化",
-        "text": "将图生图、图生视频模型能力转化为用户可直接使用的创意模板与车机任务流程。"
+        "title": "To B 平台",
+        "text": "在上海仟传参与 AI 生产工作台 0→1，把 Workflow、Prompt、资产和团队经验产品化。上线后单组需求平均耗时由 53 分钟降至 26 分钟。",
+        "highlights": [
+          "53 分钟降至 26 分钟"
+        ]
       }
     ]
   },
-  "evaluation": {
-    "id": "evaluation",
+  "ai-evaluation": {
+    "id": "ai-evaluation",
     "group": "AI",
-    "title": "评测与迭代",
-    "hook": "建立过模型、模板、Agent 与端到端生成链路的评测标准和回归机制。",
+    "groupLabel": "AI 能力",
+    "title": "AI 评测",
     "evidence": [
       {
-        "project": "理想汽车",
-        "title": "模型与模板评测",
-        "text": "搭建多模态模型评测体系，从一致性、美感、稳定性和成本等维度进行模型选型，并制定创意模板上线准入标准。"
+        "title": "评测集搭建",
+        "text": "在理想汽车搭建 AIGC 模型、创意模板等评测集；在 Pollo AI 搭建覆盖 9 种语言、3 种画幅及异常场景的 Agent 评测集。针对不同评测对象设计对应测试场景和指标。",
+        "highlights": [
+          "9 种语言"
+        ]
       },
       {
-        "project": "Pollo AI",
-        "title": "Agent 评测",
-        "text": "构建覆盖多语言、画幅和异常场景的测试集，通过 Bad Case 回归与灰度数据验证 Agent 任务稳定性。"
+        "title": "评测与验收",
+        "text": "在 Pollo AI 梳理功能场景、边界及异常情况，撰写分场景验收标准。主导功能验收与 badcase 回归，推动需求通过灰度并全量上线。",
+        "highlights": []
       },
       {
-        "project": "上海仟传",
-        "title": "端到端质量治理",
-        "text": "将生成问题归因至 LLM、Prompt、RAG、ComfyUI 工作流、参数或交互，并通过回归测试持续迭代。"
+        "title": "Badcase 归因",
+        "text": "在理想汽车将生成问题拆为主体偏移、风格不稳、Prompt 泛化不足等类型。定位模型、Prompt 或模板规则问题后针对性调优，推动模板通过率达到 80%+。",
+        "highlights": [
+          "80%+"
+        ]
       }
     ]
   },
-  "prompt-engineering": {
-    "id": "prompt-engineering",
+  "model-selection": {
+    "id": "model-selection",
     "group": "AI",
-    "title": "Prompt 工程",
-    "hook": "具备 System Prompt、模板 Prompt、Prompt 知识库与 RAG 检索增强的真实项目经验。",
+    "groupLabel": "AI 能力",
+    "title": "模型选型",
     "evidence": [
       {
-        "project": "上海仟传",
-        "title": "Prompt + RAG",
-        "text": "建设 Prompt 知识库，将优秀 Prompt、LoRA 触发词和场景模块通过 RAG 检索后交由 LLM 组合生成。"
+        "title": "业务级选型",
+        "text": "在理想汽车横向评测 5 个生图 / 生视频模型。综合效果、稳定性、调用成本与业务适配，输出选型报告及接入建议。",
+        "highlights": [
+          "5 个生图 / 生视频模型"
+        ]
       },
       {
-        "project": "上海仟传",
-        "title": "System Prompt 迭代",
-        "text": "基于真实任务和 Bad Case 持续优化 System Prompt、回复结构及目标工作流适配性。"
-      },
-      {
-        "project": "理想汽车",
-        "title": "模板 Prompt 优化",
-        "text": "结合模板生成 Bad Case 调整 Prompt，提升生成质量并推动创意模板达到上线标准。"
+        "title": "任务级选型",
+        "text": "在汽车 AIGC Workflow 中，根据结构保持、参考图一致性和场景控制需求选择能力组合。灵活使用 FLUX Fill、IPAdapter、Depth Control，而不是固定套一条生成链路。",
+        "highlights": []
       }
     ]
   },
-  "ai-exploration": {
-    "id": "ai-exploration",
+  "prompt-context-engineering": {
+    "id": "prompt-context-engineering",
     "group": "AI",
-    "title": "AI 实践探索",
-    "hook": "能用 Claude Code、Coze、ComfyUI 快速完成 AI 产品原型、工作流验证与持续迭代。",
+    "groupLabel": "AI 能力",
+    "title": "Prompt / Context Engineering",
     "evidence": [
       {
-        "project": "个人成长 AI 产品",
-        "title": "Vibe Coding",
-        "text": "使用 Claude Code 独立完成个人成长 AI 产品从概念、PRD 到可交互 Demo，并进行了约两个月真实使用和持续迭代。"
+        "title": "Prompt 设计",
+        "text": "在理想汽车进行模板 Prompt 通用性测试，在仟传持续优化 Prompt / System Prompt。也在 ComfyUI Workflow 中根据主体、场景和控制条件组织生成提示。",
+        "highlights": []
       },
       {
-        "project": "上海仟传",
-        "title": "快速技术验证",
-        "text": "独立使用 Coze 搭建核心 AI Workflow 原型，快速验证业务流程和产品方案可行性。"
+        "title": "Prompt 资产化",
+        "text": "在上海仟传沉淀 200+ 优质 Prompt，并通过标签与 RAG 混合检索支持团队复用。让 Prompt 从个人经验变成可积累的团队资产。",
+        "highlights": [
+          "200+ 优质 Prompt"
+        ]
       },
       {
-        "project": "多种 AI 工具实践",
-        "title": "",
-        "text": "在真实项目中使用 Claude Code、ComfyUI、RAG、Coze 等完成原型验证和 AI 能力产品化。"
+        "title": "上下文设计",
+        "text": "在 Pollo AI 设计多轮任务参数继承，让连续修改字幕时保留已有任务状态。结合上下文决定直接执行、推荐、追问或降级。",
+        "highlights": []
       }
     ]
   },
-  "design-visualization": {
-    "id": "design-visualization",
-    "group": "Tool",
-    "title": "设计与可视化",
-    "hook": "工业设计背景结合 Figma、MasterGo、Photoshop 与交互 Demo，能把产品想法快速转成可讨论、可评审的视觉方案。",
+  "rapid-prototyping": {
+    "id": "rapid-prototyping",
+    "group": "BUILD",
+    "groupLabel": "落地能力",
+    "title": "快速原型",
     "evidence": [
       {
-        "project": "理想汽车",
-        "title": "交互原型",
-        "text": "使用 MasterGo、Figma 梳理用户流程并制作低保真交互原型，配合可交互 Demo 完成方案评审与体验验证。"
+        "title": "交互验证",
+        "text": "在理想汽车使用 Claude Code 快速搭建可交互 Demo。让团队在开发前直接体验流程，用真实操作验证方案，而不是只看静态稿。",
+        "highlights": []
       },
       {
-        "project": "个人 AI 项目",
-        "title": "界面落地",
-        "text": "从功能架构一路推进到界面实现，并持续迭代 PC 与手机端体验，让产品概念真正变成可操作 Demo。"
+        "title": "链路验证",
+        "text": "在上海仟传正式开发前使用 Coze 搭建 Workflow 原型。提前跑通 Prompt → Workflow → 生图链路，验证产品方案是否可行。",
+        "highlights": []
       },
       {
-        "project": "设计工具基础",
-        "title": "视觉表达",
-        "text": "具备 Figma、Photoshop 等设计工具基础，可完成产品原型、视觉表达与方案沟通。"
+        "title": "产品验证",
+        "text": "FullyDancy、松鼠文仓都从个人构想直接推进为可访问 Web 产品。通过真实运行和使用结果继续发现问题、迭代方案。",
+        "highlights": []
       }
     ]
   },
-  "multimodal-generation": {
-    "id": "multimodal-generation",
-    "group": "Tool",
-    "title": "多模态生成",
-    "hook": "实际做过图生图、图生视频与营销素材生成，覆盖模型评测、创意模板和 ComfyUI 工作流。",
+  "software-hardware-delivery": {
+    "id": "software-hardware-delivery",
+    "group": "BUILD",
+    "groupLabel": "落地能力",
+    "title": "软硬件落地",
     "evidence": [
       {
-        "project": "理想汽车",
-        "title": "图像 / 视频生成",
-        "text": "参与图生图、图生视频模型评测与接入，对比模型的一致性、美感、稳定性和成本，并推动创意模板上线。"
+        "title": "软件真机",
+        "text": "Cell Factory 从游戏机制和 UI / UX 一路推进到代码实现。借助 Cursor 编写运行代码，并通过 Xcode 在真实 iOS 设备完成调试与运行。",
+        "highlights": []
       },
       {
-        "project": "上海仟传",
-        "title": "ComfyUI 生产工作流",
-        "text": "实际参与营销素材生成，将 ComfyUI 工作流接入产品链路，并围绕 Prompt、参数和生成结果持续优化。"
+        "title": "硬件原型",
+        "text": "APEX 将 BMI160、步态识别、电机状态机、电控与机械结构整合。最终完成可穿戴、可运行、可实际测试的登山助力外骨骼原型。",
+        "highlights": []
       },
       {
-        "project": "多模态工具实践",
-        "title": "AI 生图",
-        "text": "具备 ComfyUI 及 AI 生图模型 / 工具的真实项目使用经验，能够理解生成链路与工作流配置。"
+        "title": "Web 部署上线",
+        "text": "FullyDancy、松鼠文仓等 Vibe Coding 项目不止停在本地 Demo。继续处理前后端、异常和部署，最终成为可以直接访问的线上产品。",
+        "highlights": []
       }
     ]
   },
-  "coding-basics": {
-    "id": "coding-basics",
-    "group": "Tool",
-    "title": "代码基础",
-    "hook": "具备 Python、C++ 基础，并能用 Claude Code、Cursor 把产品想法快速做成可交互 Demo。",
+  "ai-assisted-development": {
+    "id": "ai-assisted-development",
+    "group": "BUILD",
+    "groupLabel": "落地能力",
+    "title": "AI 协作开发",
     "evidence": [
       {
-        "project": "个人 AI 项目",
-        "title": "Vibe Coding",
-        "text": "使用 Claude Code 通过多轮协作完成产品概念拆解、功能定义、PRD 与界面实现，独立做出可交互产品 Demo。"
+        "title": "AI 编程协作",
+        "text": "持续使用 Cursor、Codex、Claude Code 辅助实现、调试和迭代。把产品原型、Web 产品和 iOS Demo 从想法推进到真实运行。",
+        "highlights": []
       },
       {
-        "project": "理想汽车",
-        "title": "快速原型开发",
-        "text": "借助 Claude Code 搭建可交互 Demo，用于车机方案评审、体验验证和需求沟通。"
-      },
-      {
-        "project": "基础编程",
-        "title": "轻量任务处理",
-        "text": "具备 Python、C++ 基础，可编写简单脚本完成数据处理或项目任务，同时能理解产品方案中的基础技术链路。"
+        "title": "AI 辅助办公",
+        "text": "将 AI 用于需求整理、PRD 初稿、材料分析、评测框架和方案验证等产品工作。日常使用飞书 CLI、WorkBuddy、妙搭等 AI 工具辅助信息处理与产出。",
+        "highlights": []
       }
     ]
   },
-  "ai-collaboration": {
-    "id": "ai-collaboration",
-    "group": "Tool",
-    "title": "AI 协作效率",
-    "hook": "习惯把 AI 融入产品工作流，覆盖需求拆解、PRD、原型验证、界面实现与技术方案沟通。",
+  "multimodal-expression": {
+    "id": "multimodal-expression",
+    "group": "BUILD",
+    "groupLabel": "落地能力",
+    "title": "多模态表达",
     "evidence": [
       {
-        "project": "个人 AI 项目",
-        "title": "AI 协作式产品开发",
-        "text": "通过 Claude Code 多轮协作完成产品概念拆解、功能定义、PRD 和界面实现，形成完整的 AI 辅助产品开发流程。"
+        "title": "AI 视觉 / 音视频",
+        "text": "有 AI 图像、视频生成实践，并搭建过一键换车、FLUX 通用生图等 ComfyUI Workflow。持续尝试不同生成模型和视觉生产链路。",
+        "highlights": []
       },
       {
-        "project": "上海仟传",
-        "title": "AI 快速验证",
-        "text": "独立使用 Coze 搭建核心工作流原型，在正式开发前快速验证产品流程与技术可行性。"
+        "title": "3D 建模渲染",
+        "text": "工业设计课程与项目中长期进行产品建模、渲染和场景视觉化。也尝试使用 Tripo AI 等工具生成和探索 3D 模型。",
+        "highlights": []
       },
       {
-        "project": "日常产品工作",
-        "title": "AI Coding",
-        "text": "使用 Claude Code、Cursor 等 AI 编程工具制作可交互 Demo，用于概念验证、需求沟通和方案迭代。"
+        "title": "AR / VR / MR",
+        "text": "在「方块交际」项目中探索 Vision Pro / MR 空间交互，设计三维空间中的内容创作、信息展示与社交体验。",
+        "highlights": []
       }
     ]
   }

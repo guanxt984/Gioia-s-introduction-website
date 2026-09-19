@@ -82,74 +82,316 @@
       -webkit-mask: none !important;
       outline: none;
     }
+    .island-canvas {
+      --island-label-dim-opacity: .48;
+      --island-label-dim-scale: .98;
+      --island-label-current-opacity: 1;
+      --island-label-current-scale: 1.12;
+      --island-label-hover-opacity: 1;
+      --island-label-hover-scale: 1.18;
+      --island-label-selected-opacity: 1;
+      --island-label-selected-scale: 1.18;
+    }
     .island-project-labels {
       position: absolute;
       inset: 0;
       z-index: 4;
       pointer-events: none;
     }
-    .experience-project-label {
+    .island-label-anchor {
       position: absolute;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      min-height: 22px;
-      padding: 4px 7px;
-      border: 1px solid rgba(38, 36, 31, .48);
-      border-radius: 2px;
-      background: rgba(255, 253, 248, .88);
-      color: var(--ink);
-      font: 600 clamp(9px, .62vw, 10px)/1.2 Arial, "Noto Sans SC", sans-serif;
-      letter-spacing: .01em;
-      white-space: nowrap;
-      cursor: pointer;
-      pointer-events: auto;
-      transform: translate(8px, calc(-100% - 8px));
-      transition: background-color .18s ease, border-color .18s ease, translate .18s cubic-bezier(.16, 1, .3, 1);
-    }
-    .experience-project-label[hidden] { display: none; }
-    .experience-project-label::before {
-      content: "";
-      width: 5px;
-      height: 5px;
-      flex: 0 0 5px;
-      border-radius: 50%;
-      background: var(--ink);
-      box-shadow: 0 0 0 2px rgba(255, 253, 248, .88);
-    }
-    .experience-project-label::after {
-      content: "";
-      position: absolute;
-      left: 10px;
-      top: 100%;
-      width: 12px;
-      height: 8px;
-      border-left: 1px solid rgba(38, 36, 31, .48);
-      border-bottom: 1px solid rgba(38, 36, 31, .48);
+      width: max-content;
+      transform: translateY(-100%);
       pointer-events: none;
     }
-    .experience-project-label.is-disabled {
-      color: var(--muted);
-      border-style: dashed;
-      background: rgba(255, 253, 248, .72);
+    .island-label-anchor[hidden] { display: none; }
+    .experience-project-label {
+      display: block;
+      padding: 6px 10px;
+      border: 0;
+      border-radius: 3px;
+      background: rgba(255, 253, 248, .84);
+      color: var(--ink);
+      font: 600 clamp(10px, .72vw, 12px)/1.2 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: .02em;
+      white-space: nowrap;
+      opacity: var(--island-label-dim-opacity);
+      transform: scale(var(--island-label-dim-scale));
+      transform-origin: left bottom;
       cursor: default;
       pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease, color .18s ease, background-color .18s ease;
     }
-    .experience-project-label small {
-      margin-left: 2px;
+    .experience-project-label.is-current {
+      opacity: var(--island-label-current-opacity);
+      transform: scale(var(--island-label-current-scale));
+    }
+    .experience-project-label.is-current:not(:disabled) { pointer-events: auto; cursor: pointer; }
+    .experience-project-label.is-hovered {
+      opacity: var(--island-label-hover-opacity);
+      transform: scale(var(--island-label-hover-scale));
+      background: rgba(255, 253, 248, .96);
+    }
+    .experience-project-label.is-selected {
+      opacity: var(--island-label-selected-opacity);
+      transform: scale(var(--island-label-selected-scale));
+      color: var(--accent);
+      background: rgba(255, 253, 248, .96);
+    }
+    .experience-project-label:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+    .experience-island-overview {
+      margin: 0 0 22px;
+      max-width: min(800px, 100%);
+    }
+    .experience-overview-kicker,
+    .school-project-kicker {
+      margin: 0;
+      color: var(--accent);
+      font: 600 var(--exp-title-size, clamp(34px, 2.6vw, 48px))/1.08 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: -.03em;
+    }
+    .experience-overview-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: .45em; min-width: 0; }
+    .experience-overview-heading-separator { color: var(--accent); font: 600 var(--exp-title-size, clamp(34px, 2.6vw, 48px))/1.08 Arial, "Noto Sans SC", sans-serif; }
+    .experience-overview-heading .experience-overview-kicker { flex: 0 0 auto; }
+    .experience-island-overview h3 {
+      margin: 0;
+      color: var(--ink);
+      font: 600 var(--exp-title-size, clamp(34px, 2.6vw, 48px))/1.08 Arial, "Noto Sans SC", sans-serif;
+      letter-spacing: -.03em;
+    }
+    .experience-overview-intro {
+      max-width: 100%;
+      margin: 14px 0 0;
       color: var(--muted);
-      font: 500 7px/1 Arial, "Noto Sans SC", sans-serif;
-      letter-spacing: .05em;
+      font-size: 17px;
+      line-height: 1.5;
+      text-wrap: pretty;
     }
-    .experience-project-label:hover,
-    .experience-project-label:focus-visible,
-    .experience-project-label.is-active {
-      background: rgba(255, 253, 248, .98);
-      border-color: var(--ink);
-      translate: 0 -2px;
-      outline: none;
+    .experience-island-overview.is-work-overview .experience-overview-intro { margin-top: 10px; }
+    .experience-overview-list {
+      position: relative;
+      width: 100%;
+      min-height: 1px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
-    .experience-project-label.is-active::before { background: var(--accent); }
+    .school-project-details {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .experience-overview-item {
+      position: absolute;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    @property --card-shadow-x { syntax: "<length>"; inherits: false; initial-value: 0px; }
+    @property --card-shadow-y { syntax: "<length>"; inherits: false; initial-value: 0px; }
+    @property --card-shadow-blur { syntax: "<length>"; inherits: false; initial-value: 0px; }
+    @property --card-shadow-alpha { syntax: "<number>"; inherits: false; initial-value: 0; }
+    .experience-project-tilt {
+      display: block;
+      width: 100%;
+      transform-origin: center;
+      transform-style: preserve-3d;
+      will-change: transform;
+      --card-shadow-x: 0px;
+      --card-shadow-y: 0px;
+      --card-shadow-blur: 0px;
+      --card-shadow-alpha: 0;
+      box-shadow: var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(20, 20, 20, var(--card-shadow-alpha));
+      transition: box-shadow .38s ease, --card-shadow-x .38s ease, --card-shadow-y .38s ease, --card-shadow-blur .38s ease, --card-shadow-alpha .38s ease;
+    }
+    .experience-project-card {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      width: 100%;
+      padding: var(--exp-card-padding);
+      border: 1px solid var(--exp-card-border);
+      border-radius: var(--exp-card-radius);
+      background: var(--exp-card-surface);
+      color: var(--ink);
+      text-align: left;
+      cursor: pointer;
+      overflow: visible;
+      transition: border-color .22s ease, background-color .22s ease;
+    }
+    .experience-project-card-media {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      border-radius: 11px;
+      background: #f1f0ed;
+    }
+    .experience-project-card-media img {
+      display: block;
+      width: 100%;
+      height: auto;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+    .experience-project-card-body { display: grid; gap: 8px; padding: 12px 2px 2px; }
+    .experience-project-card-meta { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; column-gap: 10px; row-gap: 5px; min-width: 0; }
+    .experience-project-card .experience-project-name { grid-column: 1 / -1; min-width: 0; color: var(--ink); font-size: 18px; font-weight: 650; line-height: 1.3; overflow-wrap: anywhere; }
+    .experience-project-period { color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .experience-project-card .experience-project-summary { display: block; max-height: none; height: auto; overflow: visible; color: var(--muted); font-size: 16px; line-height: 1.48; text-wrap: pretty; white-space: normal; overflow-wrap: anywhere; text-overflow: clip; }
+    .experience-project-card:hover .experience-project-card-media img,
+    .experience-project-card:focus-visible .experience-project-card-media img { transform: scale(1.015); }
+    .experience-project-card:hover .experience-project-name,
+    .experience-project-card:focus-visible .experience-project-name { color: var(--accent); }
+    .experience-project-card:hover,
+    .experience-project-card:focus-visible { border-color: rgba(20, 20, 20, .08); }
+    .experience-project-card:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+    .school-project-summary { max-width: 100%; color: var(--muted); font-size: 16px; line-height: 1.6; }
+    .school-project-meta,
+    .school-project-results-label {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font: 500 12px/1.5 ui-monospace, monospace;
+    }
+    .school-project-results-label { margin-top: 18px; color: var(--ink); }
+    .school-project-details { margin-top: 18px; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .school-project-details li::before { content: "·"; margin-right: 8px; color: var(--accent); }
+
+    /* Phase 3 editorial content surface. The left column scrolls independently of the island. */
+    #experience {
+      --exp-title-size: clamp(38px, 2.8vw, 48px);
+      --exp-body-size: 16px;
+      --exp-body-line-height: 1.6;
+      --exp-meta-size: 13px;
+      --exp-section-label-size: 14px;
+      --exp-item-title-size: 17px;
+      --exp-number-size: 15px;
+      --exp-section-gap: 36px;
+      --exp-content-gap: 14px;
+      --exp-list-gap: 26px;
+      --exp-card-surface: rgba(255, 255, 255, .72);
+      --exp-card-border: rgba(20, 20, 20, .035);
+      --exp-card-radius: 18px;
+      --exp-card-padding: 8px;
+    }
+    #experience .experience-copy[data-experience-content] {
+      z-index: 5;
+      pointer-events: auto;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: none;
+      scrollbar-color: transparent transparent;
+      padding-right: 0;
+    }
+    #experience .experience-copy[data-experience-content].is-overview { overflow-y: hidden; }
+    #experience .experience-copy[data-experience-content]::-webkit-scrollbar { width: 0; height: 0; display: none; }
+    #experience .experience-copy[data-experience-content]::-webkit-scrollbar-track,
+    #experience .experience-copy[data-experience-content]::-webkit-scrollbar-thumb,
+    #experience .experience-copy[data-experience-content]::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+    #experience .experience-overview-projects { margin-top: 30px; }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) { max-width: min(980px, 100%); }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-overview-projects { margin-top: 20px; }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card {
+      display: grid;
+      grid-template-columns: minmax(108px, 22%) minmax(0, 1fr);
+      gap: 10px;
+      align-items: stretch;
+      padding: 4px;
+    }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card-media { width: 100%; max-width: 180px; align-self: start; border-radius: 8px; }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card-body {
+      align-content: center;
+      gap: 5px;
+      padding: 4px 8px 4px 0;
+    }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card-meta {
+      display: grid;
+      gap: 2px;
+    }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card .experience-project-name { grid-column: auto; font-size: clamp(16px, 1.4vw, 18px); line-height: 1.2; }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-period { display: block; font-size: 12px; line-height: 1.25; }
+    .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card .experience-project-summary { font-size: clamp(14px, 1.2vw, 16px); line-height: 1.35; }
+    .experience-island-overview.is-school-overview .experience-project-card {
+      grid-template-columns: minmax(120px, 26%) minmax(0, 1fr);
+      gap: 12px;
+      padding: 6px;
+    }
+    .experience-island-overview.is-school-overview .experience-project-card-media { max-width: 220px; }
+    .experience-island-overview.is-school-overview .experience-project-card-body { gap: 7px; padding: 7px 11px 7px 0; }
+    .experience-detail-label { margin: 0 0 var(--exp-content-gap); color: var(--accent); font: 600 var(--exp-section-label-size)/1.25 ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .experience-detail-header { display: grid; gap: 10px; max-width: 100%; }
+    .experience-detail-eyebrow { margin: 0; color: var(--accent); font: 600 var(--exp-section-label-size)/1.3 ui-monospace, monospace; letter-spacing: .15em; }
+    .experience-detail-title { margin: 0; max-width: 100%; color: var(--ink); font: 600 var(--exp-title-size)/1.08 Arial, "Noto Sans SC", sans-serif; letter-spacing: -.035em; overflow-wrap: anywhere; text-wrap: balance; }
+    .experience-detail-meta { margin: 0; color: var(--muted); font: 500 var(--exp-meta-size)/1.55 ui-monospace, monospace; overflow-wrap: anywhere; }
+    .experience-detail-rule { height: 1px; margin: 18px 0 32px; background: rgba(82, 77, 70, .22); }
+    .experience-detail-section { max-width: 100%; margin: 0 0 var(--exp-section-gap); }
+    .experience-detail-lede { max-width: 100%; margin: 0; color: var(--ink); font-size: var(--exp-body-size); line-height: var(--exp-body-line-height); text-wrap: pretty; }
+    .experience-detail-list { display: grid; gap: var(--exp-list-gap); margin: 0; padding: 0; list-style: none; }
+    .experience-detail-item { display: grid; grid-template-columns: 38px minmax(0, 1fr); gap: 16px; }
+    .experience-detail-item-number { color: var(--muted); font: 600 var(--exp-number-size)/1.35 ui-monospace, monospace; }
+    .experience-detail-item-title { margin: 0 0 8px; color: var(--ink); font-size: var(--exp-item-title-size); font-weight: 650; line-height: 1.35; }
+    .experience-detail-item-copy { margin: 0; color: var(--muted); font-size: var(--exp-body-size); line-height: var(--exp-body-line-height); text-wrap: pretty; }
+    .experience-external-link { display: inline-flex; align-items: baseline; gap: 7px; width: min(100%, 34rem); max-width: 100%; margin: 0 0 34px; padding: 4px 0; color: var(--ink); font-size: var(--exp-body-size); font-weight: 500; text-decoration: none; }
+    .experience-external-link-label { color: var(--accent); font: 600 var(--exp-meta-size)/1.3 ui-monospace, monospace; }
+    .experience-external-link-text { min-width: 0; font-size: var(--exp-body-size); font-weight: 500; overflow-wrap: anywhere; }
+    .experience-external-link-arrow { margin-left: -2px; color: var(--accent); transition: transform .18s ease; }
+    .experience-external-link:hover .experience-external-link-text, .experience-external-link:focus-visible .experience-external-link-text { text-decoration: underline; }
+    .experience-external-link:hover .experience-external-link-arrow, .experience-external-link:focus-visible .experience-external-link-arrow { transform: translate(2px, -2px); }
+    .experience-external-link:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+    .experience-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 18px; margin-top: 4px; }
+    .experience-metric { display: grid; gap: 6px; min-width: 0; padding-top: 14px; border-top: 1px solid rgba(82, 77, 70, .16); }
+    .experience-metric-value { color: var(--ink); font: 650 clamp(17px, 1.55vw, 24px)/1.1 Arial, "Noto Sans SC", sans-serif; overflow-wrap: anywhere; }
+    .experience-metric-label { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .experience-media-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .experience-media-grid.is-single { grid-template-columns: minmax(0, 1fr); }
+    .experience-media-slot { position: relative; display: grid; align-content: center; min-height: 170px; margin: 0; overflow: hidden; background: #f1f0ed; }
+    .experience-media-slot.is-placeholder { justify-items: start; align-content: end; min-height: 170px; padding: 18px; }
+    .experience-media-slot.experience-media-pdf, .experience-media-slot.experience-media-pdf.is-placeholder { min-height: 220px; }
+    .experience-media-slot.experience-media-video, .experience-media-slot.experience-media-video.is-placeholder { min-height: 180px; }
+    .experience-media-type { color: var(--muted); font: 600 11px/1.2 ui-monospace, monospace; letter-spacing: .13em; }
+    .experience-media-label { margin-top: 8px; color: var(--ink); font-size: 14px; font-weight: 600; }
+    .experience-media-hint { margin-top: 6px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .experience-media-slot img, .experience-media-slot video { display: block; width: 100%; max-height: 270px; object-fit: contain; background: #f0efec; }
+    .experience-media-slot iframe { display: block; width: 100%; height: 270px; border: 0; background: #f0efec; }
+    .experience-proof-canvas { position: relative; display: block; width: 100%; min-height: 0; overflow: visible; }
+    .experience-proof-canvas .experience-media-slot { position: absolute; min-width: 0; min-height: 0; max-height: none; margin: 0; overflow: hidden; border-radius: 8px; }
+    .experience-proof-canvas .experience-media-slot img,
+    .experience-proof-canvas .experience-media-slot video,
+    .experience-proof-canvas .experience-media-slot iframe { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+    .experience-proof-canvas .experience-media-slot.experience-media-video::after { content: "▶"; position: absolute; left: 50%; top: 50%; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 253, 248, .82); color: var(--ink); font-size: 13px; transform: translate(-50%, -50%); pointer-events: none; }
+    .experience-proof-pdf-hint { position: absolute; top: 10px; left: 10px; z-index: 2; padding: 5px 9px; border: 1px solid rgba(224, 91, 35, .28); border-radius: 4px; color: var(--accent); background: rgba(255, 253, 248, .94); font: 650 13px/1.25 Arial, "Noto Sans SC", sans-serif; letter-spacing: .02em; white-space: nowrap; pointer-events: none; }
+    .experience-proof-group { margin-top: 14px; }
+    .experience-proof-group-label { color: var(--muted); font: 600 11px/1.2 ui-monospace, monospace; letter-spacing: .13em; }
+    .experience-media-slot.is-openable { cursor: pointer; outline: 0; }
+    .experience-media-slot.is-openable:hover, .experience-media-slot.is-openable:focus-visible { box-shadow: inset 0 0 0 1px var(--accent); }
+    .experience-media-slot.is-openable:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+    .experience-detail-proof { margin-top: 42px; }
+    .experience-proof-group { display: grid; gap: 12px; min-width: 0; }
+    .experience-proof-list { display: grid; gap: 7px; margin: 0; padding: 12px 0 0; border-top: 1px solid rgba(82, 77, 70, .14); color: var(--muted); font-size: 14px; line-height: 1.55; list-style: none; }
+    .experience-proof-item::before { content: "—"; margin-right: 8px; color: var(--accent); }
+    .experience-media-viewer[hidden] { display: none; }
+    .experience-media-viewer { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 5vw; }
+    .experience-media-viewer-backdrop { position: absolute; inset: 0; background: rgba(29, 24, 18, .74); }
+    .experience-media-viewer-dialog { position: relative; z-index: 1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto; align-items: center; gap: 14px; width: min(100%, 1040px); max-height: 90vh; padding: 42px 18px 16px; background: #f7f6f3; }
+    .experience-media-viewer-stage { grid-column: 2; display: grid; place-items: center; min-width: 0; min-height: 0; max-height: 76vh; }
+    .experience-media-viewer-stage img, .experience-media-viewer-stage video { display: block; max-width: 100%; max-height: 76vh; object-fit: contain; }
+    .experience-media-viewer-stage iframe { width: min(78vw, 860px); height: 74vh; border: 0; background: white; }
+    .experience-media-viewer-close { position: absolute; top: 10px; right: 12px; border: 0; background: transparent; color: var(--ink); font-size: 26px; cursor: pointer; }
+    .experience-media-viewer-prev, .experience-media-viewer-next { border: 0; background: transparent; color: var(--accent); font-size: 36px; cursor: pointer; }
+    .experience-media-viewer-counter { grid-column: 2; margin: 0; color: var(--muted); font: 500 11px/1.3 ui-monospace, monospace; text-align: center; }
+    .experience-media-viewer-fallback { grid-column: 2; margin-top: 8px; color: var(--accent); font-size: 12px; text-align: center; }
+    .experience-media-viewer button:focus-visible, .experience-media-viewer a:focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
+    @media (max-width: 700px) {
+      .experience-metrics, .experience-media-grid { grid-template-columns: 1fr; }
+      .experience-island-overview:is(.is-work-overview, .is-school-overview) { max-width: 100%; }
+      .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card { grid-template-columns: minmax(96px, 28%) minmax(0, 1fr); gap: 8px; padding: 4px; }
+      .experience-island-overview:is(.is-work-overview, .is-school-overview) .experience-project-card-body { padding-right: 8px; }
+      .experience-island-overview.is-school-overview .experience-project-card { grid-template-columns: minmax(104px, 32%) minmax(0, 1fr); gap: 9px; padding: 5px; }
+      .experience-island-overview.is-school-overview .experience-project-card-body { gap: 6px; padding: 6px 8px 6px 0; }
+      .experience-detail-section { margin-bottom: 25px; }
+      .experience-media-viewer { padding: 12px; }
+      .experience-media-viewer-dialog { padding-inline: 4px; }
+    }
     .island-loading {
       position: absolute;
       left: 50%;
@@ -190,14 +432,13 @@
         transform: translate(calc(-50% - 20px), -50%);
       }
       .island-loading { bottom: -20px; font-size: 9px; }
-      .experience-project-label { min-height: 24px; padding: 5px 7px; font-size: 8px; }
-      .experience-project-label::after { width: 13px; height: 9px; }
+      .experience-project-label { min-height: 26px; padding: 6px 8px; font-size: 9px; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .experience-project-label { transition: none; }
-      .experience-project-label:hover,
-      .experience-project-label:focus-visible,
-      .experience-project-label.is-active { translate: 0; }
+      .experience-project-label,
+      .experience-project-tilt,
+      .experience-project-card,
+      .experience-project-card-media img { transition: none; }
     }
   </style>
 </head>
@@ -210,6 +451,7 @@
 
   <script type="module">
     import { skillDetails } from "./skillcloud-content.js";
+    import { initSkillCloudElastic } from "./skillcloud-elastic.js";
     Promise.all([
       fetch('./site/homepage-viewport-fit-v5.html').then(function (response) {
         if (!response.ok) throw new Error('首页结构载入失败');
@@ -262,6 +504,16 @@
 
       var root = document.getElementById('render-root');
       root.replaceWith.apply(root, Array.from(structureBody.children));
+      var experienceCopy = document.querySelector('#experience .experience-copy');
+      if (experienceCopy && !experienceCopy.querySelector('[data-experience-overview]')) {
+        experienceCopy.setAttribute('data-experience-content', '');
+        var experienceOverview = document.createElement('div');
+        experienceOverview.className = 'experience-island-overview';
+        experienceOverview.setAttribute('data-experience-overview', '');
+        experienceCopy.prepend(experienceOverview);
+      } else if (experienceCopy) {
+        experienceCopy.setAttribute('data-experience-content', '');
+      }
       var islandArea = document.querySelector('.island-area');
       if (islandArea) {
         islandArea.classList.remove('placeholder');
@@ -269,16 +521,16 @@
         islandArea.innerHTML = [
           '<div class="island-canvas" aria-label="\u53ef\u65cb\u8f6c\u7684 3D \u7ecf\u5386\u5c9b">',
           '<div class="island-project-labels" aria-label="\u7ecf\u5386\u5c9b\u9879\u76ee\u5730\u6807">',
-          '<button class="experience-project-label is-internship" type="button" data-experience-project="internship-lixiang" aria-pressed="false">北京 · 理想</button>',
-          '<button class="experience-project-label is-internship" type="button" data-experience-project="internship-qianchuan" aria-pressed="false">上海 · 仟传</button>',
-          '<button class="experience-project-label is-internship" type="button" data-experience-project="internship-baimi" aria-pressed="false">杭州 · 白米</button>',
-          '<button class="experience-project-label is-internship" type="button" data-experience-project="internship-jiuling" aria-pressed="false">深圳 · 九瓴</button>',
-          '<button class="experience-project-label is-personal" type="button" data-experience-project="personal-claude-translator" aria-pressed="false">Claude 桌面翻译 <small>COMING SOON</small></button>',
-          '<button class="experience-project-label is-personal" type="button" data-experience-project="personal-squirrel-docs" aria-pressed="false">Codex 松鼠文仓 <small>COMING SOON</small></button>',
-          '<button class="experience-project-label is-personal" type="button" data-experience-project="personal-fullydancy" aria-pressed="false">Codex FullyDancy <small>COMING SOON</small></button>',
-          '<button class="experience-project-label is-school" type="button" data-experience-project="school-uiux" aria-pressed="false">UIUX</button>',
-          '<button class="experience-project-label is-school" type="button" data-experience-project="school-apex" aria-pressed="false">APEX</button>',
-          '<button class="experience-project-label is-school" type="button" data-experience-project="school-cell-factory" aria-pressed="false">细胞工厂</button>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-internship" type="button" data-experience-project="internship-lixiang" aria-pressed="false">理想汽车</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-internship" type="button" data-experience-project="internship-qianchuan" aria-pressed="false">仟传</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-internship" type="button" data-experience-project="internship-baimi" aria-pressed="false">白米</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-internship" type="button" data-experience-project="internship-pollo-ai" aria-pressed="false">Pollo AI</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-personal" type="button" data-experience-project="personal-comfyui" aria-pressed="false">ComfyUI</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-personal" type="button" data-experience-project="personal-squirrel-docs" aria-pressed="false">松鼠文仓</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-personal" type="button" data-experience-project="personal-fullydancy" aria-pressed="false">FullyDancy</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-school" type="button" data-experience-project="school-memora" aria-pressed="false">MEMORA</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-school" type="button" data-experience-project="school-apex" aria-pressed="false">APEX</button></span>',
+          '<span class="island-label-anchor"><button class="experience-project-label is-school" type="button" data-experience-project="school-cell-factory" aria-pressed="false">细胞工厂</button></span>',
           '</div>',
           '</div>',
           '<p class="island-loading" role="status">\u6b63\u5728\u52a0\u8f7d\u7ecf\u5386\u5c9b\u6a21\u578b\u2026</p>',
@@ -338,6 +590,7 @@
       });
 
       var zones = Array.prototype.slice.call(skills.querySelectorAll('.skill-cloud-zone'));
+      initSkillCloudElastic(skills);
       var viewedKey = 'portfolio.skillCloud.viewed.v1';
       var viewed = {};
       try {
@@ -352,16 +605,30 @@
         } catch (error) {}
       }
 
+      var viewedAliases = {
+        'data-driven': '数据分析',
+        'ai-product-practice': 'AI 产品设计',
+        'ai-evaluation': '评测与迭代',
+        'prompt-context-engineering': 'Prompt 工程',
+        'ai-assisted-development': 'AI 协作效率',
+        'multimodal-expression': '多模态生成'
+      };
+
+      function hasViewedSkill(chip) {
+        var skill = chip.getAttribute('data-skill');
+        var legacySkill = viewedAliases[chip.dataset.skillId];
+        return Boolean(viewed[chip.dataset.skillId] || viewed[skill] || (legacySkill && viewed[legacySkill]));
+      }
+
       function applyViewedState() {
         chips.forEach(function (chip) {
-          var skill = chip.getAttribute('data-skill');
-          chip.classList.toggle('is-viewed', Boolean(viewed[skill]));
+          chip.classList.toggle('is-viewed', hasViewedSkill(chip));
         });
         zones.forEach(function (zone) {
-          var hasViewedSkill = Array.prototype.some.call(zone.querySelectorAll('.skill-chip'), function (chip) {
-            return Boolean(viewed[chip.getAttribute('data-skill')]);
+          var zoneHasViewedSkill = Array.prototype.some.call(zone.querySelectorAll('.skill-chip'), function (chip) {
+            return hasViewedSkill(chip);
           });
-          zone.classList.toggle('is-viewed', hasViewedSkill);
+          zone.classList.toggle('is-viewed', zoneHasViewedSkill);
         });
       }
 
@@ -369,6 +636,7 @@
         var skill = chip.getAttribute('data-skill');
         if (!skill) return;
         viewed[skill] = true;
+        if (chip.dataset.skillId) viewed[chip.dataset.skillId] = true;
         saveViewed();
         applyViewedState();
       }
@@ -449,10 +717,13 @@
 
       var dialog = document.querySelector('.skill-detail-dialog');
       if (!dialog) return;
+      if (dialog.parentElement !== document.body) document.body.append(dialog);
       var title = dialog.querySelector('[data-skill-title]');
+      var group = dialog.querySelector('[data-skill-group]');
       var body = dialog.querySelector('[data-skill-body]');
       var proof = dialog.querySelector('[data-skill-proof]');
       var close = dialog.querySelector('.skill-detail-close');
+      var lastSkillTrigger = null;
       var energyDetails = {
         '象棋': {
           body: '象棋是我的推演训练：在有限信息里判断局势、预判对手意图，并持续修正自己的策略。',
@@ -493,39 +764,124 @@
         }).join('') + '</div>';
       }
 
+      function renderEvidence(detail) {
+        var list = document.createElement('div');
+        list.className = 'skill-evidence-cards';
+        list.dataset.count = String(detail.evidence.length);
+        list.setAttribute('role', 'list');
+
+        detail.evidence.forEach(function (evidence, index) {
+          var card = document.createElement('article');
+          card.className = 'skill-evidence-card';
+          card.setAttribute('role', 'listitem');
+
+          var number = document.createElement('span');
+          number.className = 'skill-evidence-number';
+          number.textContent = String(index + 1).padStart(2, '0');
+
+          var heading = document.createElement('h4');
+          heading.className = 'skill-evidence-title';
+          heading.textContent = evidence.title;
+
+          var text = document.createElement('p');
+          text.className = 'skill-evidence-text';
+          var cursor = 0;
+          (evidence.highlights || []).forEach(function (highlight) {
+            var start = evidence.text.indexOf(highlight, cursor);
+            if (start < 0) return;
+            text.append(document.createTextNode(evidence.text.slice(cursor, start)));
+            var emphasis = document.createElement('strong');
+            emphasis.className = 'skill-evidence-highlight';
+            emphasis.textContent = highlight;
+            text.append(emphasis);
+            cursor = start + highlight.length;
+          });
+          text.append(document.createTextNode(evidence.text.slice(cursor)));
+          card.append(number, heading, text);
+          list.append(card);
+        });
+
+        return list;
+      }
+
+      function skillChipAtPoint(event) {
+        var nearest = null;
+        var nearestDistance = Infinity;
+        chips.forEach(function (chip) {
+          var bounds = chip.getBoundingClientRect();
+          if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) return;
+          var dx = event.clientX - (bounds.left + bounds.width / 2);
+          var dy = event.clientY - (bounds.top + bounds.height / 2);
+          var distance = dx * dx + dy * dy;
+          if (distance < nearestDistance) {
+            nearest = chip;
+            nearestDistance = distance;
+          }
+        });
+        return nearest;
+      }
+
+      function showSkill(chip) {
+        var skill = chip.getAttribute('data-skill');
+        lastSkillTrigger = chip;
+        markSkillViewed(chip);
+        var detail = skillDetails[chip.dataset.skillId];
+        var item = energyDetails[skill];
+        var useModal = Boolean(item);
+        dialog.classList.toggle('has-skill-content', Boolean(detail));
+        title.textContent = detail ? detail.title : skill;
+        group.textContent = detail ? detail.group + ' / ' + detail.groupLabel : '';
+        dialog.classList.toggle('is-media-only', Boolean(item));
+        body.textContent = detail ? '' : item ? item.body : 'xxx' + skill + '能力说明与项目佐证资料xxx';
+        proof.innerHTML = item ? renderProof(item) : '<span>佐证 01 · xxx相关项目资料xxx</span><span>佐证 02 · xxx过程产出或复盘xxx</span>';
+        if (detail) proof.replaceChildren(renderEvidence(detail));
+        proof.dataset.evidenceCount = detail ? String(detail.evidence.length) : '';
+        dialog.scrollTop = 0;
+
+        var isModal = dialog.open && dialog.matches(':modal');
+        if (!dialog.open || isModal !== useModal) {
+          if (dialog.open) dialog.close();
+          if (useModal && typeof dialog.showModal === 'function') dialog.showModal();
+          else dialog.show();
+          if (close) close.focus({ preventScroll: true });
+        }
+      }
+
       chips.forEach(function (chip) {
         chip.addEventListener('click', function () {
-          var skill = chip.getAttribute('data-skill');
-          markSkillViewed(chip);
-          var detail = skillDetails[chip.dataset.skillId];
-          dialog.classList.toggle('has-skill-content', Boolean(detail));
-          title.textContent = detail ? detail.title : skill;
-          var item = energyDetails[skill];
-          dialog.classList.toggle('is-media-only', Boolean(item));
-          body.textContent = detail ? detail.hook : item ? item.body : 'xxx' + skill + '能力说明与项目佐证资料xxx';
-          proof.innerHTML = item ? renderProof(item) : '<span>佐证 01 · xxx相关项目资料xxx</span><span>佐证 02 · xxx过程产出或复盘xxx</span>';
-          if (detail) {
-            var list = document.createElement('ol');
-            list.className = 'skill-evidence-list';
-            detail.evidence.forEach(function (evidence) {
-              var row = document.createElement('li');
-              var heading = document.createElement('h4');
-              heading.textContent = [evidence.project, evidence.title].filter(Boolean).join(' · ');
-              var text = document.createElement('p');
-              text.textContent = evidence.text;
-              row.append(heading, text);
-              list.append(row);
-            });
-            proof.replaceChildren(list);
-          }
-          dialog.scrollTop = 0;
-          if (typeof dialog.showModal === 'function') dialog.showModal();
-          else dialog.setAttribute('open', '');
+          showSkill(chip);
         });
       });
       if (close) close.addEventListener('click', function () { dialog.close(); });
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && dialog.open) {
+          event.preventDefault();
+          dialog.close();
+        }
+      });
+      dialog.addEventListener('close', function () {
+        if (lastSkillTrigger && lastSkillTrigger.isConnected) lastSkillTrigger.focus({ preventScroll: true });
+      });
       dialog.addEventListener('click', function (event) {
-        if (event.target === dialog) dialog.close();
+        if (!dialog.open) return;
+        if (event.target.closest && event.target.closest('.skill-detail-close')) return;
+        var targetChip = skillChipAtPoint(event);
+        if (targetChip && targetChip !== lastSkillTrigger && skillDetails[targetChip.dataset.skillId]) {
+          showSkill(targetChip);
+        } else if (dialog.matches(':modal') && event.target === dialog) {
+          dialog.close();
+        }
+      });
+      document.addEventListener('click', function (event) {
+        if (!dialog.open || dialog.matches(':modal') || dialog.contains(event.target)) return;
+        var directChip = event.target.closest && event.target.closest('[data-skill-id]');
+        if (directChip && skillDetails[directChip.dataset.skillId]) return;
+        var targetChip = skillChipAtPoint(event);
+        if (targetChip && skillDetails[targetChip.dataset.skillId]) {
+          if (targetChip !== lastSkillTrigger) showSkill(targetChip);
+          return;
+        }
+        dialog.close();
       });
     }
   </script>

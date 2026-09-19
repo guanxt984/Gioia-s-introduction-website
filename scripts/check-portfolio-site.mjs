@@ -1,6 +1,7 @@
+import './check-island-navigation.mjs';
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
-import { labelLimitForCategory, selectFrontIsland, selectVisibleProjects } from "../src/experience-island-visibility.js";
+import { selectFrontIsland } from "../src/experience-island-visibility.js";
 import { destinationFrameIndexAtElapsed, directoryFrameIndexForProgress, directoryProgressForScroll, frameIndexForProgress, frameIsForeground, nextSequelLatched, scrollTopFor, sequelFrameIndexAtElapsed } from "../src/home-transition.js";
 
 const index = await fs.readFile("public/index.html", "utf8");
@@ -22,8 +23,8 @@ const reviewed = await fs.readFile("public/site/full-five-page-reviewed-v10.html
 assert.match(reviewed, /#experience \.school-project-panel\s*\{[^}]*width:\s*min\(1190px,\s*calc\(100% \+ 280px\)\)/s);
 assert.match(reviewed, /#experience \.school-project-head h3\s*\{[^}]*font-size:\s*clamp\(28\.8px,\s*2\.64vw,\s*48px\)/s);
 assert.doesNotMatch(structure, /school-project-hint|点击学校子岛部件切换资料/);
-assert.match(reviewed, /#resume \.resume-tools\s*\{[^}]*left:\s*50%;[^}]*transform:\s*translateX\(-50%\) scale\(\.6\)/s);
-assert.match(reviewed, /#resume \.resume-tool span\s*\{\s*display:\s*none/);
+assert.match(reviewed, /#resume \.resume-tools\s*\{[^}]*right:\s*-28px;[^}]*top:\s*50%;[^}]*transform:\s*translateY\(-50%\) scale\(\.6\)/s);
+assert.match(reviewed, /#resume \.resume-tool span\s*\{\s*display:\s*inline/);
 const directoryTransitionFrames = (await fs.readdir("public/assets/directory-transition")).filter(file => /^frame_\d{5}\.png$/.test(file));
 assert.equal(directoryTransitionFrames.length, 60);
 const directorySequelFrames = (await fs.readdir("public/assets/directory-sequel")).filter(file => /^frame_\d{6}\.png$/.test(file));
@@ -57,6 +58,9 @@ assert.match(coveo, /\.destination-title\s*\{[^}]*max-width:\s*none;[^}]*white-s
 assert.match(structure, /\.destination-title\s*\{\s*font-size:\s*clamp\(33\.6px,\s*10\.4vw,\s*59\.2px\);\s*\}/);
 assert.match(structure, /class=["']destination-name["']>官晓彤 Gioia</);
 assert.match(structure, /VX &amp; PHONE 18100839418 · EMAIL 1042369137@qq\.com/);
+assert.match(structure, /\.destination-meta\s*\{[\s\S]*?font:\s*500\s+clamp\(14px,\s*1\.05vw,\s*20px\)\/1\.8/);
+assert.match(structure, /\.destination-name\s*\{[\s\S]*?clamp\(24px,\s*1\.8vw,\s*36px\)/);
+assert.match(structure, /href=["']\.\.\/assets\/resume-gxt-2026-09-16\.png["'][^>]*download/);
 const destinationSection = structure.match(/<section id=["']destination["'][\s\S]*?<\/section>/)?.[0] || "";
 assert.doesNotMatch(destinationSection, /AI 产品经理|FROM 浙江/);
 assert.doesNotMatch(structure, /class=["']experience-list["']/);
@@ -89,42 +93,21 @@ assert.match(structure, /\.island-label-line\s*\{[\s\S]*?font-family:\s*inherit[
 
 const source = await fs.readFile("src/portfolio-island.js", "utf8");
 const projectMesh = key => source.match(new RegExp(`key:\\s*["']${key}["'][\\s\\S]*?meshName:\\s*["']([^"']+)["']`))?.[1];
-const experienceAssets = [
-  "school/apex/demo.mp4",
-  "school/apex/cover.jpg",
-  "school/apex/section.png",
-  "school/uiux/ux.png",
-  "school/cell-factory/photo-01.jpg",
-  "school/cell-factory/photo-02.jpg",
-  "school/cell-factory/photo-03.jpg",
-  "school/cell-factory/innovation.mp4",
-  "school/cell-factory/live.mp4",
-  "internship/jiuling/photo.jpg",
-  "internship/qianchuan/certificate.pdf",
-  "internship/qianchuan/photo.jpg",
-  "internship/qianchuan/project.png",
-  "internship/lixiang/certificate.png",
-  "internship/lixiang/photo.jpg",
-  "internship/lixiang/project.png",
-  "internship/baimi/photo-01.png",
-  "internship/baimi/photo-02.jpg",
-  "internship/baimi/project.png",
-];
 for (const key of [
-  "school-apex", "school-uiux", "school-cell-factory",
-  "internship-jiuling", "internship-qianchuan", "internship-lixiang", "internship-baimi",
-  "personal-claude-translator", "personal-squirrel-docs", "personal-fullydancy",
+  "school-apex", "school-memora", "school-cell-factory",
+  "internship-pollo-ai", "internship-qianchuan", "internship-lixiang", "internship-baimi",
+  "personal-comfyui", "personal-squirrel-docs", "personal-fullydancy",
 ]) {
   assert.match(source, new RegExp(`key:\\s*["']${key}["']`));
 }
-for (const [city, title] of [["深圳", "九瓴"], ["上海", "仟传"], ["北京", "理想"], ["杭州", "白米"]]) {
+for (const [city, title] of [["上海", "仟传"], ["北京", "理想"], ["杭州", "白米"]]) {
   assert.match(source, new RegExp(`city:\\s*["']${city}["'][\\s\\S]*?title:\\s*["']${title}["']`));
 }
-for (const file of experienceAssets) await fs.access(`public/assets/experience-projects/${file}`);
 assert.match(source, /const EXPERIENCE_PROJECTS\s*=/);
-assert.match(source, /function showExperienceProject\(projectKey\)/);
-assert.match(source, /querySelectorAll\(["']video["']\)[\s\S]*?pause\(\)/);
-assert.match(source, /type:\s*["']pdf["']/);
+assert.match(source, /function showExperienceProject\(projectKey/);
+assert.match(source, /const navigateToIsland\s*=/);
+assert.match(source, /const navigateToProject\s*=/);
+assert.match(source, /NAVIGATION_DURATION_MS\s*=\s*760/);
 const pkg = JSON.parse(await fs.readFile("package.json", "utf8"));
 const server = await fs.readFile("scripts/serve.mjs", "utf8");
 assert.match(index, /rel=["']preload["'][^>]+experience-island-uploaded-preview\.glb/);
@@ -132,22 +115,22 @@ assert.doesNotMatch(index, /loading=["']lazy["']/);
 assert.match(index, /portfolio-island\.bundle\.js/);
 assert.match(source, /experience-island-uploaded-preview\.glb/);
 assert.equal((source.match(/meshName:\s*["'][^"']+["'][\s\S]*?anchor:\s*\{/g) || []).length, 10);
-assert.equal(projectMesh("internship-jiuling"), "tripo_part_5");
+assert.equal(projectMesh("internship-pollo-ai"), "tripo_part_5");
 assert.equal(projectMesh("internship-lixiang"), "tripo_part_3");
-assert.equal(projectMesh("personal-claude-translator"), "tripo_part_0");
+assert.equal(projectMesh("personal-comfyui"), "tripo_part_0");
 assert.equal(projectMesh("personal-fullydancy"), "tripo_part_8");
 assert.equal(projectMesh("personal-squirrel-docs"), "tripo_part_9");
-assert.equal(projectMesh("school-uiux"), "tripo_part_4");
+assert.equal(projectMesh("school-memora"), "tripo_part_4");
 assert.equal(projectMesh("school-apex"), "tripo_part_14");
 assert.equal(projectMesh("school-cell-factory"), "tripo_part_4");
-assert.match(source, /key:\s*["']school-uiux["'][\s\S]*?meshName:\s*["']tripo_part_4["'][\s\S]*?highlightMode:\s*["']component["'][\s\S]*?componentAnchor:\s*\{\s*x:\s*0\.0301,\s*y:\s*0\.4191,\s*z:\s*-0\.2511\s*\}/);
+assert.match(source, /key:\s*["']school-memora["'][\s\S]*?meshName:\s*["']tripo_part_4["'][\s\S]*?highlightMode:\s*["']component["'][\s\S]*?componentAnchor:\s*\{\s*x:\s*0\.0301,\s*y:\s*0\.4191,\s*z:\s*-0\.2511\s*\}/);
 assert.match(source, /key:\s*["']school-cell-factory["'][\s\S]*?meshName:\s*["']tripo_part_4["'][\s\S]*?highlightMode:\s*["']component["'][\s\S]*?componentAnchor:\s*\{\s*x:\s*-0\.0358,\s*y:\s*0\.4256,\s*z:\s*-0\.3058\s*\}/);
 assert.match(source, /extractConnectedComponentGeometry/);
 assert.match(source, /highlightMode\s*===\s*["']component["'][\s\S]*?new THREE\.EdgesGeometry\(component\.geometry,\s*28\)[\s\S]*?new THREE\.LineBasicMaterial[\s\S]*?new THREE\.LineSegments/);
-assert.match(source, /key:\s*["']personal-claude-translator["'][\s\S]*?highlightMode:\s*["']local["'][\s\S]*?highlightShape:\s*["']building["']/);
+assert.match(source, /key:\s*["']personal-comfyui["'][\s\S]*?highlightMode:\s*["']local["'][\s\S]*?highlightShape:\s*["']building["']/);
 assert.match(source, /category:\s*["']personal["'],\s*anchor:\s*\{\s*x:\s*0\.25,\s*y:\s*0\.12,\s*z:\s*0\.065\s*\}/);
 assert.match(source, /category:\s*["']school["'],\s*anchor:\s*\{\s*x:\s*-0\.005,\s*y:\s*0\.12,\s*z:\s*-0\.28\s*\}/);
-for (const key of ["personal-claude-translator", "personal-squirrel-docs", "personal-fullydancy"]) {
+for (const key of ["personal-comfyui", "personal-squirrel-docs", "personal-fullydancy"]) {
   assert.match(source, new RegExp(`key:\\s*["']${key}["'][\\s\\S]*?enabled:\\s*true`));
 }
 assert.doesNotMatch(source, /nodeName:\s*["']/);
@@ -157,44 +140,35 @@ assert.match(pkg.scripts["build:site"], /portfolio-island\.js/);
 assert.match(index, /\.island-area\.is-3d/);
 assert.match(index, /\.island-canvas\s*\{/);
 assert.equal((index.match(/data-experience-project=/g) || []).length, 10);
-assert.match(index, /COMING SOON/);
-assert.match(index, /\.experience-project-label::after[\s\S]*border/);
-assert.match(index, /\.experience-project-label\.is-disabled/);
-assert.match(index, /background:\s*rgba\(255,\s*253,\s*248,\s*\.88\)/);
 assert.doesNotMatch(index, /box-shadow:\s*0 3px 0 currentColor/);
 assert.equal(selectFrontIsland([
   { category: "internship", depth: -2.4 },
   { category: "personal", depth: -1.2 },
   { category: "school", depth: -3.1 },
 ]), "personal");
-assert.deepEqual(selectVisibleProjects([
-  { key: "i-far", category: "internship", depth: -3.2, inView: true },
-  { key: "s-near", category: "school", depth: -0.8, inView: true },
-  { key: "s-mid", category: "school", depth: -1.1, inView: true },
-  { key: "s-back", category: "school", depth: -1.7, inView: true },
-  { key: "s-out", category: "school", depth: -0.2, inView: false },
-  { key: "s-hidden", category: "school", depth: -2.2, inView: true },
-], "school", 3), ["s-near", "s-mid", "s-back"]);
-assert.equal(labelLimitForCategory("internship"), 4);
-assert.equal(labelLimitForCategory("personal"), 3);
-assert.equal(labelLimitForCategory("school"), 3);
+// Island stability, collision priorities, and resize behavior are tested in check-island-navigation.mjs.
 assert.match(source, /data-front-island/);
 assert.match(source, /CURRENT_ISLAND_LABELS/);
 assert.match(source, /currentIslandLabel\.textContent\s*=\s*CURRENT_ISLAND_LABELS\[activeCategory\]/);
+assert.match(source, /let activeCategory\s*=\s*null/);
+assert.match(source, /let selectedProjectKey\s*=\s*null/);
+assert.match(source, /let hoveredProjectKey\s*=\s*null/);
+assert.match(source, /projectedVisibleProjectKeys/);
+assert.doesNotMatch(source, /\bvisibleProjectKeys\b/);
+assert.match(source, /navigationMode/);
+assert.match(index, /--island-label-dim-opacity/);
+assert.match(index, /data-experience-overview/);
 assert.match(source, /status\.hidden\s*=\s*true/);
-assert.match(source, /prefers-reduced-motion/);
 assert.equal((index.match(/data-experience-island=/g) || []).length, 0);
-assert.match(index, /\.experience-project-label\[hidden\]\s*\{\s*display:\s*none/);
+assert.match(index, /\.island-label-anchor\[hidden\]\s*\{\s*display:\s*none/);
 assert.doesNotMatch(index, /class=["']island-switcher["']/);
 assert.match(source, /intersectObjects\(clickableMeshes,\s*false\)/);
 assert.doesNotMatch(source, /distance\s*=\s*0\.14/);
 assert.doesNotMatch(source, /focusIsland/);
-assert.match(source, /visibleProjectKeys\.has\(project\.key\)/);
 assert.match(source, /THREE\.BackSide/);
 assert.doesNotMatch(source, /THREE\.AdditiveBlending/);
 assert.equal((source.match(/scale:\s*1\.018/g) || []).length, 1);
 assert.match(source, /transparent:\s*false/);
-assert.match(source, /material\.opacity\s*=\s*1/);
 assert.match(source, /record\.shell\.scale\.setScalar/);
 assert.match(source, /highlightMode:\s*["']local["']/);
 assert.match(index, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);

@@ -3431,25 +3431,25 @@ var ImageUtils = class {
    * @param {string} [type='image/png'] - Indicates the image format.
    * @return {string} The data URI.
    */
-  static getDataURL(image, type = "image/png") {
-    if (/^data:/i.test(image.src)) {
-      return image.src;
+  static getDataURL(image2, type = "image/png") {
+    if (/^data:/i.test(image2.src)) {
+      return image2.src;
     }
     if (typeof HTMLCanvasElement === "undefined") {
-      return image.src;
+      return image2.src;
     }
     let canvas;
-    if (image instanceof HTMLCanvasElement) {
-      canvas = image;
+    if (image2 instanceof HTMLCanvasElement) {
+      canvas = image2;
     } else {
       if (_canvas === void 0) _canvas = createElementNS("canvas");
-      _canvas.width = image.width;
-      _canvas.height = image.height;
+      _canvas.width = image2.width;
+      _canvas.height = image2.height;
       const context = _canvas.getContext("2d");
-      if (image instanceof ImageData) {
-        context.putImageData(image, 0, 0);
+      if (image2 instanceof ImageData) {
+        context.putImageData(image2, 0, 0);
       } else {
-        context.drawImage(image, 0, 0, image.width, image.height);
+        context.drawImage(image2, 0, 0, image2.width, image2.height);
       }
       canvas = _canvas;
     }
@@ -3461,22 +3461,22 @@ var ImageUtils = class {
    * @param {(HTMLImageElement|HTMLCanvasElement|ImageBitmap|Object)} image - The image object.
    * @return {HTMLCanvasElement|Object} The converted image.
    */
-  static sRGBToLinear(image) {
-    if (typeof HTMLImageElement !== "undefined" && image instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image instanceof ImageBitmap) {
+  static sRGBToLinear(image2) {
+    if (typeof HTMLImageElement !== "undefined" && image2 instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image2 instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image2 instanceof ImageBitmap) {
       const canvas = createElementNS("canvas");
-      canvas.width = image.width;
-      canvas.height = image.height;
+      canvas.width = image2.width;
+      canvas.height = image2.height;
       const context = canvas.getContext("2d");
-      context.drawImage(image, 0, 0, image.width, image.height);
-      const imageData = context.getImageData(0, 0, image.width, image.height);
+      context.drawImage(image2, 0, 0, image2.width, image2.height);
+      const imageData = context.getImageData(0, 0, image2.width, image2.height);
       const data = imageData.data;
       for (let i = 0; i < data.length; i++) {
         data[i] = SRGBToLinear(data[i] / 255) * 255;
       }
       context.putImageData(imageData, 0, 0);
       return canvas;
-    } else if (image.data) {
-      const data = image.data.slice(0);
+    } else if (image2.data) {
+      const data = image2.data.slice(0);
       for (let i = 0; i < data.length; i++) {
         if (data instanceof Uint8Array || data instanceof Uint8ClampedArray) {
           data[i] = Math.floor(SRGBToLinear(data[i] / 255) * 255);
@@ -3486,12 +3486,12 @@ var ImageUtils = class {
       }
       return {
         data,
-        width: image.width,
-        height: image.height
+        width: image2.width,
+        height: image2.height
       };
     } else {
       console.warn("THREE.ImageUtils.sRGBToLinear(): Unsupported image type. No color space conversion applied.");
-      return image;
+      return image2;
     }
   }
 };
@@ -3580,16 +3580,16 @@ var Source = class {
     return output;
   }
 };
-function serializeImage(image) {
-  if (typeof HTMLImageElement !== "undefined" && image instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image instanceof ImageBitmap) {
-    return ImageUtils.getDataURL(image);
+function serializeImage(image2) {
+  if (typeof HTMLImageElement !== "undefined" && image2 instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image2 instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image2 instanceof ImageBitmap) {
+    return ImageUtils.getDataURL(image2);
   } else {
-    if (image.data) {
+    if (image2.data) {
       return {
-        data: Array.from(image.data),
-        width: image.width,
-        height: image.height,
-        type: image.data.constructor.name
+        data: Array.from(image2.data),
+        width: image2.width,
+        height: image2.height,
+        type: image2.data.constructor.name
       };
     } else {
       console.warn("THREE.Texture: Unable to serialize Texture.");
@@ -3614,13 +3614,13 @@ var Texture = class _Texture extends EventDispatcher {
    * @param {number} [anisotropy=Texture.DEFAULT_ANISOTROPY] - The anisotropy value.
    * @param {string} [colorSpace=NoColorSpace] - The color space.
    */
-  constructor(image = _Texture.DEFAULT_IMAGE, mapping = _Texture.DEFAULT_MAPPING, wrapS = ClampToEdgeWrapping, wrapT = ClampToEdgeWrapping, magFilter = LinearFilter, minFilter = LinearMipmapLinearFilter, format = RGBAFormat, type = UnsignedByteType, anisotropy = _Texture.DEFAULT_ANISOTROPY, colorSpace = NoColorSpace) {
+  constructor(image2 = _Texture.DEFAULT_IMAGE, mapping = _Texture.DEFAULT_MAPPING, wrapS = ClampToEdgeWrapping, wrapT = ClampToEdgeWrapping, magFilter = LinearFilter, minFilter = LinearMipmapLinearFilter, format = RGBAFormat, type = UnsignedByteType, anisotropy = _Texture.DEFAULT_ANISOTROPY, colorSpace = NoColorSpace) {
     super();
     this.isTexture = true;
     Object.defineProperty(this, "id", { value: _textureId++ });
     this.uuid = generateUUID();
     this.name = "";
-    this.source = new Source(image);
+    this.source = new Source(image2);
     this.mipmaps = [];
     this.mapping = mapping;
     this.channel = 0;
@@ -3649,7 +3649,7 @@ var Texture = class _Texture extends EventDispatcher {
     this.onUpdate = null;
     this.renderTarget = null;
     this.isRenderTargetTexture = false;
-    this.isArrayTexture = image && image.depth && image.depth > 1 ? true : false;
+    this.isArrayTexture = image2 && image2.depth && image2.depth > 1 ? true : false;
     this.pmremVersion = 0;
   }
   /**
@@ -4696,8 +4696,8 @@ var RenderTarget = class extends EventDispatcher {
     this.scissor = new Vector4(0, 0, width, height);
     this.scissorTest = false;
     this.viewport = new Vector4(0, 0, width, height);
-    const image = { width, height, depth: options.depth };
-    const texture = new Texture(image);
+    const image2 = { width, height, depth: options.depth };
+    const texture = new Texture(image2);
     this.textures = [];
     const count = options.count;
     for (let i = 0; i < count; i++) {
@@ -4818,8 +4818,8 @@ var RenderTarget = class extends EventDispatcher {
       this.textures[i] = source.textures[i].clone();
       this.textures[i].isRenderTargetTexture = true;
       this.textures[i].renderTarget = this;
-      const image = Object.assign({}, source.textures[i].image);
-      this.textures[i].source = new Source(image);
+      const image2 = Object.assign({}, source.textures[i].image);
+      this.textures[i].source = new Source(image2);
     }
     this.depthBuffer = source.depthBuffer;
     this.stencilBuffer = source.stencilBuffer;
@@ -12261,8 +12261,8 @@ var WebGLCubeRenderTarget = class extends WebGLRenderTarget {
   constructor(size = 1, options = {}) {
     super(size, size, options);
     this.isWebGLCubeRenderTarget = true;
-    const image = { width: size, height: size, depth: 1 };
-    const images = [image, image, image, image, image, image];
+    const image2 = { width: size, height: size, depth: 1 };
+    const images = [image2, image2, image2, image2, image2, image2];
     this.texture = new CubeTexture(images);
     this._setTextureOptions(options);
     this.texture.isRenderTargetTexture = true;
@@ -14600,8 +14600,8 @@ var DepthTexture = class extends Texture {
     if (format !== DepthFormat && format !== DepthStencilFormat) {
       throw new Error("DepthTexture format must be either THREE.DepthFormat or THREE.DepthStencilFormat");
     }
-    const image = { width, height, depth };
-    super(image, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy);
+    const image2 = { width, height, depth };
+    super(image2, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy);
     this.isDepthTexture = true;
     this.flipY = false;
     this.generateMipmaps = false;
@@ -16813,7 +16813,7 @@ var ImageLoader = class extends Loader {
       }
       return cached;
     }
-    const image = createElementNS("img");
+    const image2 = createElementNS("img");
     function onImageLoad() {
       removeEventListeners();
       if (onLoad) onLoad(this);
@@ -16839,18 +16839,18 @@ var ImageLoader = class extends Loader {
       scope.manager.itemEnd(url);
     }
     function removeEventListeners() {
-      image.removeEventListener("load", onImageLoad, false);
-      image.removeEventListener("error", onImageError, false);
+      image2.removeEventListener("load", onImageLoad, false);
+      image2.removeEventListener("error", onImageError, false);
     }
-    image.addEventListener("load", onImageLoad, false);
-    image.addEventListener("error", onImageError, false);
+    image2.addEventListener("load", onImageLoad, false);
+    image2.addEventListener("error", onImageError, false);
     if (url.slice(0, 5) !== "data:") {
-      if (this.crossOrigin !== void 0) image.crossOrigin = this.crossOrigin;
+      if (this.crossOrigin !== void 0) image2.crossOrigin = this.crossOrigin;
     }
-    Cache.add(`image:${url}`, image);
+    Cache.add(`image:${url}`, image2);
     scope.manager.itemStart(url);
-    image.src = url;
-    return image;
+    image2.src = url;
+    return image2;
   }
 };
 var TextureLoader = class extends Loader {
@@ -16879,8 +16879,8 @@ var TextureLoader = class extends Loader {
     const loader = new ImageLoader(this.manager);
     loader.setCrossOrigin(this.crossOrigin);
     loader.setPath(this.path);
-    loader.load(url, function(image) {
-      texture.image = image;
+    loader.load(url, function(image2) {
+      texture.image = image2;
       texture.needsUpdate = true;
       if (onLoad !== void 0) {
         onLoad(texture);
@@ -20048,9 +20048,9 @@ function WebGLCubeMaps(renderer) {
           const cubemap = cubemaps.get(texture).texture;
           return mapTextureMapping(cubemap, texture.mapping);
         } else {
-          const image = texture.image;
-          if (image && image.height > 0) {
-            const renderTarget = new WebGLCubeRenderTarget(image.height);
+          const image2 = texture.image;
+          if (image2 && image2.height > 0) {
+            const renderTarget = new WebGLCubeRenderTarget(image2.height);
             renderTarget.fromEquirectangularTexture(renderer, texture);
             cubemaps.set(texture, renderTarget);
             texture.addEventListener("dispose", onTextureDispose);
@@ -20781,8 +20781,8 @@ function WebGLCubeUVMaps(renderer) {
           if (renderTarget !== void 0) {
             return renderTarget.texture;
           } else {
-            const image = texture.image;
-            if (isEquirectMap && image && image.height > 0 || isCubeMap && image && isCubeTextureComplete(image)) {
+            const image2 = texture.image;
+            if (isEquirectMap && image2 && image2.height > 0 || isCubeMap && image2 && isCubeTextureComplete(image2)) {
               if (pmremGenerator === null) pmremGenerator = new PMREMGenerator(renderer);
               renderTarget = isEquirectMap ? pmremGenerator.fromEquirectangular(texture) : pmremGenerator.fromCubemap(texture);
               renderTarget.texture.pmremVersion = texture.pmremVersion;
@@ -20798,11 +20798,11 @@ function WebGLCubeUVMaps(renderer) {
     }
     return texture;
   }
-  function isCubeTextureComplete(image) {
+  function isCubeTextureComplete(image2) {
     let count = 0;
     const length = 6;
     for (let i = 0; i < length; i++) {
-      if (image[i] !== void 0) count++;
+      if (image2[i] !== void 0) count++;
     }
     return count === length;
   }
@@ -24627,14 +24627,14 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       new OffscreenCanvas(width, height)
     ) : createElementNS("canvas");
   }
-  function resizeImage(image, needsNewCanvas, maxSize) {
+  function resizeImage(image2, needsNewCanvas, maxSize) {
     let scale = 1;
-    const dimensions = getDimensions(image);
+    const dimensions = getDimensions(image2);
     if (dimensions.width > maxSize || dimensions.height > maxSize) {
       scale = maxSize / Math.max(dimensions.width, dimensions.height);
     }
     if (scale < 1) {
-      if (typeof HTMLImageElement !== "undefined" && image instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image instanceof ImageBitmap || typeof VideoFrame !== "undefined" && image instanceof VideoFrame) {
+      if (typeof HTMLImageElement !== "undefined" && image2 instanceof HTMLImageElement || typeof HTMLCanvasElement !== "undefined" && image2 instanceof HTMLCanvasElement || typeof ImageBitmap !== "undefined" && image2 instanceof ImageBitmap || typeof VideoFrame !== "undefined" && image2 instanceof VideoFrame) {
         const width = Math.floor(scale * dimensions.width);
         const height = Math.floor(scale * dimensions.height);
         if (_canvas2 === void 0) _canvas2 = createCanvas(width, height);
@@ -24642,17 +24642,17 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         canvas.width = width;
         canvas.height = height;
         const context = canvas.getContext("2d");
-        context.drawImage(image, 0, 0, width, height);
+        context.drawImage(image2, 0, 0, width, height);
         console.warn("THREE.WebGLRenderer: Texture has been resized from (" + dimensions.width + "x" + dimensions.height + ") to (" + width + "x" + height + ").");
         return canvas;
       } else {
-        if ("data" in image) {
+        if ("data" in image2) {
           console.warn("THREE.WebGLRenderer: Image in DataTexture is too big (" + dimensions.width + "x" + dimensions.height + ").");
         }
-        return image;
+        return image2;
       }
     }
-    return image;
+    return image2;
   }
   function textureNeedsGenerateMipmaps(texture) {
     return texture.generateMipmaps;
@@ -24752,13 +24752,13 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
     }
     return glInternalFormat;
   }
-  function getMipLevels(texture, image) {
+  function getMipLevels(texture, image2) {
     if (textureNeedsGenerateMipmaps(texture) === true || texture.isFramebufferTexture && texture.minFilter !== NearestFilter && texture.minFilter !== LinearFilter) {
-      return Math.log2(Math.max(image.width, image.height)) + 1;
+      return Math.log2(Math.max(image2.width, image2.height)) + 1;
     } else if (texture.mipmaps !== void 0 && texture.mipmaps.length > 0) {
       return texture.mipmaps.length;
     } else if (texture.isCompressedTexture && Array.isArray(texture.image)) {
-      return image.mipmaps.length;
+      return image2.mipmaps.length;
     } else {
       return 1;
     }
@@ -24876,10 +24876,10 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
     const textureProperties = properties.get(texture);
     if (texture.isVideoTexture) updateVideoTexture(texture);
     if (texture.isRenderTargetTexture === false && texture.isExternalTexture !== true && texture.version > 0 && textureProperties.__version !== texture.version) {
-      const image = texture.image;
-      if (image === null) {
+      const image2 = texture.image;
+      if (image2 === null) {
         console.warn("THREE.WebGLRenderer: Texture marked for update but no image data found.");
-      } else if (image.complete === false) {
+      } else if (image2.complete === false) {
         console.warn("THREE.WebGLRenderer: Texture marked for update but image is incomplete");
       } else {
         uploadTexture(textureProperties, texture, slot);
@@ -25001,11 +25001,11 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
   function getRow(index, rowLength, componentStride) {
     return Math.floor(Math.floor(index / componentStride) / rowLength);
   }
-  function updateTexture(texture, image, glFormat, glType) {
+  function updateTexture(texture, image2, glFormat, glType) {
     const componentStride = 4;
     const updateRanges = texture.updateRanges;
     if (updateRanges.length === 0) {
-      state.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, image.width, image.height, glFormat, glType, image.data);
+      state.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, image2.width, image2.height, glFormat, glType, image2.data);
     } else {
       updateRanges.sort((a, b) => a.start - b.start);
       let mergeIndex = 0;
@@ -25013,9 +25013,9 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         const previousRange = updateRanges[mergeIndex];
         const range = updateRanges[i];
         const previousEnd = previousRange.start + previousRange.count;
-        const currentRow = getRow(range.start, image.width, componentStride);
-        const previousRow = getRow(previousRange.start, image.width, componentStride);
-        if (range.start <= previousEnd + 1 && currentRow === previousRow && getRow(range.start + range.count - 1, image.width, componentStride) === currentRow) {
+        const currentRow = getRow(range.start, image2.width, componentStride);
+        const previousRow = getRow(previousRange.start, image2.width, componentStride);
+        if (range.start <= previousEnd + 1 && currentRow === previousRow && getRow(range.start + range.count - 1, image2.width, componentStride) === currentRow) {
           previousRange.count = Math.max(
             previousRange.count,
             range.start + range.count - previousRange.start
@@ -25029,18 +25029,18 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       const currentUnpackRowLen = _gl.getParameter(_gl.UNPACK_ROW_LENGTH);
       const currentUnpackSkipPixels = _gl.getParameter(_gl.UNPACK_SKIP_PIXELS);
       const currentUnpackSkipRows = _gl.getParameter(_gl.UNPACK_SKIP_ROWS);
-      _gl.pixelStorei(_gl.UNPACK_ROW_LENGTH, image.width);
+      _gl.pixelStorei(_gl.UNPACK_ROW_LENGTH, image2.width);
       for (let i = 0, l = updateRanges.length; i < l; i++) {
         const range = updateRanges[i];
         const pixelStart = Math.floor(range.start / componentStride);
         const pixelCount = Math.ceil(range.count / componentStride);
-        const x = pixelStart % image.width;
-        const y = Math.floor(pixelStart / image.width);
+        const x = pixelStart % image2.width;
+        const y = Math.floor(pixelStart / image2.width);
         const width = pixelCount;
         const height = 1;
         _gl.pixelStorei(_gl.UNPACK_SKIP_PIXELS, x);
         _gl.pixelStorei(_gl.UNPACK_SKIP_ROWS, y);
-        state.texSubImage2D(_gl.TEXTURE_2D, 0, x, y, width, height, glFormat, glType, image.data);
+        state.texSubImage2D(_gl.TEXTURE_2D, 0, x, y, width, height, glFormat, glType, image2.data);
       }
       texture.clearUpdateRanges();
       _gl.pixelStorei(_gl.UNPACK_ROW_LENGTH, currentUnpackRowLen);
@@ -25065,8 +25065,8 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       _gl.pixelStorei(_gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
       _gl.pixelStorei(_gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
       _gl.pixelStorei(_gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, unpackConversion);
-      let image = resizeImage(texture.image, false, capabilities.maxTextureSize);
-      image = verifyColorSpace(texture, image);
+      let image2 = resizeImage(texture.image, false, capabilities.maxTextureSize);
+      image2 = verifyColorSpace(texture, image2);
       const glFormat = utils.convert(texture.format, texture.colorSpace);
       const glType = utils.convert(texture.type);
       let glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.colorSpace, texture.isVideoTexture);
@@ -25076,14 +25076,14 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       const useTexStorage = texture.isVideoTexture !== true;
       const allocateMemory = sourceProperties.__version === void 0 || forceUpload === true;
       const dataReady = source.dataReady;
-      const levels = getMipLevels(texture, image);
+      const levels = getMipLevels(texture, image2);
       if (texture.isDepthTexture) {
         glInternalFormat = getInternalDepthFormat(texture.format === DepthStencilFormat, texture.type);
         if (allocateMemory) {
           if (useTexStorage) {
-            state.texStorage2D(_gl.TEXTURE_2D, 1, glInternalFormat, image.width, image.height);
+            state.texStorage2D(_gl.TEXTURE_2D, 1, glInternalFormat, image2.width, image2.height);
           } else {
-            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, image.width, image.height, 0, glFormat, glType, null);
+            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, image2.width, image2.height, 0, glFormat, glType, null);
           }
         }
       } else if (texture.isDataTexture) {
@@ -25105,19 +25105,19 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         } else {
           if (useTexStorage) {
             if (allocateMemory) {
-              state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, image.width, image.height);
+              state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, image2.width, image2.height);
             }
             if (dataReady) {
-              updateTexture(texture, image, glFormat, glType);
+              updateTexture(texture, image2, glFormat, glType);
             }
           } else {
-            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, image.width, image.height, 0, glFormat, glType, image.data);
+            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, image2.width, image2.height, 0, glFormat, glType, image2.data);
           }
         }
       } else if (texture.isCompressedTexture) {
         if (texture.isCompressedArrayTexture) {
           if (useTexStorage && allocateMemory) {
-            state.texStorage3D(_gl.TEXTURE_2D_ARRAY, levels, glInternalFormat, mipmaps[0].width, mipmaps[0].height, image.depth);
+            state.texStorage3D(_gl.TEXTURE_2D_ARRAY, levels, glInternalFormat, mipmaps[0].width, mipmaps[0].height, image2.depth);
           }
           for (let i = 0, il = mipmaps.length; i < il; i++) {
             mipmap = mipmaps[i];
@@ -25136,11 +25136,11 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
                       }
                       texture.clearLayerUpdates();
                     } else {
-                      state.compressedTexSubImage3D(_gl.TEXTURE_2D_ARRAY, i, 0, 0, 0, mipmap.width, mipmap.height, image.depth, glFormat, mipmap.data);
+                      state.compressedTexSubImage3D(_gl.TEXTURE_2D_ARRAY, i, 0, 0, 0, mipmap.width, mipmap.height, image2.depth, glFormat, mipmap.data);
                     }
                   }
                 } else {
-                  state.compressedTexImage3D(_gl.TEXTURE_2D_ARRAY, i, glInternalFormat, mipmap.width, mipmap.height, image.depth, 0, mipmap.data, 0, 0);
+                  state.compressedTexImage3D(_gl.TEXTURE_2D_ARRAY, i, glInternalFormat, mipmap.width, mipmap.height, image2.depth, 0, mipmap.data, 0, 0);
                 }
               } else {
                 console.warn("THREE.WebGLRenderer: Attempt to load unsupported compressed texture format in .uploadTexture()");
@@ -25148,10 +25148,10 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
             } else {
               if (useTexStorage) {
                 if (dataReady) {
-                  state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, i, 0, 0, 0, mipmap.width, mipmap.height, image.depth, glFormat, glType, mipmap.data);
+                  state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, i, 0, 0, 0, mipmap.width, mipmap.height, image2.depth, glFormat, glType, mipmap.data);
                 }
               } else {
-                state.texImage3D(_gl.TEXTURE_2D_ARRAY, i, glInternalFormat, mipmap.width, mipmap.height, image.depth, 0, glFormat, glType, mipmap.data);
+                state.texImage3D(_gl.TEXTURE_2D_ARRAY, i, glInternalFormat, mipmap.width, mipmap.height, image2.depth, 0, glFormat, glType, mipmap.data);
               }
             }
           }
@@ -25187,43 +25187,43 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       } else if (texture.isDataArrayTexture) {
         if (useTexStorage) {
           if (allocateMemory) {
-            state.texStorage3D(_gl.TEXTURE_2D_ARRAY, levels, glInternalFormat, image.width, image.height, image.depth);
+            state.texStorage3D(_gl.TEXTURE_2D_ARRAY, levels, glInternalFormat, image2.width, image2.height, image2.depth);
           }
           if (dataReady) {
             if (texture.layerUpdates.size > 0) {
-              const layerByteLength = getByteLength(image.width, image.height, texture.format, texture.type);
+              const layerByteLength = getByteLength(image2.width, image2.height, texture.format, texture.type);
               for (const layerIndex of texture.layerUpdates) {
-                const layerData = image.data.subarray(
-                  layerIndex * layerByteLength / image.data.BYTES_PER_ELEMENT,
-                  (layerIndex + 1) * layerByteLength / image.data.BYTES_PER_ELEMENT
+                const layerData = image2.data.subarray(
+                  layerIndex * layerByteLength / image2.data.BYTES_PER_ELEMENT,
+                  (layerIndex + 1) * layerByteLength / image2.data.BYTES_PER_ELEMENT
                 );
-                state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, 0, 0, 0, layerIndex, image.width, image.height, 1, glFormat, glType, layerData);
+                state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, 0, 0, 0, layerIndex, image2.width, image2.height, 1, glFormat, glType, layerData);
               }
               texture.clearLayerUpdates();
             } else {
-              state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data);
+              state.texSubImage3D(_gl.TEXTURE_2D_ARRAY, 0, 0, 0, 0, image2.width, image2.height, image2.depth, glFormat, glType, image2.data);
             }
           }
         } else {
-          state.texImage3D(_gl.TEXTURE_2D_ARRAY, 0, glInternalFormat, image.width, image.height, image.depth, 0, glFormat, glType, image.data);
+          state.texImage3D(_gl.TEXTURE_2D_ARRAY, 0, glInternalFormat, image2.width, image2.height, image2.depth, 0, glFormat, glType, image2.data);
         }
       } else if (texture.isData3DTexture) {
         if (useTexStorage) {
           if (allocateMemory) {
-            state.texStorage3D(_gl.TEXTURE_3D, levels, glInternalFormat, image.width, image.height, image.depth);
+            state.texStorage3D(_gl.TEXTURE_3D, levels, glInternalFormat, image2.width, image2.height, image2.depth);
           }
           if (dataReady) {
-            state.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, image.width, image.height, image.depth, glFormat, glType, image.data);
+            state.texSubImage3D(_gl.TEXTURE_3D, 0, 0, 0, 0, image2.width, image2.height, image2.depth, glFormat, glType, image2.data);
           }
         } else {
-          state.texImage3D(_gl.TEXTURE_3D, 0, glInternalFormat, image.width, image.height, image.depth, 0, glFormat, glType, image.data);
+          state.texImage3D(_gl.TEXTURE_3D, 0, glInternalFormat, image2.width, image2.height, image2.depth, 0, glFormat, glType, image2.data);
         }
       } else if (texture.isFramebufferTexture) {
         if (allocateMemory) {
           if (useTexStorage) {
-            state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, image.width, image.height);
+            state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, image2.width, image2.height);
           } else {
-            let width = image.width, height = image.height;
+            let width = image2.width, height = image2.height;
             for (let i = 0; i < levels; i++) {
               state.texImage2D(_gl.TEXTURE_2D, i, glInternalFormat, width, height, 0, glFormat, glType, null);
               width >>= 1;
@@ -25251,14 +25251,14 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         } else {
           if (useTexStorage) {
             if (allocateMemory) {
-              const dimensions = getDimensions(image);
+              const dimensions = getDimensions(image2);
               state.texStorage2D(_gl.TEXTURE_2D, levels, glInternalFormat, dimensions.width, dimensions.height);
             }
             if (dataReady) {
-              state.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, glFormat, glType, image);
+              state.texSubImage2D(_gl.TEXTURE_2D, 0, 0, 0, glFormat, glType, image2);
             }
           } else {
-            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, glFormat, glType, image);
+            state.texImage2D(_gl.TEXTURE_2D, 0, glInternalFormat, glFormat, glType, image2);
           }
         }
       }
@@ -25296,16 +25296,16 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         }
         cubeImage[i] = verifyColorSpace(texture, cubeImage[i]);
       }
-      const image = cubeImage[0], glFormat = utils.convert(texture.format, texture.colorSpace), glType = utils.convert(texture.type), glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.colorSpace);
+      const image2 = cubeImage[0], glFormat = utils.convert(texture.format, texture.colorSpace), glType = utils.convert(texture.type), glInternalFormat = getInternalFormat(texture.internalFormat, glFormat, glType, texture.colorSpace);
       const useTexStorage = texture.isVideoTexture !== true;
       const allocateMemory = sourceProperties.__version === void 0 || forceUpload === true;
       const dataReady = source.dataReady;
-      let levels = getMipLevels(texture, image);
+      let levels = getMipLevels(texture, image2);
       setTextureParameters(_gl.TEXTURE_CUBE_MAP, texture);
       let mipmaps;
       if (isCompressed) {
         if (useTexStorage && allocateMemory) {
-          state.texStorage2D(_gl.TEXTURE_CUBE_MAP, levels, glInternalFormat, image.width, image.height);
+          state.texStorage2D(_gl.TEXTURE_CUBE_MAP, levels, glInternalFormat, image2.width, image2.height);
         }
         for (let i = 0; i < 6; i++) {
           mipmaps = cubeImage[i].mipmaps;
@@ -25774,11 +25774,11 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
       texture.update();
     }
   }
-  function verifyColorSpace(texture, image) {
+  function verifyColorSpace(texture, image2) {
     const colorSpace = texture.colorSpace;
     const format = texture.format;
     const type = texture.type;
-    if (texture.isCompressedTexture === true || texture.isVideoTexture === true) return image;
+    if (texture.isCompressedTexture === true || texture.isVideoTexture === true) return image2;
     if (colorSpace !== LinearSRGBColorSpace && colorSpace !== NoColorSpace) {
       if (ColorManagement.getTransfer(colorSpace) === SRGBTransfer) {
         if (format !== RGBAFormat || type !== UnsignedByteType) {
@@ -25788,18 +25788,18 @@ function WebGLTextures(_gl, extensions, state, properties, capabilities, utils, 
         console.error("THREE.WebGLTextures: Unsupported texture color space:", colorSpace);
       }
     }
-    return image;
+    return image2;
   }
-  function getDimensions(image) {
-    if (typeof HTMLImageElement !== "undefined" && image instanceof HTMLImageElement) {
-      _imageDimensions.width = image.naturalWidth || image.width;
-      _imageDimensions.height = image.naturalHeight || image.height;
-    } else if (typeof VideoFrame !== "undefined" && image instanceof VideoFrame) {
-      _imageDimensions.width = image.displayWidth;
-      _imageDimensions.height = image.displayHeight;
+  function getDimensions(image2) {
+    if (typeof HTMLImageElement !== "undefined" && image2 instanceof HTMLImageElement) {
+      _imageDimensions.width = image2.naturalWidth || image2.width;
+      _imageDimensions.height = image2.naturalHeight || image2.height;
+    } else if (typeof VideoFrame !== "undefined" && image2 instanceof VideoFrame) {
+      _imageDimensions.width = image2.displayWidth;
+      _imageDimensions.height = image2.displayHeight;
     } else {
-      _imageDimensions.width = image.width;
-      _imageDimensions.height = image.height;
+      _imageDimensions.width = image2.width;
+      _imageDimensions.height = image2.height;
     }
     return _imageDimensions;
   }
@@ -28375,7 +28375,7 @@ var WebGLRenderer = class {
       }
       let width, height, depth2, minX, minY, minZ;
       let dstX, dstY, dstZ;
-      const image = srcTexture.isCompressedTexture ? srcTexture.mipmaps[dstLevel] : srcTexture.image;
+      const image2 = srcTexture.isCompressedTexture ? srcTexture.mipmaps[dstLevel] : srcTexture.image;
       if (srcRegion !== null) {
         width = srcRegion.max.x - srcRegion.min.x;
         height = srcRegion.max.y - srcRegion.min.y;
@@ -28385,12 +28385,12 @@ var WebGLRenderer = class {
         minZ = srcRegion.isBox3 ? srcRegion.min.z : 0;
       } else {
         const levelScale = Math.pow(2, -srcLevel);
-        width = Math.floor(image.width * levelScale);
-        height = Math.floor(image.height * levelScale);
+        width = Math.floor(image2.width * levelScale);
+        height = Math.floor(image2.height * levelScale);
         if (srcTexture.isDataArrayTexture) {
-          depth2 = image.depth;
+          depth2 = image2.depth;
         } else if (srcTexture.isData3DTexture) {
-          depth2 = Math.floor(image.depth * levelScale);
+          depth2 = Math.floor(image2.depth * levelScale);
         } else {
           depth2 = 1;
         }
@@ -28428,8 +28428,8 @@ var WebGLRenderer = class {
       const currentUnpackSkipPixels = _gl.getParameter(_gl.UNPACK_SKIP_PIXELS);
       const currentUnpackSkipRows = _gl.getParameter(_gl.UNPACK_SKIP_ROWS);
       const currentUnpackSkipImages = _gl.getParameter(_gl.UNPACK_SKIP_IMAGES);
-      _gl.pixelStorei(_gl.UNPACK_ROW_LENGTH, image.width);
-      _gl.pixelStorei(_gl.UNPACK_IMAGE_HEIGHT, image.height);
+      _gl.pixelStorei(_gl.UNPACK_ROW_LENGTH, image2.width);
+      _gl.pixelStorei(_gl.UNPACK_IMAGE_HEIGHT, image2.height);
       _gl.pixelStorei(_gl.UNPACK_SKIP_PIXELS, minX);
       _gl.pixelStorei(_gl.UNPACK_SKIP_ROWS, minY);
       _gl.pixelStorei(_gl.UNPACK_SKIP_IMAGES, minZ);
@@ -28480,19 +28480,19 @@ var WebGLRenderer = class {
       } else {
         if (isDst3D) {
           if (srcTexture.isDataTexture || srcTexture.isData3DTexture) {
-            _gl.texSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, glType, image.data);
+            _gl.texSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, glType, image2.data);
           } else if (dstTexture.isCompressedArrayTexture) {
-            _gl.compressedTexSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, image.data);
+            _gl.compressedTexSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, image2.data);
           } else {
-            _gl.texSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, glType, image);
+            _gl.texSubImage3D(glTarget, dstLevel, dstX, dstY, dstZ, width, height, depth2, glFormat, glType, image2);
           }
         } else {
           if (srcTexture.isDataTexture) {
-            _gl.texSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image.data);
+            _gl.texSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image2.data);
           } else if (srcTexture.isCompressedTexture) {
-            _gl.compressedTexSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, image.width, image.height, glFormat, image.data);
+            _gl.compressedTexSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, image2.width, image2.height, glFormat, image2.data);
           } else {
-            _gl.texSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image);
+            _gl.texSubImage2D(_gl.TEXTURE_2D, dstLevel, dstX, dstY, width, height, glFormat, glType, image2);
           }
         }
       }
@@ -32039,6 +32039,14 @@ function experienceIslandZoomRange(fitDistance) {
     maxDistance: fitDistance
   };
 }
+function preserveOrbitDistance(camera, target, range) {
+  const offset = camera.position.clone().sub(target);
+  const distance = offset.length();
+  const clamped = Math.min(range.maxDistance, Math.max(range.minDistance, distance));
+  if (distance > 0 && clamped !== distance) {
+    camera.position.copy(target).add(offset.multiplyScalar(clamped / distance));
+  }
+}
 
 // src/experience-island-visibility.js
 function selectFrontIsland(islands) {
@@ -32047,48 +32055,942 @@ function selectFrontIsland(islands) {
     return front;
   }, null)?.category ?? null;
 }
-function labelLimitForCategory(category) {
-  return category === "internship" ? 4 : 3;
+var ISLAND_STABILITY_MS = 120;
+function createIslandStabilizer(delay = ISLAND_STABILITY_MS) {
+  let active = null;
+  let candidate = null;
+  let since = 0;
+  const stabilizer = (next, now) => {
+    if (active === null) active = next;
+    if (next === active || next === null) {
+      candidate = null;
+    } else if (next !== candidate) {
+      candidate = next;
+      since = now;
+    } else if (now - since >= delay) {
+      active = candidate;
+      candidate = null;
+    }
+    return active;
+  };
+  stabilizer.reset = (next) => {
+    active = next ?? null;
+    candidate = null;
+    since = 0;
+    return active;
+  };
+  return stabilizer;
 }
-function selectVisibleProjects(projects, activeCategory, limit = 3) {
-  return projects.filter((project) => project.category === activeCategory && project.inView).sort((a, b) => b.depth - a.depth).slice(0, limit).map((project) => project.key);
+function layoutProjectLabels(labels, activeCategory, selectedKey, hoveredKey, previousOffsets = /* @__PURE__ */ new Map()) {
+  const priority = (item) => item.key === selectedKey ? 3 : item.key === hoveredKey ? 2 : item.category === activeCategory ? 1 : 0;
+  const overlaps = (a, b) => a.x < b.x + b.width + 4 && a.x + a.width + 4 > b.x && a.y < b.y + b.height + 4 && a.y + a.height + 4 > b.y;
+  const placed = [];
+  [...labels].sort((a, b) => priority(b) - priority(a) || b.depth - a.depth || a.key.localeCompare(b.key)).forEach((label) => {
+    const important = priority(label) > 0;
+    const previous = previousOffsets.get(label.key);
+    const preservedOffset = previous && typeof previous === "object" ? Number(previous.top) - label.y : previous;
+    const offsets = label.key === hoveredKey && Number.isFinite(preservedOffset) ? [preservedOffset] : important ? [0, -16, 16, -32, 32] : [0];
+    let best = null;
+    let bestHits = Infinity;
+    for (const offsetY of offsets) {
+      const candidate = { ...label, y: label.y + offsetY, offsetY };
+      const hits = placed.filter((other) => overlaps(candidate, other)).length;
+      if (hits < bestHits) {
+        best = candidate;
+        bestHits = hits;
+      }
+      if (!hits) break;
+    }
+    if (important || bestHits === 0) placed.push(best);
+  });
+  return placed;
 }
 
-// public/justified-media-layout.js
-function enumeratePartitions(assets) {
-  if (!assets.length) return [[]];
-  const partitions = [];
-  const breakCount = Math.max(0, assets.length - 1);
-  for (let mask = 0; mask < 2 ** breakCount; mask += 1) {
-    const rows = [[assets[0]]];
-    for (let index = 1; index < assets.length; index += 1) {
-      if (mask & 1 << index - 1) rows.push([]);
-      rows.at(-1).push(assets[index]);
-    }
-    partitions.push(rows);
+// src/experience-proof-content.js
+var proof = (id, type, src, width, height, extra = {}) => ({
+  id,
+  type,
+  src,
+  width,
+  height,
+  aspectRatio: width / height,
+  ...extra
+});
+var image = (id, src, width, height, extra = {}) => proof(id, "image", src, width, height, extra);
+var video = (id, src, width, height, extra = {}) => proof(id, "video", src, width, height, extra);
+var pdf = (id, src, preview, width, height, extra = {}) => proof(id, "pdf", src, width, height, { preview, ...extra });
+var PROOF_CONTENT = Object.freeze({
+  "school-cell-factory": [
+    video("cell-factory-video", "./assets/experience-island-proof/school-cell-factory/01-project-video.mp4", 854, 480, { label: "PROJECT VIDEO" }),
+    image("cell-factory-awards", "./assets/experience-island-proof/school-cell-factory/02-project-board.png", 1349, 614, { label: "AWARDS" })
+  ],
+  "school-apex": [
+    video("apex-video", "./assets/experience-island-proof/school-apex/01-project-video.mp4", 1080, 2560, { label: "PROJECT VIDEO" }),
+    image("apex-board", "./assets/experience-island-proof/school-apex/02-project-board.png", 8e3, 17380, { label: "PROJECT BOARD" })
+  ],
+  "school-memora": [
+    pdf(
+      "memora-project",
+      "./assets/experience-island-proof/school-memora/01-full-project.pdf",
+      "./assets/experience-island-proof/school-memora/01-full-project-preview.png",
+      1600,
+      900,
+      { label: "FULL PROJECT" }
+    )
+  ],
+  "internship-pollo-ai": [
+    image("pollo-proof-01", "./assets/experience-island-proof/internship-pollo-ai/01-proof.jpg", 1024, 196, { label: "PROJECT PROOF" }),
+    image("pollo-proof-02", "./assets/experience-island-proof/internship-pollo-ai/02-proof.jpg", 1024, 914, { label: "PROJECT PROOF" }),
+    image("pollo-proof-03", "./assets/experience-island-proof/internship-pollo-ai/03-proof.jpg", 1166, 1754, { label: "PROJECT PROOF" })
+  ],
+  "internship-lixiang": [
+    image("lixiang-certificate", "./assets/experience-island-proof/internship-lixiang/01-certificate.png", 1240, 1753, { label: "CERTIFICATE" }),
+    image("lixiang-proof-02", "./assets/experience-island-proof/internship-lixiang/02-proof.png", 931, 1182, { label: "PROJECT PROOF" }),
+    image("lixiang-proof-03", "./assets/experience-island-proof/internship-lixiang/03-proof.png", 1920, 903, { label: "PROJECT PROOF" })
+  ],
+  "internship-qianchuan": [
+    image("qianchuan-proof", "./assets/experience-island-proof/internship-qianchuan/01-proof.png", 780, 1106, { label: "PROJECT PROOF" })
+  ],
+  "internship-baimi": [
+    image("baimi-proof", "./assets/experience-island-proof/internship-baimi/01-proof.jpg", 2085, 2780, { label: "PROJECT PROOF" })
+  ],
+  "personal-fullydancy": [
+    image("fullydancy-screen-01", "./assets/experience-island-proof/personal-fullydancy/01-screen.png", 1280, 665, { label: "PRODUCT SCREEN" }),
+    image("fullydancy-screen-02", "./assets/experience-island-proof/personal-fullydancy/02-screen.png", 1280, 665, { label: "PRODUCT SCREEN" }),
+    image("fullydancy-screen-03", "./assets/experience-island-proof/personal-fullydancy/03-screen.png", 1280, 665, { label: "PRODUCT SCREEN" }),
+    image("fullydancy-screen-04", "./assets/experience-island-proof/personal-fullydancy/04-screen.png", 1280, 665, { label: "PRODUCT SCREEN" })
+  ],
+  "personal-squirrel-docs": [
+    image("squirrel-product", "./assets/experience-island-proof/personal-squirrel-docs/01-product.png", 1280, 666, { label: "PRODUCT SCREEN" }),
+    image("squirrel-logo", "./assets/experience-island-proof/personal-squirrel-docs/02-logo.png", 1254, 1254, { label: "PROJECT MARK" })
+  ],
+  "personal-comfyui": [
+    image("comfyui-workflow", "./assets/experience-island-proof/personal-comfyui/01-workflow.png", 3840, 1740, { label: "WORKFLOW BOARD" }),
+    image("comfyui-workflow-header", "./assets/experience-island-proof/personal-comfyui/02-workflow-header.png", 698, 97, { label: "WORKFLOW PROOF" }),
+    image("comfyui-change-car", "./assets/experience-island-proof/personal-comfyui/03-change-car.png", 3840, 2160, { label: "WORKFLOW BOARD" }),
+    image("comfyui-flux", "./assets/experience-island-proof/personal-comfyui/04-flux.png", 3840, 2160, { label: "WORKFLOW BOARD" })
+  ]
+});
+var PROOF_PROJECT_KEYS = Object.freeze(Object.keys(PROOF_CONTENT));
+
+// src/experience-island-content.js
+var media = (id, type, label, hint) => ({ id, type, preview: null, src: null, label, hint });
+var PROJECT_ENTRY_METADATA = {
+  "internship-pollo-ai": {
+    title: "Pollo AI",
+    description: "\u56F4\u7ED5 Agent \u5B57\u5E55\u80FD\u529B\uFF0C\u63A8\u52A8\u5B57\u5E55 Skill \u4ECE\u9700\u6C42\u6D1E\u5BDF\u5230\u7070\u5EA6\u4E0A\u7EBF\u3002",
+    previewImage: "./assets/experience-island-index/internship-pollo-ai/preview.png",
+    cta: "\u67E5\u770B\u7ECF\u5386"
+  },
+  "internship-lixiang": {
+    title: "\u7406\u60F3\u6C7D\u8F66",
+    description: "\u53C2\u4E0E\u8F66\u8F7D AIGC \u521B\u610F\u5E94\u7528\u300C\u827A\u672F\u76F8\u6846\u300D\uFF0C\u8D1F\u8D23\u539F\u578B\u3001\u6A21\u578B\u8BC4\u6D4B\u4E0E\u4E0A\u7EBF\u8FED\u4EE3\u3002",
+    previewImage: "./assets/experience-island-index/internship-lixiang/preview.png",
+    cta: "\u67E5\u770B\u7ECF\u5386"
+  },
+  "internship-qianchuan": {
+    title: "\u4E0A\u6D77\u4EDF\u4F20",
+    description: "\u53C2\u4E0E AI \u751F\u4EA7\u5DE5\u4F5C\u53F0 0\u21921 \u5EFA\u8BBE\uFF0C\u63A8\u52A8\u8BBE\u8BA1\u56E2\u961F AIGC \u6D41\u7A0B\u4EA7\u54C1\u5316\u3002",
+    previewImage: "./assets/experience-island-index/internship-qianchuan/preview.png",
+    cta: "\u67E5\u770B\u7ECF\u5386"
+  },
+  "internship-baimi": {
+    title: "\u676D\u5DDE\u767D\u7C73",
+    description: "\u901A\u8FC7\u7528\u6237\u4E0E\u5E02\u573A\u7814\u7A76\uFF0C\u4E3A\u5DE5\u4E1A\u8BBE\u8BA1\u9879\u76EE\u7684\u524D\u671F\u4EA7\u54C1\u5B9A\u4E49\u63D0\u4F9B\u4F9D\u636E\u3002",
+    previewImage: "./assets/experience-island-index/internship-baimi/preview.png",
+    cta: "\u67E5\u770B\u7ECF\u5386"
+  },
+  "school-cell-factory": {
+    title: "Cell Factory\uFF5C\u7EC6\u80DE\u5DE5\u5382",
+    description: "\u9762\u5411 8\u201314 \u5C81\u9752\u5C11\u5E74\u7684\u7EC6\u80DE\u79D1\u666E\u7B56\u7565\u6E38\u620F\uFF0C\u6700\u7EC8\u5B8C\u6210 iOS \u53EF\u8FD0\u884C Demo\u3002",
+    previewImage: "./assets/experience-island-index/school-cell-factory/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
+  },
+  "school-apex": {
+    title: "APEX\uFF5C\u51CC\u5CB3",
+    description: "\u7ED3\u5408\u4EBA\u4F53\u8FD0\u52A8\u5206\u6790\u3001\u4F20\u611F\u5668\u4E0E\u7535\u673A\u63A7\u5236\u7684\u667A\u80FD\u767B\u5C71\u52A9\u529B\u5916\u9AA8\u9ABC\u5B9E\u7269\u539F\u578B\u3002",
+    previewImage: "./assets/experience-island-index/school-apex/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
+  },
+  "school-memora": {
+    title: "MEMORA",
+    description: "\u9762\u5411\u4E34\u7EC8\u8001\u4EBA\u53CA\u5BB6\u5C5E\u7684\u5FC3\u613F\u5B9E\u73B0\u4E0E\u8BB0\u5FC6\u7559\u5B58\u670D\u52A1\u7CFB\u7EDF\u3002",
+    previewImage: "./assets/experience-island-index/school-memora/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
+  },
+  "personal-fullydancy": {
+    title: "FullyDancy",
+    description: "\u6D4F\u89C8\u5668\u7AEF AI \u59FF\u6001\u8BC6\u522B\u821E\u8E48\u8DDF\u7EC3\u4EA7\u54C1\uFF0C\u901A\u8FC7\u6444\u50CF\u5934\u5B9E\u73B0\u5B9E\u65F6\u4E92\u52A8\u7EC3\u4E60\u3002",
+    previewImage: "./assets/experience-island-index/personal-fullydancy/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
+  },
+  "personal-squirrel-docs": {
+    title: "\u677E\u9F20\u6587\u4ED3",
+    description: "\u628A\u788E\u7247\u4FE1\u606F\u9010\u6E10\u6C89\u6DC0\u4E3A\u7ED3\u6784\u5316\u4E3B\u9898\u6587\u6863\u7684\u4E2A\u4EBA\u4FE1\u606F\u6574\u7406\u5DE5\u5177\u3002",
+    previewImage: "./assets/experience-island-index/personal-squirrel-docs/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
+  },
+  "personal-comfyui": {
+    title: "ComfyUI",
+    description: "\u56F4\u7ED5\u6C7D\u8F66 AIGC \u751F\u56FE\u4E0E\u6362\u8F66\u9700\u6C42\u642D\u5EFA\u5E76\u53D1\u5E03\u7684\u53EF\u590D\u7528 Workflow\u3002",
+    previewImage: "./assets/experience-island-index/personal-comfyui/preview.png",
+    cta: "\u67E5\u770B\u9879\u76EE"
   }
-  return partitions;
-}
-function solveJustifiedMosaic(assets, maxWidth, maxHeight, gap, candidatePartitions = enumeratePartitions(assets)) {
-  let best = null;
-  candidatePartitions.forEach((rows) => {
-    const sums = rows.map((row) => row.reduce((sum, asset) => sum + asset.aspect, 0));
-    const inverseSum = sums.reduce((sum, value) => sum + 1 / value, 0);
-    const weightedInnerGaps = rows.reduce((sum, row, index) => sum + gap * (row.length - 1) / sums[index], 0);
-    const rowGaps = gap * (rows.length - 1);
-    const width = Math.min(maxWidth, (maxHeight - rowGaps + weightedInnerGaps) / inverseSum);
-    const heights = rows.map((row, index) => (width - gap * (row.length - 1)) / sums[index]);
-    if (width <= 0 || heights.some((height2) => height2 <= 0)) return;
-    const height = heights.reduce((sum, value) => sum + value, 0) + rowGaps;
-    if (height > maxHeight + 0.5) return;
-    const mediaArea = rows.reduce((total, row, rowIndex) => total + row.reduce((sum, asset) => sum + asset.aspect * heights[rowIndex] ** 2, 0), 0);
-    const outlinePenalty = Math.abs(Math.log(width / height));
-    const meanHeight = heights.reduce((sum, value) => sum + value, 0) / heights.length;
-    const variancePenalty = heights.reduce((sum, value) => sum + Math.abs(value - meanHeight), 0) / (meanHeight * heights.length);
-    const score = mediaArea / (1 + outlinePenalty * 0.09 + variancePenalty * 0.035);
-    if (!best || score > best.score) best = { rows, width, height, heights, score, mediaArea };
+};
+var attachEntryMetadata = (projects) => projects.map((project) => ({
+  ...project,
+  entry: PROJECT_ENTRY_METADATA[project.key],
+  proofs: PROOF_CONTENT[project.key] || []
+}));
+var schoolProjects = attachEntryMetadata([
+  {
+    key: "school-cell-factory",
+    title: "\u7EC6\u80DE\u5DE5\u5382",
+    summary: "\u5C06\u7EC6\u80DE\u751F\u7269\u5B66\u8F6C\u5316\u4E3A\u7B56\u7565\u6E38\u620F\u673A\u5236\uFF0C\u5E76\u6700\u7EC8\u5B8C\u6210\u53EF\u5728 iOS \u8BBE\u5907\u8FD0\u884C\u7684\u6E38\u620F Demo\u3002",
+    intro: "\u4E00\u6B3E\u9762\u5411 8\u201314 \u5C81\u9752\u5C11\u5E74\u7684\u7EC6\u80DE\u79D1\u666E\u7B56\u7565\u6E38\u620F\u3002\u5C06\u86CB\u767D\u8D28\u5408\u6210\u3001ATP \u4F9B\u80FD\u7B49\u590D\u6742\u7EC6\u80DE\u751F\u547D\u6D3B\u52A8\u8F6C\u8BD1\u4E3A\u751F\u4EA7\u7EBF\u642D\u5EFA\u3001\u8D44\u6E90\u8C03\u914D\u4E0E\u5173\u5361\u4EFB\u52A1\uFF0C\u8BA9\u73A9\u5BB6\u5728\u7ECF\u8425\u4E00\u4E2A\u201C\u7EC6\u80DE\u5DE5\u5382\u201D\u7684\u8FC7\u7A0B\u4E2D\u7406\u89E3\u7EC6\u80DE\u5668\u53CA\u751F\u547D\u6D3B\u52A8\u3002",
+    whatIDid: [
+      { title: "\u77E5\u8BC6\u6E38\u620F\u5316\u8F6C\u8BD1", body: "\u5C06\u6838\u7CD6\u4F53\u3001\u7EBF\u7C92\u4F53\u7B49\u7EC6\u80DE\u5668\u7684\u771F\u5B9E\u529F\u80FD\u6620\u5C04\u4E3A\u751F\u4EA7\u8F66\u95F4\u3001\u8D44\u6E90\u4E0E\u751F\u4EA7\u7EBF\u673A\u5236\uFF0C\u5E76\u56F4\u7ED5\u4E0D\u540C\u4EBA\u4F53\u7EC6\u80DE\u8BBE\u8BA1\u5173\u5361\u4E0E\u4EFB\u52A1\u3002" },
+      { title: "\u6E38\u620F\u4F53\u9A8C\u4E0E\u89C6\u89C9\u8BBE\u8BA1", body: "\u53C2\u4E0E\u6E38\u620F\u4FE1\u606F\u67B6\u6784\u3001\u5173\u5361\u9009\u62E9\u3001\u6218\u6597\u6C99\u76D8\u3001\u7EC6\u80DE\u56FE\u9274\u7B49\u6838\u5FC3\u4F53\u9A8C\u8BBE\u8BA1\uFF0C\u5E76\u786E\u5B9A\u4F4E\u591A\u8FB9\u5F62\u7684\u89C6\u89C9\u98CE\u683C\uFF0C\u5B8C\u6210 UI/UX \u8BBE\u8BA1\u3002" },
+      { title: "\u53EF\u73A9 Demo \u843D\u5730", body: "\u4F7F\u7528 Cursor \u8F85\u52A9\u5B8C\u6210\u6E38\u620F\u8FD0\u884C\u4EE3\u7801\uFF0C\u5E76\u901A\u8FC7 Xcode \u5B8C\u6210 iOS \u7AEF\u8C03\u8BD5\u548C\u8FD0\u884C\uFF0C\u5C06\u8BBE\u8BA1\u65B9\u6848\u63A8\u8FDB\u4E3A\u53EF\u5728\u771F\u5B9E\u8BBE\u5907\u4E0A\u64CD\u4F5C\u4F53\u9A8C\u7684\u6E38\u620F Demo\u3002" }
+    ],
+    media: [media("cell-factory-film", "video", "PROJECT FILM", "\u70B9\u51FB\u64AD\u653E\u9879\u76EE\u89C6\u9891"), { ...media("cell-factory-awards", "gallery", "AWARDS", "\u70B9\u51FB\u67E5\u770B\u83B7\u5956\u8BC1\u660E"), items: [] }],
+    proofText: ["2025 \u7B2C\u5341\u4E09\u5C4A\u672A\u6765\u8BBE\u8BA1\u5E08\u4E8C\u7B49\u5956", "2025 \u79FB\u52A8\u5E94\u7528\u521B\u65B0\u8D5B\u4E09\u7B49\u5956", "2026 G-CROSS AWARD"]
+  },
+  {
+    key: "school-apex",
+    title: "APEX\uFF5C\u51CC\u5CB3\u767B\u5C71\u52A9\u529B\u5916\u9AA8\u9ABC",
+    summary: "\u4ECE\u4EBA\u4F53\u8FD0\u52A8\u5206\u6790\u3001\u673A\u68B0\u7ED3\u6784\u5230 IMU \u6B65\u6001\u8BC6\u522B\u4E0E\u7535\u673A\u63A7\u5236\uFF0C\u5B8C\u6210\u667A\u80FD\u767B\u5C71\u52A9\u529B\u5916\u9AA8\u9ABC\u5B9E\u7269\u539F\u578B\u3002",
+    intro: "\u4E00\u6B3E\u9762\u5411\u6237\u5916\u7231\u597D\u8005\u7684\u667A\u80FD\u767B\u5C71\u52A9\u529B\u5916\u9AA8\u9ABC\u3002\u901A\u8FC7\u8170\u2014\u819D\u4EFF\u751F\u4F20\u529B\u673A\u6784\u4E0E\u817F\u90E8\u60EF\u6027\u4F20\u611F\u5668\u611F\u77E5\u6B65\u6001\uFF0C\u5728\u767B\u5C71\u62AC\u817F\u4E0E\u8E6C\u4F38\u8FC7\u7A0B\u4E2D\u63A7\u5236\u52A9\u529B\u673A\u6784\uFF0C\u5C06\u4EBA\u4F53\u8FD0\u52A8\u5206\u6790\u3001\u5DE5\u4E1A\u8BBE\u8BA1\u3001\u5D4C\u5165\u5F0F\u63A7\u5236\u6574\u5408\u4E3A\u53EF\u7A7F\u6234\u5B9E\u7269\u539F\u578B\u3002",
+    whatIDid: [
+      { title: "\u4EFF\u751F\u52A9\u529B\u673A\u6784\u8BBE\u8BA1", body: "\u5206\u6790\u767B\u5C71\u8E6C\u817F\u8FC7\u7A0B\u4E0E\u80A1\u56DB\u5934\u808C\u53D1\u529B\u8DEF\u5F84\uFF0C\u901A\u8FC7\u4EBA\u4F53\u52A8\u4F5C\u4E0E\u884C\u7A0B\u6D4B\u91CF\u786E\u5B9A\u8170\u2014\u819D\u4F20\u529B\u65B9\u5F0F\uFF0C\u5E76\u6301\u7EED\u8FED\u4EE3\u7A7F\u6234\u7ED3\u6784\u548C\u6280\u672F\u8DEF\u7EBF\u3002" },
+      { title: "\u6B65\u6001\u8BC6\u522B\u4E0E\u63A7\u5236\u903B\u8F91", body: "\u4F7F\u7528 BMI160 \u60EF\u6027\u4F20\u611F\u5668\u91C7\u96C6\u5DE6\u53F3\u817F\u8FD0\u52A8\u6570\u636E\uFF0C\u6839\u636E\u6CE2\u5CF0\u6CE2\u8C37\u5224\u65AD\u52A8\u4F5C\u72B6\u6001\uFF0C\u5E76\u8BBE\u8BA1\u53CC\u817F\u7535\u673A\u72B6\u6001\u673A\u4E0E\u52A8\u6001\u5EF6\u8FDF\u63A7\u5236\u903B\u8F91\u3002" },
+      { title: "\u5B9E\u7269\u539F\u578B\u4E0E\u6D4B\u8BD5\u8FED\u4EE3", body: "\u53C2\u4E0E\u4EA7\u54C1\u5EFA\u6A21\u3001\u7535\u5B50\u5143\u4EF6\u96C6\u6210\u3001\u7ED3\u6784\u88C5\u914D\u3001\u5B9E\u9645\u7A7F\u6234\u4E0E\u8FD0\u52A8\u6D4B\u8BD5\uFF0C\u5C06\u4F20\u611F\u5668\u3001\u7535\u673A\u3001\u7535\u63A7\u4E0E\u673A\u68B0\u7ED3\u6784\u6574\u5408\u6210\u771F\u5B9E\u53EF\u8FD0\u884C\u539F\u578B\u3002" }
+    ],
+    media: [media("apex-film", "video", "PROJECT FILM", "\u70B9\u51FB\u64AD\u653E\u9879\u76EE\u89C6\u9891"), media("apex-board", "image", "PROJECT BOARD", "\u70B9\u51FB\u653E\u5927\u67E5\u770B")]
+  },
+  {
+    key: "school-memora",
+    title: "MEMORA",
+    summary: "\u56F4\u7ED5\u4E34\u7EC8\u8001\u4EBA\u53CA\u5176\u5BB6\u5C5E\u7684\u8BB0\u5FC6\u4E0E\u5FC3\u613F\u9700\u6C42\uFF0C\u8BBE\u8BA1\u878D\u5408\u5B9E\u4F53\u4EA7\u54C1\u3001\u6570\u5B57\u7AEF\u4E0E\u5FD7\u613F\u670D\u52A1\u7684\u5B8C\u6574\u670D\u52A1\u7CFB\u7EDF\u3002",
+    intro: "\u4E00\u5957\u9762\u5411\u4E34\u7EC8\u8001\u4EBA\u53CA\u5176\u5BB6\u5C5E\u7684\u5FC3\u613F\u5B9E\u73B0\u4E0E\u8BB0\u5FC6\u7559\u5B58\u670D\u52A1\u7CFB\u7EDF\u3002\u901A\u8FC7\u5B9E\u4F53\u8BB0\u5FC6\u7EC8\u7AEF\u3001NFC \u8BB0\u5FC6\u8F7D\u4F53\u4E0E\u624B\u673A\u7AEF\uFF0C\u4E32\u8054\u8BB0\u5FC6\u4FDD\u5B58\u3001\u5FC3\u613F\u5B9E\u73B0\u4E0E\u5BB6\u5EAD\u60C5\u611F\u8FDE\u63A5\uFF0C\u6784\u5EFA\u5B8C\u6574\u7684\u8F6F\u786C\u4EF6\u670D\u52A1\u4F53\u9A8C\u3002",
+    whatIDid: [
+      { title: "\u7528\u6237\u4E0E\u60C5\u5883\u6D1E\u5BDF", body: "\u56F4\u7ED5\u4E34\u7EC8\u8001\u4EBA\u53CA\u5BB6\u5C5E\u5F00\u5C55\u684C\u9762\u7814\u7A76\u3001\u5229\u76CA\u76F8\u5173\u8005\u4E0E\u7528\u6237\u65C5\u7A0B\u5206\u6790\uFF0C\u4ECE\u590D\u6742\u60C5\u5883\u4E2D\u63D0\u70BC\u8BB0\u5FC6\u7559\u5B58\u3001\u5FC3\u613F\u8868\u8FBE\u548C\u60C5\u611F\u8FDE\u63A5\u7B49\u6838\u5FC3\u9700\u6C42\u3002" },
+      { title: "\u670D\u52A1\u7CFB\u7EDF\u8BBE\u8BA1", body: "\u6784\u5EFA\u8001\u4EBA\u3001\u5BB6\u5C5E\u3001\u5FD7\u613F\u8005\u3001\u5B9E\u4F53\u7EC8\u7AEF\u4E0E\u6570\u5B57\u7AEF\u4E4B\u95F4\u7684\u670D\u52A1\u5173\u7CFB\uFF0C\u5B8C\u6210\u670D\u52A1\u7CFB\u7EDF\u56FE\u3001\u670D\u52A1\u84DD\u56FE\u3001\u89E6\u70B9\u8BBE\u8BA1\u4EE5\u53CA As-is / To-be \u7528\u6237\u65C5\u7A0B\u3002" },
+      { title: "UI/UX \u8BBE\u8BA1", body: "\u5B8C\u6210 MEMORA \u624B\u673A\u7AEF APP \u7684\u6838\u5FC3\u4EA4\u4E92\u8BBE\u8BA1\uFF0C\u5B8C\u6210\u4F4E\u4FDD\u771F\u539F\u578B\u3001\u98CE\u683C\u786E\u5B9A\u53CA\u6700\u7EC8\u6548\u679C\u5448\u73B0\u3002" }
+    ],
+    media: [media("memora-project", "pdf", "FULL PROJECT", "\u70B9\u51FB\u67E5\u770B\u5B8C\u6574 PDF")]
+  }
+]);
+var workProjects = attachEntryMetadata([
+  {
+    key: "internship-pollo-ai",
+    title: "Pollo AI",
+    role: "Agent \u4EA7\u54C1\u5B9E\u4E60\u751F",
+    period: "2026.06 \u2013 2026.09",
+    summary: "\u56F4\u7ED5\u9762\u5411\u6D77\u5916\u5E02\u573A\u7684\u300CPollo.ai\u300D\u4E2D\u7684\u300CAgent-\u5B57\u5E55\u80FD\u529B\u300D\u5C55\u5F00\uFF0C\u6838\u5FC3\u76EE\u6807\u4E3A\u5B57\u5E55\u80FD\u529B 0-1 \u843D\u5730\uFF0C\u6253\u9020\u5FEB\u901F\u6210\u7247\u4F53\u9A8C\u3002",
+    workItems: [
+      { title: "\u6D77\u5916\u5E02\u573A\u8C03\u7814\u6D1E\u5BDF", body: "\u5206\u6790\u8FD1\u4E09\u4E2A\u6708\u7EBF\u4E0A\u5B57\u5E55\u76F8\u5173 Query \u7684\u51FA\u73B0\u9891\u7387\u3001\u6838\u5FC3\u573A\u666F\u53CA\u4E1A\u52A1\u5F71\u54CD\uFF0C\u5224\u65AD\u5B57\u5E55\u80FD\u529B\u4E3A\u9AD8\u4F18\u9700\u6C42\uFF1B\u5206\u6790 TikTok\u3001YouTube \u7B49\u5E73\u53F0\u7684 200+ \u7206\u6B3E\u77ED\u89C6\u9891\u6837\u672C\uFF0C\u5F52\u7EB3\u6D77\u5916\u7528\u6237\u5BF9\u5B57\u5E55\u98CE\u683C\u7684\u504F\u597D\uFF0C\u7B5B\u9009 12 \u6B3E\u9996\u53D1\u9884\u8BBE\u5B57\u5E55\u6837\u5F0F\u3002" },
+      { title: "MVP \u4EA7\u54C1\u65B9\u6848\u89C4\u5212", body: "\u5BF9\u6BD4 5 \u6B3E\u6D77\u5916\u540C\u7C7B\u4EA7\u54C1\uFF0C\u7ED3\u5408\u6D77\u5916\u8425\u9500\u89C6\u9891\u521B\u4F5C\u8005\u5FEB\u901F\u6210\u7247\u7684\u6838\u5FC3\u8BC9\u6C42\uFF0C\u5B9A\u4E49\u201C\u81EA\u7136\u8BED\u8A00\u63A7\u5236 + \u5185\u7F6E\u6837\u5F0F\u6A21\u677F + \u72EC\u7ACB\u7248\u672C\u5B58\u50A8\u201D\u7684 MVP \u4EA7\u54C1\u65B9\u6848\uFF1B\u660E\u786E\u529F\u80FD\u8FB9\u754C\u3001\u7528\u6237\u6D41\u7A0B\u3001Agent \u5BF9\u8BDD\u89C4\u5219\uFF0C\u8F93\u51FA PRD \u5E76\u63A8\u52A8\u8BC4\u5BA1\u843D\u5730\u3002" },
+      { title: "Agent \u94FE\u8DEF\u4E0E\u7B56\u7565\u8BBE\u8BA1", body: "\u8BBE\u8BA1\u201C\u610F\u56FE\u8BC6\u522B\u2014\u76EE\u6807\u4E0E\u53C2\u6570\u8865\u5168\u2014\u5B57\u5E55\u5DE5\u5177\u8C03\u7528\u2014\u5F02\u6B65\u751F\u6210\u2014\u7ED3\u679C\u8FD4\u56DE\u201D\u7684 Agent \u94FE\u8DEF\uFF1B\u6839\u636E MECE \u539F\u5219\u62C6\u89E3\u9996\u6B21\u6DFB\u52A0\u3001\u6587\u672C\u4FEE\u6539\u3001\u6837\u5F0F\u5207\u6362\u53CA\u5F02\u5E38\u8F93\u5165\u7B49\u573A\u666F\uFF0C\u5236\u5B9A\u76F4\u63A5\u6267\u884C\u3001\u667A\u80FD\u63A8\u8350\u3001\u8FFD\u95EE\u6F84\u6E05\u548C\u5F02\u5E38\u964D\u7EA7\u7684\u5904\u7406\u7B56\u7565\uFF1B\u901A\u8FC7\u5B57\u5E55\u6837\u5F0F\u6807\u7B7E\u5339\u914D\u7528\u6237\u63CF\u8FF0\uFF0C\u5E76\u5728\u591A\u8F6E\u5BF9\u8BDD\u4E2D\u7EE7\u627F\u4EFB\u52A1\u53C2\u6570\uFF0C\u652F\u6301\u8FDE\u7EED\u4FEE\u6539\u800C\u4E0D\u8986\u76D6\u539F\u89C6\u9891\u3002" },
+      { title: "\u529F\u80FD\u9A8C\u6536\u4E0E\u7070\u5EA6\u8FED\u4EE3", body: "\u6784\u5EFA\u8986\u76D6 9 \u79CD\u8BED\u8A00\u30013 \u79CD\u753B\u5E45\u53CA\u5F02\u5E38\u573A\u666F\u7684\u8BC4\u6D4B\u96C6\uFF0C\u5236\u5B9A\u5206\u573A\u666F\u9A8C\u6536\u6807\u51C6\uFF0C\u5B8C\u6210\u529F\u80FD\u9A8C\u6536\u4E0E badcase \u56DE\u5F52\uFF1B\u5236\u5B9A\u7070\u5EA6\u6D4B\u8BD5\u65B9\u6848\uFF0C\u5B8C\u6210\u5206\u9636\u6BB5\u653E\u91CF\uFF0C\u76D1\u63A7\u751F\u6210\u6210\u529F\u7387\u3001\u8D85\u65F6\u7387\u3001\u4EFB\u52A1\u6210\u672C\u53CA\u6838\u5FC3\u6F0F\u6597\uFF0C\u63A8\u52A8\u529F\u80FD\u7A33\u5B9A\u5168\u91CF\u4E0A\u7EBF\u3002" }
+    ],
+    results: ["\u6309\u671F\u5B8C\u6210\u5168\u91CF\u4E0A\u7EBF", "\u4E0A\u7EBF\u9996\u5468\u5B57\u5E55\u4EFB\u52A1\u6210\u529F\u7387 86.3%", "\u5B57\u5E55\u7ED3\u679C\u6EE1\u610F\u5EA6 76%", "\u6D89\u53CA\u5B57\u5E55\u4EFB\u52A1\u7684\u5BF9\u8BDD\u5360\u6BD4 11.0% \u2192 23.5%"],
+    resultMetrics: [{ value: "86.3%", label: "\u4E0A\u7EBF\u9996\u5468\u5B57\u5E55\u4EFB\u52A1\u6210\u529F\u7387" }, { value: "76%", label: "\u5B57\u5E55\u7ED3\u679C\u6EE1\u610F\u5EA6" }, { value: "11.0% \u2192 23.5%", label: "\u6D89\u53CA\u5B57\u5E55\u4EFB\u52A1\u7684\u5BF9\u8BDD\u5360\u6BD4" }, { value: "\u5168\u91CF\u4E0A\u7EBF", label: "\u6309\u671F\u5B8C\u6210" }]
+  },
+  {
+    key: "internship-lixiang",
+    title: "\u7406\u60F3\u6C7D\u8F66",
+    role: "AI \u4EA7\u54C1\u5B9E\u4E60\u751F \xB7 To C",
+    period: "2025.12 \u2013 2026.05",
+    summary: "\u56F4\u7ED5\u8F66\u673A\u7AEF\u521B\u610F\u5E94\u7528\u300C\u827A\u672F\u76F8\u6846\u300D\u5C55\u5F00\uFF0C\u6838\u5FC3\u76EE\u6807\u4E3A\u628A\u63A7\u4EA7\u54C1\u843D\u5730\u6548\u679C\uFF0C\u5E76\u57FA\u4E8E\u6570\u636E\u4F18\u5316 AI \u5C4F\u4FDD\u4F53\u9A8C\uFF0C\u63D0\u5347 WAU \u548C\u7528\u6237\u6EE1\u610F\u5EA6\u3002",
+    workItems: [
+      { title: "\u8F66\u673A\u4EA4\u4E92\u539F\u578B\u843D\u5730", body: "\u68B3\u7406\u9996\u9875\u6D4F\u89C8\u3001\u751F\u6210\u53D1\u8D77\u53CA\u76F8\u518C\u7BA1\u7406\u7B49\u6838\u5FC3\u4EFB\u52A1\u6D41\u7A0B\uFF0C\u4F7F\u7528 MasterGO\u3001Figma \u8F93\u51FA\u7528\u6237\u6D41\u7A0B\u56FE\u4E0E\u4F4E\u4FDD\u771F\u539F\u578B\uFF1B\u501F\u52A9 Claude Code \u642D\u5EFA\u53EF\u4EA4\u4E92 Demo\uFF0C\u5B8C\u6210\u65B9\u6848\u8BC4\u5BA1\u4E0E\u4F53\u9A8C\u9A8C\u8BC1\uFF1B\u534F\u540C\u8BBE\u8BA1\u3001\u7814\u53D1\u53CA\u6D4B\u8BD5\u63A8\u8FDB\u65B9\u6848\u843D\u5730\uFF0C\u5E76\u5B9E\u8F66\u8D70\u67E5\u5B8C\u6210 UI\u3001UX \u9A8C\u6536\u3002" },
+      { title: "\u6A21\u578B\u8BC4\u6D4B\u9009\u578B\u63A5\u5165", body: "\u4E3B\u5BFC\u751F\u56FE\u4E0E\u751F\u89C6\u9891\u6A21\u578B\u8BC4\u6D4B\u9009\u578B\uFF0C\u642D\u5EFA\u7531\u201C\u73B0\u6709\u6A21\u677F\u5B9E\u6218\u6D4B\u8BD5\u201D\u201C\u6838\u5FC3\u80FD\u529B\u4E13\u9879\u6D4B\u8BD5\u201D\u7EC4\u6210\u7684\u8BC4\u6D4B\u96C6\uFF0C\u91CD\u70B9\u8003\u5BDF\u4E00\u81F4\u6027\u7EF4\u6301\u3001\u89C6\u89C9\u7F8E\u611F\u53CA\u751F\u6210\u7A33\u5B9A\u6027\uFF1B\u5BF9\u6BD4 5 \u4E2A AI \u6A21\u578B\uFF0C\u7EFC\u5408\u751F\u6210\u6548\u679C\u3001\u8C03\u7528\u6210\u672C\u4E0E\u73B0\u6709\u80FD\u529B\u77ED\u677F\uFF0C\u8F93\u51FA\u9009\u578B\u62A5\u544A\u53CA\u63A5\u5165\u5EFA\u8BAE\u3002" },
+      { title: "\u521B\u610F\u6A21\u677F\u8BC4\u6D4B\u4E0A\u7EBF", body: "\u53C2\u4E0E\u521B\u610F\u6A21\u677F\u4ECE\u7B56\u5212\u5230\u4E0A\u7EBF\u7684\u5168\u6D41\u7A0B\u3002\u7ED3\u5408\u516C\u53F8\u7406\u5FF5\u3001\u4EA7\u54C1\u76EE\u6807\u3001AI \u70ED\u70B9\uFF0C\u7B56\u5212\u5177\u5907\u4F20\u64AD\u6F5C\u529B\u7684\u6A21\u677F\u65B9\u6848\uFF1B\u6839\u636E\u4E0D\u540C\u6A21\u677F\u7279\u6027\u5236\u5B9A\u53EF\u91CF\u5316\u3001\u53EF\u8BC4\u5206\u7684\u751F\u6210\u8D28\u91CF\u8BC4\u6D4B\u6807\u51C6\uFF0C\u660E\u786E\u4E3B\u4F53\u504F\u79FB\u7387\u7B49\u8BC4\u5206\u7EF4\u5EA6\uFF1B\u534F\u540C\u6D4B\u8BD5\u5F00\u5C55 Prompt \u901A\u7528\u6027\u6D4B\u8BD5\uFF0C\u5B8C\u6210 badcase \u5206\u7C7B\u5F52\u56E0\u4E0E Prompt \u8C03\u4F18\uFF0C\u63A8\u52A8\u6A21\u677F\u751F\u6210\u7ED3\u679C\u901A\u8FC7\u7387\u9AD8\u4E8E 80% \u5E76\u4E0A\u7EBF\u3002" },
+      { title: "\u6570\u636E\u5206\u6790\u8FD0\u8425\u8FED\u4EE3", body: "\u642D\u5EFA\u6570\u636E\u770B\u677F\uFF0C\u8FFD\u8E2A WAU\u3001\u6A21\u677F\u70B9\u51FB\u7387\u3001\u751F\u6210\u7387\uFF0C\u53CA\u8BBE\u4E3A\u5C4F\u4FDD\u3001\u91CD\u65B0\u751F\u6210\u7B49\u751F\u6210\u540E\u884C\u4E3A\uFF0C\u8F93\u51FA\u6570\u636E\u590D\u76D8\u62A5\u544A\uFF0C\u5224\u65AD\u7528\u6237\u504F\u597D\u5E76\u5F62\u6210\u8FD0\u8425\u5224\u65AD\uFF1B\u9488\u5BF9\u91CD\u65B0\u751F\u6210\u7387\u504F\u9AD8\u7B49\u6570\u636E\u5F02\u5E38\u5F00\u5C55\u95EE\u9898\u5F52\u56E0\uFF0C\u91C7\u53D6\u8C03\u6574\u6A21\u677F\u6392\u5E8F\u7B49\u76F8\u5E94\u63AA\u65BD\uFF0C\u63A8\u52A8\u5E94\u7528\u4F53\u9A8C\u4F18\u5316\u3002" }
+    ],
+    results: ["DAU / \u6C7D\u8F66\u4FDD\u6709\u91CF\u5CF0\u503C 18%", "\u529F\u80FD\u4E0A\u7EBF\u4E09\u65E5\u6E17\u900F\u7387 37%", "\u5E73\u5747\u6B21\u65E5\u7559\u5B58\u7387 35.2%", "\u201C\u88F8\u773C 3D \u840C\u5BA0\u201D\u5355\u65E5\u751F\u6210\u6B21\u6570\u5CF0\u503C 3w", "\u5E94\u7528\u76F8\u5173\u8BDD\u9898\u8FDB\u5165\u5FAE\u535A\u3001\u6296\u97F3\u70ED\u641C\u524D\u5341", "\u6536\u5230\u8BBF\u8C08\u548C\u7EBF\u4E0B\u516C\u76CA\u6D3B\u52A8\u9080\u8BF7"],
+    resultMetrics: [{ value: "18%", label: "DAU / \u6C7D\u8F66\u4FDD\u6709\u91CF\u5CF0\u503C" }, { value: "37%", label: "\u529F\u80FD\u4E0A\u7EBF\u4E09\u65E5\u6E17\u900F\u7387" }, { value: "35.2%", label: "\u5E73\u5747\u6B21\u65E5\u7559\u5B58\u7387" }, { value: "3w", label: "\u201C\u88F8\u773C 3D \u840C\u5BA0\u201D\u5355\u65E5\u751F\u6210\u6B21\u6570\u5CF0\u503C" }, { value: "TOP 10", label: "\u76F8\u5173\u8BDD\u9898\u8FDB\u5165\u5FAE\u535A\u3001\u6296\u97F3\u70ED\u641C\u524D\u5341" }, { value: "2 \u9879", label: "\u8BBF\u8C08\u4E0E\u7EBF\u4E0B\u516C\u76CA\u6D3B\u52A8\u9080\u8BF7" }]
+  },
+  {
+    key: "internship-qianchuan",
+    title: "\u4E0A\u6D77\u4EDF\u4F20",
+    role: "AI \u4EA7\u54C1\u5B9E\u4E60\u751F \xB7 To B",
+    period: "2025.06 \u2013 2025.12",
+    summary: "\u56F4\u7ED5\u9762\u5411\u5185\u90E8\u8BBE\u8BA1\u56E2\u961F\u7684\u300CAI \u751F\u4EA7\u5DE5\u4F5C\u53F0\u300D\u5C55\u5F00\uFF0C\u6838\u5FC3\u76EE\u6807\u4E3A\u5DE5\u4F5C\u53F0 0-1 \u843D\u5730\uFF0C\u964D\u4F4E\u9700\u6C42\u751F\u4EA7\u8017\u65F6\uFF0C\u63D0\u9AD8\u751F\u6210\u56FE\u53EF\u7528\u7387\u3002",
+    workItems: [
+      { title: "\u9700\u6C42\u8C03\u7814\u4E0E\u4EA7\u54C1\u89C4\u5212", body: "\u901A\u8FC7\u53C2\u4E0E\u5B9E\u9645\u751F\u4EA7\u8FC7\u7A0B\u3001\u8BBF\u8C08\u8BBE\u8BA1\u56E2\u961F\u53CA\u590D\u76D8\u5386\u53F2\u9879\u76EE\uFF0C\u62C6\u89E3\u201C\u7532\u65B9\u9700\u6C42\u7406\u89E3\u2014Prompt \u7F16\u5199\u2014\u591A\u8F6E\u751F\u6210\u2014\u7D20\u6750\u4EA4\u4ED8\u201D\u6D41\u7A0B\uFF0C\u8BC6\u522B\u591A\u5E73\u53F0\u5207\u6362\u3001\u8D44\u4EA7\u96BE\u7BA1\u7406\u548C\u7ECF\u9A8C\u96BE\u590D\u7528\u7B49\u95EE\u9898\uFF1B\u660E\u786E AI \u521B\u4F5C\u548C\u8D44\u4EA7\u7BA1\u7406\u4E00\u4F53\u5316\u7684\u4EA7\u54C1\u65B9\u5411\uFF0C\u636E\u6B64\u89C4\u5212 Prompt \u8F85\u52A9\u751F\u6210\u3001\u5DE5\u4F5C\u6D41\u63A5\u5165\u3001\u53C2\u6570\u914D\u7F6E\u53CA\u8D44\u4EA7\u7BA1\u7406\u7B49\u6838\u5FC3\u80FD\u529B\uFF1B\u4F7F\u7528 Coze \u642D\u5EFA workflow \u539F\u578B\uFF0C\u9A8C\u8BC1\u4E1A\u52A1\u53EF\u884C\u6027\u3002" },
+      { title: "\u5DE5\u4F5C\u6D41\u63A5\u5165\u4E0E\u4EA7\u54C1\u5316", body: "\u5C06\u8BBE\u8BA1\u5E08\u4F7F\u7528 ComfyUI \u7684\u751F\u6210\u6D41\u7A0B\u62BD\u8C61\u4E3A\u53EF\u914D\u7F6E\u5DE5\u4F5C\u6D41\uFF1B\u5B9A\u4E49 Generation Spec\uFF0C\u5C06 Prompt\u3001\u53C2\u8003\u7D20\u6750\u53CA\u751F\u6210\u53C2\u6570\u5C01\u88C5\u4E3A\u6807\u51C6\u4E1A\u52A1\u5B57\u6BB5\uFF1B\u8D1F\u8D23\u5DE5\u4F5C\u6D41\u6CE8\u518C\uFF0C\u5E76\u534F\u540C\u7814\u53D1\u5B8C\u6210 Liblib API \u63A5\u5165\u4E0E\u8054\u8C03\uFF0C\u6253\u901A Prompt \u64B0\u5199\u3001\u751F\u56FE\u6267\u884C\u7684\u5B8C\u6574\u94FE\u8DEF\u3002" },
+      { title: "\u7ECF\u9A8C\u590D\u7528\u4E0E\u6548\u679C\u8FED\u4EE3", body: "\u5EFA\u7ACB\u751F\u6210\u56FE\u4E0E\u751F\u6210\u6570\u636E\u7684\u5173\u8054\u8BB0\u5F55\uFF0C\u8BBE\u8BA1\u4EA4\u4ED8\u72B6\u6001\u3001\u54C1\u724C\u578B\u53F7\u548C\u753B\u9762\u98CE\u683C\u7B49\u6807\u7B7E\uFF0C\u652F\u6301\u7ED3\u679C\u7B5B\u9009\u3001\u8FC7\u7A0B\u590D\u73B0\u4E0E\u4EA4\u4ED8\u7BA1\u7406\uFF1B\u534F\u540C\u8BBE\u8BA1\u56E2\u961F\u6C89\u6DC0\u4F18\u8D28 Prompt \u77E5\u8BC6\u5E93\uFF0C\u843D\u5730 RAG \u6DF7\u5408\u68C0\u7D22\uFF0C\u652F\u6301\u76F8\u4F3C\u6848\u4F8B\u53CA\u56E2\u961F\u7ECF\u9A8C\u590D\u7528\uFF1B\u901A\u8FC7\u771F\u5B9E\u9700\u6C42\u6848\u4F8B\u6D4B\u8BD5\u751F\u6210\u56FE\u753B\u9762\u6548\u679C\u4E0E\u53EF\u7528\u7387\uFF0C\u6839\u636E badcase \u6301\u7EED\u4F18\u5316 System Prompt\uFF0C\u63D0\u9AD8 LLM \u751F\u6210\u5185\u5BB9\u7684\u7A33\u5B9A\u6027\u3001\u5B8C\u6574\u6027\u548C\u516C\u53F8\u4E1A\u52A1\u9002\u914D\u5EA6\u3002" }
+    ],
+    results: ["\u5355\u7EC4\u9700\u6C42\u56FE\u5E73\u5747\u751F\u4EA7\u8017\u65F6 53 \u5206\u949F\uFF0853min\uFF09 \u2192 26 \u5206\u949F\uFF0826min\uFF09", "\u7F29\u77ED 51%", "\u751F\u6210\u56FE\u53EF\u7528\u7387 85%+", "\u6C89\u6DC0 200+ \u4F18\u8D28 Prompt", "\u652F\u6301\u591A\u54C1\u724C\u5FEB\u901F\u63A5\u5165", "AI \u7D20\u6750\u5E16\u76F8\u8F83\u4F20\u7EDF\u5BA3\u4F20\u5E16\u5E73\u5747\u8BC4\u8BBA\u7387\u63D0\u5347 237%", "\u5355\u5E16\u6700\u9AD8\u6D4F\u89C8\u91CF 13 \u4E07"],
+    resultMetrics: [{ value: "53 \u2192 26 min", label: "\u5355\u7EC4\u9700\u6C42\u56FE\u5E73\u5747\u751F\u4EA7\u8017\u65F6" }, { value: "51%", label: "\u8017\u65F6\u7F29\u77ED" }, { value: "85%+", label: "\u751F\u6210\u56FE\u53EF\u7528\u7387" }, { value: "200+", label: "\u4F18\u8D28 Prompt" }, { value: "237%", label: "AI \u7D20\u6750\u5E16\u5E73\u5747\u8BC4\u8BBA\u7387\u63D0\u5347" }, { value: "13 \u4E07", label: "\u5355\u5E16\u6700\u9AD8\u6D4F\u89C8\u91CF" }]
+  },
+  {
+    key: "internship-baimi",
+    title: "\u676D\u5DDE\u767D\u7C73\u5DE5\u4E1A\u8BBE\u8BA1",
+    role: "\u4EA7\u54C1\u8BBE\u8BA1\u52A9\u7406",
+    period: "2025.01 \u2013 2025.03",
+    summary: "\u56F4\u7ED5\u5DE5\u4E1A\u8BBE\u8BA1\u9879\u76EE\u7684\u524D\u671F\u8C03\u7814\u5C55\u5F00\uFF0C\u6838\u5FC3\u76EE\u6807\u4E3A\u8BC6\u522B\u7528\u6237\u9700\u6C42\u4E0E\u5E02\u573A\u673A\u4F1A\u3001\u4E3A\u540E\u7EED\u4EA7\u54C1\u8BBE\u8BA1\u63D0\u4F9B\u4F9D\u636E\u3002",
+    workItems: [{ title: "\u7528\u6237\u5E02\u573A\u524D\u671F\u8C03\u7814", body: "\u901A\u8FC7\u8BBF\u8C08\u3001\u95EE\u5377\u53CA\u79C1\u57DF\u7FA4\u7B49\u6E20\u9053\u6536\u96C6\u5E76\u6574\u7406\u7528\u6237\u53CD\u9988\uFF0C\u7CFB\u7EDF\u5F00\u5C55\u7ADE\u54C1\u5206\u6790\u4E0E\u5E02\u573A\u7814\u7A76\uFF0C\u8F93\u51FA 8+ \u524D\u671F\u8C03\u7814\u62A5\u544A\u3002" }],
+    results: ["\u8F93\u51FA 8+ \u524D\u671F\u8C03\u7814\u62A5\u544A", "\u4E3A\u540E\u7EED\u4EA7\u54C1\u8BBE\u8BA1\u63D0\u4F9B\u7814\u7A76\u4F9D\u636E"],
+    resultMetrics: [{ value: "8+", label: "\u524D\u671F\u8C03\u7814\u62A5\u544A" }, { value: "\u7814\u7A76\u4F9D\u636E", label: "\u652F\u6301\u540E\u7EED\u4EA7\u54C1\u8BBE\u8BA1" }]
+  }
+]);
+var labProjects = attachEntryMetadata([
+  {
+    key: "personal-fullydancy",
+    title: "FullyDancy",
+    summary: "\u901A\u8FC7\u6D4F\u89C8\u5668\u672C\u5730\u59FF\u6001\u8BC6\u522B\u3001\u5361\u70B9\u4E0E\u5B9E\u65F6\u53CD\u9988\uFF0C\u63A2\u7D22 AI \u80FD\u529B\u5982\u4F55\u8FDB\u5165\u4E92\u52A8\u821E\u8E48\u8DDF\u7EC3\u4F53\u9A8C\u3002",
+    intro: "\u4E00\u6B3E\u6D4F\u89C8\u5668\u7AEF\u4E92\u52A8\u821E\u8E48\u8DDF\u7EC3\u4EA7\u54C1\uFF0C\u901A\u8FC7\u6444\u50CF\u5934\u5B9E\u65F6\u59FF\u6001\u8BC6\u522B\u3001\u53EF\u7F16\u8F91\u5361\u70B9\u4E0E\u547D\u4E2D / \u8FDE\u51FB\u53CD\u9988\uFF0C\u628A\u821E\u8E48\u7EC3\u4E60\u53D8\u6210\u5177\u6709\u5373\u65F6\u53CD\u9988\u7684\u4E92\u52A8\u8BAD\u7EC3\u4F53\u9A8C\u3002",
+    link: { label: "\u4F53\u9A8C\u94FE\u63A5", text: "fullydancy.onrender.com", url: "https://fullydancy.onrender.com/", ariaLabel: "\u6253\u5F00 FullyDancy \u4F53\u9A8C\u94FE\u63A5\uFF08\u65B0\u6807\u7B7E\u9875\uFF09" },
+    highlights: [
+      { title: "\u628A\u59FF\u6001\u8BC6\u522B\u8F6C\u5316\u4E3A\u771F\u5B9E\u4EA7\u54C1\u80FD\u529B", body: "\u63A5\u5165 MediaPipe \u6D4F\u89C8\u5668\u7AEF\u59FF\u6001\u8BC6\u522B\uFF0C\u5C06\u4EBA\u4F53\u5173\u952E\u70B9\u3001\u793A\u8303\u52A8\u4F5C\u4E0E\u89C6\u9891\u65F6\u95F4\u8F74\u7ED3\u5408\uFF0C\u8BBE\u8BA1\u5361\u70B9\u547D\u4E2D\u3001Perfect / Great / Miss \u4E0E\u8FDE\u51FB\u7B49\u89C4\u5219\u53CD\u9988\uFF0C\u8BA9\u201C\u8BC6\u522B\u4EBA\u4F53\u201D\u771F\u6B63\u53C2\u4E0E\u5230\u7EC3\u821E\u4F53\u9A8C\u4E2D\u3002" },
+      { title: "\u8BBE\u8BA1\u5B8C\u6574\u7684\u4E92\u52A8\u8DDF\u7EC3\u95ED\u73AF", body: "\u4ECE\u5361\u70B9\u7F16\u8F91\u3001\u6444\u50CF\u5934\u6821\u51C6\u3001\u5012\u8BA1\u65F6\u8FDB\u5165\u7EC3\u4E60\uFF0C\u5230\u624B\u52BF\u63A7\u5236\u6682\u505C\u3001\u7ED3\u679C\u53CD\u9988\u3001\u91CD\u65B0\u7EC3\u4E60\u4E0E\u8C03\u6574\u5361\u70B9\uFF0C\u6784\u5EFA\u5B8C\u6574\u7684\u821E\u8E48\u8DDF\u7EC3\u6D41\u7A0B\uFF0C\u5E76\u9488\u5BF9\u6444\u50CF\u5934\u4E2D\u65AD\u3001\u5A92\u4F53\u5931\u8D25\u7B49\u5F02\u5E38\u72B6\u6001\u8BBE\u8BA1\u6062\u590D\u8DEF\u5F84\u3002" },
+      { title: "\u5C06\u4EA7\u54C1\u771F\u6B63\u5B9E\u73B0\u5E76\u4E0A\u7EBF", body: "\u4F7F\u7528 React + TypeScript + Vite \u5B8C\u6210 Web \u7AEF\u4EA7\u54C1\u5B9E\u73B0\uFF0C\u8BA9\u59FF\u6001\u63A8\u7406\u76F4\u63A5\u5728\u6D4F\u89C8\u5668\u672C\u5730\u8FD0\u884C\uFF0C\u5E76\u5C06\u4EA7\u54C1\u90E8\u7F72\u4E3A\u53EF\u76F4\u63A5\u8BBF\u95EE\u548C\u4F53\u9A8C\u7684\u7F51\u7AD9\u3002" }
+    ],
+    media: []
+  },
+  {
+    key: "personal-squirrel-docs",
+    title: "\u677E\u9F20\u6587\u4ED3",
+    summary: "\u4ECE\u788E\u7247\u4FE1\u606F\u96BE\u4EE5\u6301\u7EED\u79EF\u7D2F\u7684\u95EE\u9898\u51FA\u53D1\uFF0C\u628A\u96F6\u6563\u8BB0\u5F55\u9010\u6B65\u6574\u7406\u6210\u53EF\u9605\u8BFB\u3001\u53EF\u7F16\u8F91\u7684\u7ED3\u6784\u5316\u4E3B\u9898\u6587\u6863\u3002",
+    intro: "\u4E00\u6B3E\u628A\u7ECF\u9A8C\u3001\u6458\u6284\u3001\u7075\u611F\u548C\u804A\u5929\u8BB0\u5F55\u7B49\u96F6\u6563\u4FE1\u606F\u5148\u4FDD\u5B58\u4E3A\u201C\u677E\u679C\u201D\uFF0C\u518D\u9010\u6B65\u6574\u7406\u6210\u53EF\u9605\u8BFB\u3001\u53EF\u7F16\u8F91\u3001\u53EF\u6301\u7EED\u8865\u5145\u7684\u7ED3\u6784\u5316\u4E3B\u9898\u6587\u6863\u7684\u4E2A\u4EBA\u4FE1\u606F\u6574\u7406\u5DE5\u5177\u3002",
+    link: { label: "\u4F53\u9A8C\u94FE\u63A5", text: "songshu-wencang.onrender.com", url: "https://songshu-wencang.onrender.com/", ariaLabel: "\u6253\u5F00\u677E\u9F20\u6587\u4ED3\u4F53\u9A8C\u94FE\u63A5\uFF08\u65B0\u6807\u7B7E\u9875\uFF09" },
+    highlights: [
+      { title: "\u91CD\u65B0\u8BBE\u8BA1\u201C\u5148\u8BB0\u5F55\uFF0C\u518D\u6574\u7406\u201D\u7684\u4FE1\u606F\u6D41", body: "\u56F4\u7ED5\u788E\u7247\u4FE1\u606F\u96BE\u4EE5\u6301\u7EED\u79EF\u7D2F\u7684\u95EE\u9898\uFF0C\u8BBE\u8BA1\u201C\u677E\u679C \u2192 \u6682\u5B58\u680F \u2192 \u677E\u679C\u67B6 \u2192 \u7ED3\u6784\u5316\u6587\u6863\u201D\u7684\u4FE1\u606F\u6A21\u578B\uFF0C\u8BA9\u7528\u6237\u65E0\u9700\u5728\u8BB0\u5F55\u65F6\u63D0\u524D\u60F3\u597D\u5206\u7C7B\uFF0C\u540C\u65F6\u4FDD\u7559\u6574\u7406\u7ED3\u679C\u4E0E\u539F\u59CB\u5185\u5BB9\u4E4B\u95F4\u7684\u6765\u6E90\u5173\u7CFB\u3002" },
+      { title: "\u6784\u5EFA\u5B8C\u6574\u7684\u4E2A\u4EBA\u77E5\u8BC6\u6574\u7406\u95ED\u73AF", body: "\u5B9E\u73B0\u677E\u9F20\u4ED3\u521B\u5EFA\u3001\u788E\u7247\u6536\u96C6\u3001\u6682\u5B58\u3001\u81EA\u52A8\u6574\u7406\u3001\u6587\u6863\u9605\u8BFB\u4E0E\u7F16\u8F91\u3001\u677E\u679C\u641C\u7D22\u548C\u6301\u7EED\u8865\u5145\u7B49\u6838\u5FC3\u6D41\u7A0B\uFF0C\u8BA9\u4E00\u6B21\u6027\u7684\u968F\u624B\u8BB0\u5F55\u9010\u6E10\u6C89\u6DC0\u6210\u53EF\u4EE5\u957F\u671F\u7EF4\u62A4\u7684\u4E3B\u9898\u5185\u5BB9\u3002" },
+      { title: "\u4ECE\u4EA7\u54C1\u8BBE\u8BA1\u63A8\u8FDB\u5230\u5B8C\u6574 Web \u4EA7\u54C1", body: "\u5B8C\u6210\u4ECE\u524D\u7AEF\u4EA4\u4E92\u5230 Node.js API\u3001GitHub OAuth\u3001PostgreSQL \u4E91\u7AEF\u5B58\u50A8\u7684\u4EA7\u54C1\u5B9E\u73B0\uFF0C\u540C\u65F6\u652F\u6301\u6E38\u5BA2\u672C\u5730\u4FDD\u5B58\u4E0E\u767B\u5F55\u7528\u6237\u4E91\u7AEF\u4ED3\u5E93\uFF0C\u5C06\u4E2A\u4EBA\u60F3\u6CD5\u63A8\u8FDB\u4E3A\u53EF\u76F4\u63A5\u8BBF\u95EE\u548C\u4F7F\u7528\u7684\u7EBF\u4E0A\u4EA7\u54C1\u3002" }
+    ],
+    media: []
+  },
+  {
+    key: "personal-comfyui",
+    title: "ComfyUI",
+    summary: "\u56F4\u7ED5\u771F\u5B9E\u6C7D\u8F66 AIGC \u9700\u6C42\u642D\u5EFA\u548C\u53D1\u5E03\u53EF\u590D\u7528 Workflow\uFF0C\u5C06\u590D\u6742\u751F\u6210\u6D41\u7A0B\u5C01\u88C5\u6210\u66F4\u52A0\u53EF\u63A7\u7684\u4E00\u952E\u5DE5\u4F5C\u6D41\u3002",
+    intro: "\u56F4\u7ED5\u771F\u5B9E\u7684\u6C7D\u8F66 AIGC \u751F\u56FE\u4E0E\u6362\u8F66\u9700\u6C42\uFF0C\u6301\u7EED\u642D\u5EFA\u3001\u8C03\u8BD5\u5E76\u53D1\u5E03 ComfyUI Workflow\uFF0C\u5C06\u539F\u672C\u4F9D\u8D56 WebUI\u3001Photoshop \u548C\u5927\u91CF\u4EBA\u5DE5\u64CD\u4F5C\u7684\u590D\u6742\u6D41\u7A0B\uFF0C\u5C01\u88C5\u4E3A\u66F4\u7A33\u5B9A\u3001\u53EF\u8C03\u63A7\u3001\u53EF\u590D\u7528\u7684\u4E00\u952E\u751F\u6210\u5DE5\u4F5C\u6D41\u3002",
+    link: { label: "\u67E5\u770B\u94FE\u63A5", text: "Liblib \u5DE5\u4F5C\u6D41\u4E3B\u9875", url: "https://www.liblib.art/userpage/8aa471a4de584390bc7b3db3083aef31/publish/workflow", ariaLabel: "\u6253\u5F00 Liblib \u5DE5\u4F5C\u6D41\u4E3B\u9875\uFF08\u65B0\u6807\u7B7E\u9875\uFF09" },
+    highlights: [
+      { title: "\u5C06\u590D\u6742\u751F\u6210\u6D41\u7A0B\u5C01\u88C5\u4E3A\u53EF\u590D\u7528 Workflow", body: "\u9488\u5BF9\u4F20\u7EDF\u6362\u8F66\u6D41\u7A0B\u6B65\u9AA4\u7E41\u7410\u3001\u4F9D\u8D56 WebUI + Photoshop\u3001\u4EBA\u5DE5\u64CD\u4F5C\u6210\u672C\u9AD8\u7684\u95EE\u9898\uFF0C\u5C06\u76EE\u6807\u56FE\u3001\u91CD\u7ED8\u5E95\u56FE\u3001\u56FE\u50CF\u62FC\u63A5\u3001\u6362\u8F66\u4E0E\u540E\u5904\u7406\u7B49\u6B65\u9AA4\u91CD\u65B0\u62C6\u89E3\u5E76\u4E32\u8054\uFF0C\u5E76\u7EC4\u5408 FLUX Fill\u3001IPAdapter\u3001Depth Control \u7B49\u80FD\u529B\u63D0\u5347\u751F\u6210\u7A33\u5B9A\u6027\u4E0E\u53EF\u63A7\u6027\u3002" },
+      { title: "\u4ECE\u4E2A\u4EBA\u5B9E\u9A8C\u8D70\u5411\u771F\u5B9E\u7528\u6237\u4F7F\u7528", body: "\u5C06\u6210\u719F Workflow \u53D1\u5E03\u81F3 Liblib \u5E73\u53F0\uFF0C\u5176\u4E2D\u5DF2\u53D1\u5E03\u5DE5\u4F5C\u6D41\u7D2F\u8BA1\u83B7\u5F97\u7EA6 3.5k \u6B21\u4F7F\u7528\uFF0C\u8BC1\u660E\u5DE5\u4F5C\u6D41\u4E0D\u53EA\u80FD\u591F\u8FD0\u884C\uFF0C\u4E5F\u5177\u5907\u771F\u5B9E\u521B\u4F5C\u573A\u666F\u4E2D\u7684\u590D\u7528\u4EF7\u503C\u3002" }
+    ],
+    media: [
+      media("comfyui-board", "image", "WORKFLOW BOARD", "\u8D44\u6599\u5F85\u8865\u5145"),
+      { ...media("comfyui-nodes", "gallery", "NODE DIAGRAM", "\u8D44\u6599\u5F85\u8865\u5145"), items: [] },
+      media("comfyui-results", "image", "BEFORE / AFTER", "\u8D44\u6599\u5F85\u8865\u5145"),
+      media("comfyui-proof", "image", "LIBLIB PROOF", "\u8D44\u6599\u5F85\u8865\u5145")
+    ]
+  }
+]);
+var ISLAND_CONTENT = {
+  school: { eyebrow: "SCHOOL", title: "\u5B66\u6821\u9879\u76EE", intro: "\u5DE5\u4E1A\u8BBE\u8BA1\u4E13\u4E1A\u8BA9\u6211\u8DE8\u8D8A\u4E0D\u540C\u5A92\u4ECB\uFF0C\u4ECE UI/UX\u3001\u8F6F\u786C\u4EF6\u843D\u5730\u5230\u670D\u52A1\u7CFB\u7EDF\u8BBE\u8BA1\u3002", projects: schoolProjects },
+  internship: { eyebrow: "WORK", title: "\u5B9E\u4E60\u7ECF\u5386", intro: "\u56DB\u6BB5\u5B9E\u4E60\u8BA9\u6211\u4ECE\u7528\u6237\u7814\u7A76\u4E00\u8DEF\u8D70\u8FDB AI Workflow\u3001AIGC \u4EA7\u54C1\u4E0E Agent Skill \u7684\u771F\u5B9E\u843D\u5730\u3002", projects: workProjects },
+  personal: { eyebrow: "LAB", title: "\u4E2A\u4EBA\u5B9E\u9A8C\u5BA4", intro: "\u6211\u4F1A\u628A\u5BF9 AI \u548C\u65B0\u5DE5\u5177\u7684\u597D\u5947\uFF0C\u5FEB\u901F\u53D8\u6210\u4E00\u4E2A\u80FD\u8FD0\u884C\u3001\u80FD\u9A8C\u8BC1\u3001\u80FD\u88AB\u4F7F\u7528\u7684\u4E1C\u897F\u3002", projects: labProjects }
+};
+var PROJECT_CONTENT = new Map(Object.values(ISLAND_CONTENT).flatMap((island) => island.projects.map((project) => [project.key, project])));
+
+// src/experience-island-masonry.js
+function layoutExperienceMasonry(items = [], { width = 0, columns = 2, gap = 0 } = {}) {
+  const source = Array.isArray(items) ? items : [];
+  const safeWidth = Math.max(0, Number(width) || 0);
+  const safeGap = Math.max(0, Number(gap) || 0);
+  const requestedColumns = Math.max(1, Math.floor(Number(columns) || 1));
+  const columnCount = Math.min(requestedColumns, Math.max(source.length, 1));
+  const columnWidth = columnCount === 1 ? safeWidth : Math.max(0, (safeWidth - safeGap * (columnCount - 1)) / columnCount);
+  const columnHeights = Array.from({ length: columnCount }, () => 0);
+  const placements = source.map((item, index) => {
+    const column = columnHeights.reduce((shortest, height2, candidate) => height2 < columnHeights[shortest] ? candidate : shortest, 0);
+    const y = columnHeights[column];
+    const height = Math.max(0, Number(item?.height) || 0);
+    columnHeights[column] = y + height + safeGap;
+    return {
+      ...item,
+      index,
+      column,
+      x: column * (columnWidth + safeGap),
+      y,
+      width: columnWidth
+    };
   });
-  return best;
+  return {
+    columns: columnCount,
+    columnWidth,
+    height: placements.length ? Math.max(...columnHeights) - safeGap : 0,
+    placements
+  };
+}
+
+// src/experience-island-tilt.js
+var DEFAULTS = {
+  maxTilt: 4,
+  perspective: 1e3,
+  scale: 1.012,
+  returnDuration: 380,
+  shadowMaxX: 6,
+  shadowMaxY: 7,
+  shadowMaxBlur: 22,
+  shadowMaxAlpha: 0.065
+};
+function prefersReducedMotion(matchMedia) {
+  return Boolean(matchMedia?.("(prefers-reduced-motion: reduce)")?.matches);
+}
+function hasCoarsePointer(matchMedia) {
+  return Boolean(matchMedia?.("(pointer: coarse)")?.matches);
+}
+function raf(callback) {
+  if (typeof globalThis.requestAnimationFrame === "function") return globalThis.requestAnimationFrame(callback);
+  return globalThis.setTimeout(callback, 16);
+}
+function cancelRaf(frame) {
+  if (!frame) return;
+  if (typeof globalThis.cancelAnimationFrame === "function") globalThis.cancelAnimationFrame(frame);
+  else globalThis.clearTimeout(frame);
+}
+function createExperienceCardTilt(wrapper, options = {}) {
+  if (!wrapper) return { destroy() {
+  } };
+  const settings = { ...DEFAULTS, ...options };
+  const matchMedia = options.matchMedia || globalThis.matchMedia?.bind(globalThis);
+  const disabled = prefersReducedMotion(matchMedia) || hasCoarsePointer(matchMedia);
+  let frame = 0;
+  let latestEvent = null;
+  let active = false;
+  const setShadow = (x = 0, y = 0, blur = 0, alpha = 0) => {
+    const zero = (value) => value === 0 ? "0px" : `${value.toFixed(2)}px`;
+    wrapper.style.setProperty?.("--card-shadow-x", zero(x));
+    wrapper.style.setProperty?.("--card-shadow-y", zero(y));
+    wrapper.style.setProperty?.("--card-shadow-blur", zero(blur));
+    wrapper.style.setProperty?.("--card-shadow-alpha", alpha === 0 ? "0" : alpha.toFixed(3));
+  };
+  const reset = () => {
+    wrapper.style.transition = `transform ${settings.returnDuration}ms ease, box-shadow ${settings.returnDuration}ms ease`;
+    wrapper.style.transform = `perspective(${settings.perspective}px) rotateX(0deg) rotateY(0deg) scale(1)`;
+    setShadow();
+  };
+  if (disabled) {
+    return { destroy() {
+    } };
+  }
+  const paint = () => {
+    frame = 0;
+    if (!active || !latestEvent) return;
+    const rect = wrapper.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const x = Math.max(-1, Math.min(1, (latestEvent.clientX - rect.left) / rect.width * 2 - 1));
+    const y = Math.max(-1, Math.min(1, (latestEvent.clientY - rect.top) / rect.height * 2 - 1));
+    const rotateX = -(y * settings.maxTilt);
+    const rotateY = x * settings.maxTilt;
+    const intensity = Math.min(1, Math.hypot(x, y));
+    const shadowX = -x * settings.shadowMaxX;
+    const shadowY = -y * settings.shadowMaxY;
+    const shadowBlur = intensity * settings.shadowMaxBlur;
+    const shadowAlpha = intensity * settings.shadowMaxAlpha;
+    wrapper.style.transition = "none";
+    wrapper.style.transform = `perspective(${settings.perspective}px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale(${settings.scale})`;
+    setShadow(shadowX, shadowY, shadowBlur, shadowAlpha);
+  };
+  const schedule = () => {
+    if (!frame) frame = raf(paint);
+  };
+  const onEnter = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+    active = true;
+    latestEvent = event;
+    schedule();
+  };
+  const onMove = (event) => {
+    if (event?.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+    active = true;
+    latestEvent = event;
+    schedule();
+  };
+  const onLeave = () => {
+    active = false;
+    latestEvent = null;
+    cancelRaf(frame);
+    frame = 0;
+    reset();
+  };
+  wrapper.addEventListener("pointerenter", onEnter);
+  wrapper.addEventListener("pointermove", onMove);
+  wrapper.addEventListener("pointerleave", onLeave);
+  wrapper.addEventListener("pointercancel", onLeave);
+  return {
+    destroy() {
+      cancelRaf(frame);
+      wrapper.removeEventListener("pointerenter", onEnter);
+      wrapper.removeEventListener("pointermove", onMove);
+      wrapper.removeEventListener("pointerleave", onLeave);
+      wrapper.removeEventListener("pointercancel", onLeave);
+      reset();
+    }
+  };
+}
+
+// src/experience-proof-layout.js
+var DEFAULT_GAP = 12;
+function ratioFor(item) {
+  const ratio = Number(item?.aspectRatio || (item?.width && item?.height ? item.width / item.height : 1));
+  return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+}
+function compositions(length) {
+  if (length <= 1) return [[length]];
+  const result = [];
+  const masks = 1 << length - 1;
+  for (let mask = 0; mask < masks; mask += 1) {
+    const rows = [];
+    let count = 1;
+    for (let index = 0; index < length - 1; index += 1) {
+      if (mask & 1 << index) {
+        rows.push(count);
+        count = 1;
+      } else {
+        count += 1;
+      }
+    }
+    rows.push(count);
+    result.push(rows);
+  }
+  return result;
+}
+function buildCandidate(items, rowSizes, width, height, gap) {
+  const rows = [];
+  let cursor = 0;
+  let naturalHeight = 0;
+  for (const count of rowSizes) {
+    const rowItems = items.slice(cursor, cursor + count);
+    const ratioSum = rowItems.reduce((sum, item) => sum + ratioFor(item), 0);
+    const rowHeight = Math.max(1, (width - gap * Math.max(0, count - 1)) / ratioSum);
+    rows.push({ items: rowItems, rowHeight });
+    naturalHeight += rowHeight;
+    cursor += count;
+  }
+  naturalHeight += gap * Math.max(0, rows.length - 1);
+  const scale = naturalHeight > height && height > 0 ? height / naturalHeight : 1;
+  const renderedWidth = width * scale;
+  const renderedHeight = naturalHeight * scale;
+  const leftOffset = Math.max(0, (width - renderedWidth) / 2);
+  const topOffset = Math.max(0, (height - renderedHeight) / 2);
+  const placements = [];
+  let y = topOffset;
+  let minimumDimension = Infinity;
+  let area = 0;
+  for (const row of rows) {
+    const rowHeight = row.rowHeight * scale;
+    const rowWidth = width * scale;
+    let x = leftOffset;
+    for (const item of row.items) {
+      const itemWidth = ratioFor(item) * rowHeight;
+      placements.push({
+        key: item.id,
+        x,
+        y,
+        width: itemWidth,
+        height: rowHeight,
+        item
+      });
+      minimumDimension = Math.min(minimumDimension, itemWidth, rowHeight);
+      area += itemWidth * rowHeight;
+      x += itemWidth + gap * scale;
+    }
+    y += rowHeight + gap * scale;
+    if (row.items.length) {
+      const gapRemainder = x - leftOffset - rowWidth;
+      if (Math.abs(gapRemainder) > 0.5) placements[placements.length - 1].width += gapRemainder;
+    }
+  }
+  const availableArea = Math.max(1, width * Math.max(1, height));
+  const fill = area / availableArea;
+  const minimumScore = Math.min(1, minimumDimension / Math.max(1, Math.min(width, height)));
+  const verticalFill = Math.min(1, renderedHeight / Math.max(1, height));
+  const rowPenalty = rowSizes.length * 0.012;
+  const score = fill * 0.56 + minimumScore * 0.28 + verticalFill * 0.18 - rowPenalty;
+  return { placements, width: renderedWidth, height: renderedHeight, score, rowSizes };
+}
+function chooseProofLayout(items = [], { width = 0, height = 0, gap = DEFAULT_GAP } = {}) {
+  const usableWidth = Math.max(1, Number(width) || 1);
+  const usableHeight = Math.max(1, Number(height) || 1);
+  if (!items.length) return { placements: [], width: usableWidth, height: 0, score: 0, rowSizes: [] };
+  return compositions(items.length).map((rowSizes) => buildCandidate(items, rowSizes, usableWidth, usableHeight, gap)).sort((left, right) => right.score - left.score)[0];
+}
+function proofAvailableRect(proofElement, { viewportHeight = typeof window === "undefined" ? 0 : window.innerHeight, bottomSafeGap = 32 } = {}) {
+  const rect = proofElement?.getBoundingClientRect?.();
+  const width = Math.max(1, rect?.width || 1);
+  const availableHeight = Number(viewportHeight) - (rect?.top || 0) - bottomSafeGap;
+  return { width, height: Math.max(180, availableHeight) };
+}
+
+// src/experience-island-renderers.js
+var CATEGORY_LABELS = { school: "SCHOOL", internship: "WORK", personal: "LAB" };
+var EXPERIENCE_MASONRY_GAP = 24;
+var EXPERIENCE_WORK_MASONRY_GAP = 14;
+var EXPERIENCE_MASONRY_SINGLE_COLUMN_WIDTH = 560;
+var EXPERIENCE_PROOF_GAP = 12;
+var EXPERIENCE_PROOF_BOTTOM_SAFE_GAP = 32;
+var el = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== void 0) node.textContent = text;
+  return node;
+};
+var section = (label, className = "") => {
+  const node = el("section", `experience-detail-section ${className}`.trim());
+  const heading = el("h4", "experience-detail-label", label);
+  node.append(heading);
+  return node;
+};
+function setupExperienceMasonry(list) {
+  let frame = 0;
+  let observer = null;
+  const cards = () => [...list.querySelectorAll("[data-masonry-item]")];
+  const tiltControllers = cards().map((item) => createExperienceCardTilt(item.querySelector("[data-experience-tilt]")));
+  const layout = () => {
+    frame = 0;
+    const width = list.clientWidth;
+    const items = cards();
+    if (!width || !items.length) {
+      list.style.height = "0px";
+      return;
+    }
+    const isHorizontalOverview = Boolean(list.closest(".is-work-overview, .is-school-overview"));
+    const masonryGap = isHorizontalOverview ? EXPERIENCE_WORK_MASONRY_GAP : EXPERIENCE_MASONRY_GAP;
+    const columns = isHorizontalOverview || width <= EXPERIENCE_MASONRY_SINGLE_COLUMN_WIDTH ? 1 : 2;
+    const columnWidth = columns === 1 ? width : (width - masonryGap) / 2;
+    items.forEach((item) => {
+      item.style.width = `${columnWidth}px`;
+      item.style.left = "0px";
+      item.style.top = "0px";
+    });
+    const measurements = items.map((item) => ({ key: item.dataset.projectKey, height: item.offsetHeight }));
+    const result = layoutExperienceMasonry(measurements, { width, columns, gap: masonryGap });
+    const placements = new Map(result.placements.map((item) => [item.key, item]));
+    items.forEach((item) => {
+      const placement = placements.get(item.dataset.projectKey);
+      if (!placement) return;
+      item.style.width = `${placement.width}px`;
+      item.style.left = `${placement.x}px`;
+      item.style.top = `${placement.y}px`;
+    });
+    list.style.height = `${result.height}px`;
+  };
+  const schedule = () => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(layout);
+  };
+  cards().forEach((item) => item.querySelector("img")?.addEventListener("load", schedule));
+  observer = new ResizeObserver(schedule);
+  observer.observe(list);
+  document.fonts?.ready.then(schedule);
+  schedule();
+  return () => {
+    if (frame) cancelAnimationFrame(frame);
+    observer?.disconnect();
+    tiltControllers.forEach((controller) => controller.destroy());
+  };
+}
+function renderIslandOverview(container, content, onNavigate = null) {
+  if (!container || !content) return;
+  container.__experienceMasonryCleanup?.();
+  container.replaceChildren();
+  const overviewKind = content.eyebrow === "WORK" ? "work" : content.eyebrow === "SCHOOL" ? "school" : "lab";
+  container.className = `experience-island-overview is-${overviewKind}-overview`;
+  const kicker = el("p", "experience-overview-kicker", content.eyebrow);
+  const title = el("h3", "experience-overview-title", content.title);
+  const intro = el("p", "experience-overview-intro", content.intro);
+  const heading = el("div", "experience-overview-heading");
+  heading.append(kicker, el("span", "experience-overview-heading-separator", "\xB7"), title);
+  const projectSection = el("section", "experience-overview-projects");
+  const list = el("ol", "experience-overview-list");
+  content.projects.forEach((project, index) => {
+    const entry = project.entry || {
+      title: project.title,
+      description: project.summary || "",
+      previewImage: ""
+    };
+    const item = el("li", "experience-overview-item");
+    item.dataset.masonryItem = "";
+    item.dataset.projectKey = project.key;
+    const tilt = el("span", "experience-project-tilt");
+    tilt.dataset.experienceTilt = "";
+    const button = el("button", "experience-project-link experience-project-card");
+    button.type = "button";
+    button.dataset.navigateProject = project.key;
+    button.addEventListener("click", () => onNavigate ? onNavigate(project.key) : window.experienceIslandNavigation?.navigateToProject(project.key));
+    button.setAttribute("aria-label", `${entry.title}\uFF0C\u6253\u5F00\u8BE6\u60C5`);
+    const media2 = el("span", "experience-project-card-media");
+    if (entry.previewImage) {
+      const image2 = document.createElement("img");
+      image2.src = entry.previewImage;
+      image2.alt = entry.title;
+      image2.loading = "lazy";
+      image2.decoding = "async";
+      media2.append(image2);
+    }
+    const body = el("span", "experience-project-card-body");
+    const meta = el("span", "experience-project-card-meta");
+    meta.append(
+      el("strong", "experience-project-name", entry.title)
+    );
+    if (project.period) meta.append(el("span", "experience-project-period", project.period));
+    const description = el("small", "experience-project-summary", entry.description || project.summary || "");
+    body.append(meta, description);
+    button.append(media2, body);
+    tilt.append(button);
+    item.append(tilt);
+    list.append(item);
+  });
+  projectSection.append(list);
+  container.append(heading, intro, projectSection);
+  container.__experienceMasonryCleanup = setupExperienceMasonry(list);
+}
+function canOpenExperienceMedia(slot) {
+  return Boolean(slot?.src || slot?.preview || slot?.type === "gallery" && slot?.items?.some((item) => item?.src || item?.preview));
+}
+function mediaTypeLabel(type) {
+  return { image: "IMAGE", gallery: "GALLERY", video: "VIDEO", pdf: "PDF" }[type] || "MEDIA";
+}
+function mediaEntry(slot, item, index) {
+  return { ...slot, ...item || {}, id: item?.id || `${slot.id}-${index}`, type: item?.type || slot.type, label: item?.label || slot.label, hint: item?.hint || slot.hint };
+}
+function openExperienceMediaInNewTab(slot, index = 0) {
+  const item = slot?.type === "gallery" && Array.isArray(slot.items) && slot.items.length ? mediaEntry(slot, slot.items[index] || slot.items[0], index) : slot;
+  const url = item?.src || item?.preview;
+  if (!url || typeof window === "undefined" || typeof window.open !== "function") return false;
+  const opened = window.open(url, "_blank", "noopener,noreferrer");
+  if (opened) opened.opener = null;
+  return Boolean(opened);
+}
+function scheduleProofLayout(container) {
+  let frame = 0;
+  const section2 = container.closest(".experience-detail-proof") || container;
+  const scrollContainer = container.closest(".experience-copy");
+  const layout = () => {
+    frame = 0;
+    const available = proofAvailableRect(section2, { bottomSafeGap: EXPERIENCE_PROOF_BOTTOM_SAFE_GAP });
+    const items = [...container.children].map((figure) => ({
+      id: figure.dataset.mediaId,
+      aspectRatio: Number(figure.dataset.proofAspectRatio) || 1
+    }));
+    const result = chooseProofLayout(items, { width: available.width, height: available.height, gap: EXPERIENCE_PROOF_GAP });
+    container.style.height = `${Math.max(0, result.height)}px`;
+    const placements = new Map(result.placements.map((item) => [item.key, item]));
+    [...container.children].forEach((figure) => {
+      const placement = placements.get(figure.dataset.mediaId);
+      if (!placement) return;
+      figure.style.left = `${placement.x}px`;
+      figure.style.top = `${placement.y}px`;
+      figure.style.width = `${placement.width}px`;
+      figure.style.height = `${placement.height}px`;
+    });
+  };
+  const schedule = () => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(layout);
+  };
+  const observer = typeof ResizeObserver === "function" ? new ResizeObserver(schedule) : null;
+  observer?.observe(section2);
+  window.addEventListener("resize", schedule, { passive: true });
+  scrollContainer?.addEventListener("scroll", schedule, { passive: true });
+  container.querySelectorAll("img").forEach((image2) => image2.addEventListener("load", schedule));
+  container.querySelectorAll("video").forEach((video2) => video2.addEventListener("loadedmetadata", schedule));
+  schedule();
+  return () => {
+    if (frame) cancelAnimationFrame(frame);
+    observer?.disconnect();
+    window.removeEventListener("resize", schedule);
+    scrollContainer?.removeEventListener("scroll", schedule);
+  };
+}
+function renderMediaGrid(container, slots = [], onOpenMedia = () => {
+}) {
+  if (!container) return;
+  container.__proofLayoutCleanup?.();
+  container.replaceChildren();
+  container.className = `experience-media-grid experience-proof-canvas ${slots.length === 1 ? "is-single" : slots.length > 1 ? "is-multi" : "is-empty"}`;
+  slots.forEach((slot) => {
+    const figure = el("figure", `experience-media-slot experience-media-${slot.type || "image"}`);
+    figure.dataset.mediaId = slot.id || "";
+    figure.dataset.proofAspectRatio = String(Number(slot.aspectRatio || (slot.width && slot.height ? slot.width / slot.height : 1)) || 1);
+    const sourceReady = canOpenExperienceMedia(slot);
+    const entries = slot.type === "gallery" && Array.isArray(slot.items) && slot.items.length ? slot.items.map((item, index) => mediaEntry(slot, item, index)) : [slot];
+    const preview = entries[0];
+    if (sourceReady) {
+      figure.classList.add("is-openable");
+      figure.tabIndex = 0;
+      figure.setAttribute("role", "button");
+      figure.setAttribute("aria-label", `${slot.label || mediaTypeLabel(slot.type)}\uFF1A${slot.hint || "\u5728\u65B0\u6807\u7B7E\u9875\u6253\u5F00\u8D44\u6599"}`);
+      const open = () => onOpenMedia(slot, 0);
+      figure.addEventListener("click", open);
+      figure.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          open();
+        }
+      });
+      if (preview.type === "image" || preview.type === "gallery") {
+        const image2 = document.createElement("img");
+        image2.src = preview.preview || preview.src;
+        image2.alt = preview.alt || slot.label || "\u9879\u76EE\u5A92\u4F53";
+        figure.append(image2);
+      } else if (preview.type === "video") {
+        const video2 = document.createElement("video");
+        video2.src = preview.src || "";
+        if (preview.preview) video2.poster = preview.preview;
+        video2.controls = false;
+        video2.preload = "metadata";
+        video2.playsInline = true;
+        video2.muted = true;
+        figure.append(video2);
+      } else if (preview.type === "pdf") {
+        const image2 = document.createElement("img");
+        image2.src = preview.preview || preview.src;
+        image2.alt = slot.label || "PDF \u9884\u89C8";
+        image2.loading = "lazy";
+        image2.decoding = "async";
+        figure.append(image2, el("span", "experience-proof-pdf-hint", "\u70B9\u51FB\u67E5\u770B PDF"));
+      }
+    } else {
+      figure.classList.add("is-placeholder");
+      const type = el("span", "experience-media-type", mediaTypeLabel(slot.type));
+      const label = el("strong", "experience-media-label", slot.label || "MEDIA");
+      const hint = el("small", "experience-media-hint", slot.hint || "\u8D44\u6599\u5F85\u8865\u5145");
+      figure.append(type, label, hint);
+    }
+    container.append(figure);
+  });
+  container.__proofLayoutCleanup = scheduleProofLayout(container);
+}
+function renderHeader(panel, project, island) {
+  const category = CATEGORY_LABELS[project.category] || island?.eyebrow || "PROJECT";
+  const header = el("header", "experience-detail-header");
+  const eyebrow = el("p", "experience-detail-eyebrow", category === "WORK" ? "WORK EXPERIENCE" : category === "LAB" ? "PERSONAL LAB" : "SCHOOL PROJECT");
+  const title = el("h3", "experience-detail-title", project.title);
+  header.append(eyebrow, title);
+  if (project.role || project.period) header.append(el("p", "experience-detail-meta", [project.role, project.period].filter(Boolean).join(" \xB7 ")));
+  panel.append(header, el("div", "experience-detail-rule"));
+}
+function renderNumberedList(parent, items, className, dataAttribute) {
+  const list = el("ol", className);
+  (items || []).forEach((item, index) => {
+    const row = el("li", "experience-detail-item");
+    if (dataAttribute) row.dataset[dataAttribute] = "";
+    row.append(el("span", "experience-detail-item-number", String(index + 1).padStart(2, "0")));
+    const body = el("div", "experience-detail-item-body");
+    body.append(el("h5", "experience-detail-item-title", item.title || item));
+    if (item.body) body.append(el("p", "experience-detail-item-copy", item.body));
+    row.append(body);
+    list.append(row);
+  });
+  parent.append(list);
+}
+function renderProof(parent, project, onOpenMedia) {
+  const proof2 = section("PROOF\uFF08\u5728\u6B64\u533A\u57DF\u4E0B\u6ED1 / \u70B9\u51FB\u8BD5\u8BD5\uFF09", "experience-detail-proof");
+  const grid = el("div", "experience-media-grid");
+  renderMediaGrid(grid, project.proofs?.length ? project.proofs : project.media || [], onOpenMedia);
+  let awards = null;
+  if (project.proofText?.length) {
+    const list = el("ul", "experience-proof-list");
+    project.proofText.forEach((item) => list.append(el("li", "experience-proof-item", item)));
+    awards = [...grid.children].find((node) => /award/i.test(node.dataset.mediaId || ""));
+    proof2.append(grid);
+    if (awards) {
+      const group = el("div", "experience-proof-group experience-proof-awards");
+      group.dataset.proofGroup = "awards";
+      group.append(el("strong", "experience-proof-group-label", "AWARDS"), list);
+      proof2.append(group);
+    } else {
+      proof2.append(list);
+    }
+    parent.append(proof2);
+    grid.__proofLayoutCleanup?.();
+    grid.__proofLayoutCleanup = scheduleProofLayout(grid);
+    return;
+  }
+  proof2.append(grid);
+  parent.append(proof2);
+  grid.__proofLayoutCleanup?.();
+  grid.__proofLayoutCleanup = scheduleProofLayout(grid);
+}
+function renderSchool(panel, project, onOpenMedia) {
+  const intro = section("\u9879\u76EE\u4ECB\u7ECD", "experience-detail-intro");
+  intro.append(el("p", "experience-detail-lede", project.intro || project.summary));
+  panel.append(intro);
+  const did = section("WHAT I DID");
+  renderNumberedList(did, project.whatIDid, "experience-detail-list", "whatIDid");
+  panel.append(did);
+  renderProof(panel, project, onOpenMedia);
+}
+function renderWork(panel, project, onOpenMedia) {
+  const overview = section("\u5DE5\u4F5C\u6982\u8FF0", "experience-detail-intro");
+  overview.append(el("p", "experience-detail-lede", project.summary));
+  panel.append(overview);
+  const work = section("\u5DE5\u4F5C\u5185\u5BB9");
+  renderNumberedList(work, project.workItems || [], "experience-detail-list", "workItem");
+  panel.append(work);
+  const results = section("\u4E3B\u8981\u6210\u679C", "experience-detail-results");
+  const metrics = el("div", "experience-metrics");
+  (project.resultMetrics || project.results || []).forEach((metric) => {
+    const item = typeof metric === "string" ? { value: metric, label: "" } : metric;
+    const metricNode = el("div", "experience-metric");
+    metricNode.append(el("strong", "experience-metric-value", item.value), el("span", "experience-metric-label", item.label));
+    metrics.append(metricNode);
+  });
+  results.append(metrics);
+  panel.append(results);
+  if (project.proofs?.length || project.media?.length) renderProof(panel, project, onOpenMedia);
+}
+function renderLab(panel, project, onOpenMedia) {
+  if (project.link?.url) {
+    const link = el("a", "experience-external-link");
+    link.href = project.link.url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.setAttribute("aria-label", project.link.ariaLabel || `${project.link.label}\uFF08\u65B0\u6807\u7B7E\u9875\uFF09`);
+    link.append(el("span", "experience-external-link-label", project.link.label), el("strong", "experience-external-link-text", project.link.text || project.link.url), el("span", "experience-external-link-arrow", "\u2197"));
+    panel.append(link);
+  }
+  const intro = section("\u4EA7\u54C1\u4ECB\u7ECD", "experience-detail-intro");
+  intro.append(el("p", "experience-detail-lede", project.intro || project.summary));
+  panel.append(intro);
+  const highlights = section("HIGHLIGHTS");
+  renderNumberedList(highlights, project.highlights || [], "experience-detail-list", "highlight");
+  panel.append(highlights);
+  if (project.proofs?.length || project.media?.length) renderProof(panel, project, onOpenMedia);
+}
+function renderProjectDetail(panel, project, island, { onOpenMedia = () => {
+}, onRendered = () => {
+} } = {}) {
+  if (!panel || !project) return;
+  panel.querySelectorAll(".experience-proof-canvas").forEach((canvas) => canvas.__proofLayoutCleanup?.());
+  panel.replaceChildren();
+  panel.className = `school-project-panel experience-detail experience-detail-${project.category}`;
+  renderHeader(panel, project, island);
+  if (project.category === "school") renderSchool(panel, project, onOpenMedia);
+  else if (project.category === "internship") renderWork(panel, project, onOpenMedia);
+  else renderLab(panel, project, onOpenMedia);
+  onRendered(panel);
+}
+
+// src/experience-island-navigation.js
+function createExperienceNavigationState(activeCategory = null) {
+  return { activeCategory, selectedProjectKey: null, navigationMode: "manual" };
+}
+function commitManualCategory(state, activeCategory) {
+  return { ...state, activeCategory, selectedProjectKey: null, navigationMode: "manual" };
+}
+function beginProgrammaticNavigation(state, targetCategory, targetProjectKey = null) {
+  return { ...state, navigationMode: "programmatic" };
+}
+function finishProgrammaticNavigation(state, targetCategory, targetProjectKey = null) {
+  return {
+    ...state,
+    activeCategory: targetCategory,
+    selectedProjectKey: targetProjectKey,
+    navigationMode: "manual"
+  };
+}
+function cancelProgrammaticNavigation(state) {
+  return { ...state, navigationMode: "manual" };
 }
 
 // src/portfolio-island.js
@@ -32109,22 +33011,13 @@ var EXPERIENCE_PROJECTS = [
   { key: "internship-baimi", category: "internship", city: "\u676D\u5DDE", title: "\u767D\u7C73", enabled: true, landmark: "\u897F\u6E56", meshName: "tripo_part_7", anchor: { x: -0.15, y: 0.4, z: 0.19 }, media: [
     { type: "image", src: "assets/experience-island-details/internship/baimi/proof.webp", alt: "\u767D\u7C73\u9879\u76EE\u8BC1\u660E", width: 2085, height: 2780 }
   ] },
-  { key: "internship-jiuling", category: "internship", city: "\u6DF1\u5733", title: "\u4E5D\u74F4", enabled: true, landmark: "\u5E73\u5B89\u91D1\u878D\u4E2D\u5FC3", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
-    { type: "image", src: "assets/experience-island-details/internship/jiuling/agreement.webp", alt: "\u4E5D\u74F4\u5B9E\u4E60\u534F\u8BAE\u89E3\u9664\u8D44\u6599", width: 1698, height: 2400 }
-  ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude \u684C\u9762\u7FFB\u8BD1", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
+  { key: "internship-pollo-ai", category: "internship", title: "Pollo AI", enabled: true, meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [] },
+  { key: "personal-comfyui", category: "personal", title: "ComfyUI", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
   { key: "personal-squirrel-docs", category: "personal", title: "Codex \u677E\u9F20\u6587\u4ED3", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
   { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
-    { type: "image", src: "assets/experience-island-details/school/uiux/ux.webp", alt: "UIUX \u9879\u76EE\u8D44\u6599", width: 2400, height: 1354 }
-  ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
-    { type: "video", src: "assets/experience-island-details/school/apex/demo.mp4", alt: "APEX \u9879\u76EE\u89C6\u9891" },
-    { type: "image", src: "assets/experience-island-details/school/apex/section.webp", alt: "APEX \u9879\u76EE\u957F\u56FE", width: 2400, height: 5214 }
-  ] },
-  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
-    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "\u7EC6\u80DE\u5DE5\u5382\u9879\u76EE\u89C6\u9891" }
-  ] }
+  { key: "school-memora", category: "school", title: "MEMORA", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [] },
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [] },
+  { key: "school-cell-factory", category: "school", title: "\u7EC6\u80DE\u5DE5\u5382", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [] }
 ];
 var PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map((project) => [project.key, project]));
 var CURRENT_ISLAND_LABELS = {
@@ -32206,93 +33099,37 @@ function extractConnectedComponentGeometry(mesh, modelAnchor) {
   geometry.translate(-center.x, -center.y, -center.z);
   return { geometry, center, size };
 }
-function resolveProjectAspect(asset) {
-  if (asset.width && asset.height) return Promise.resolve({ ...asset, aspect: asset.width / asset.height });
-  if (asset.type !== "video") return Promise.resolve({ ...asset, aspect: 0.707 });
-  return new Promise((resolve) => {
-    const probe = document.createElement("video");
-    const finish = () => resolve({ ...asset, aspect: probe.videoWidth && probe.videoHeight ? probe.videoWidth / probe.videoHeight : 16 / 9 });
-    probe.preload = "metadata";
-    probe.addEventListener("loadedmetadata", finish, { once: true });
-    probe.addEventListener("error", finish, { once: true });
-    probe.src = asset.src;
-  });
-}
-function createProjectMedia(asset) {
-  const figure = document.createElement("figure");
-  figure.style.flexGrow = asset.aspect;
-  if (asset.type === "image") {
-    const link = document.createElement("a");
-    link.href = asset.src;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.setAttribute("aria-label", `${asset.alt}\uFF0C\u6253\u5F00\u539F\u56FE`);
-    const image = document.createElement("img");
-    image.src = asset.src;
-    image.alt = asset.alt;
-    image.width = asset.width;
-    image.height = asset.height;
-    link.append(image);
-    figure.append(link);
-  } else if (asset.type === "video") {
-    const video = document.createElement("video");
-    video.src = asset.src;
-    video.controls = true;
-    video.playsInline = true;
-    video.preload = "metadata";
-    video.setAttribute("aria-label", asset.alt);
-    figure.append(video);
-  } else {
-    const link = document.createElement("a");
-    link.href = asset.src;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = "\u6253\u5F00 PDF \u2197";
-    const frame = document.createElement("iframe");
-    frame.src = asset.src;
-    frame.title = asset.alt;
-    figure.append(link, frame);
+function renderIslandDefault(category, onNavigate = null) {
+  const overview = document.querySelector("[data-experience-overview]");
+  const detail = document.querySelector("[data-school-project-panel]");
+  const content = ISLAND_CONTENT[category];
+  if (!overview || !content) return;
+  overview.hidden = false;
+  if (detail) detail.hidden = true;
+  renderIslandOverview(overview, content, onNavigate || ((projectKey) => window.experienceIslandNavigation?.navigateToProject(projectKey)));
+  const scrollContainer = overview.closest(".experience-copy");
+  if (scrollContainer) {
+    scrollContainer.classList.add("is-overview");
+    scrollContainer.scrollTop = 0;
   }
-  return figure;
 }
-async function showExperienceProject(projectKey) {
+function showExperienceProject(projectKey) {
   const project = PROJECT_BY_KEY.get(projectKey);
+  const overview = document.querySelector("[data-experience-overview]");
   const panel = document.querySelector("[data-school-project-panel]");
   if (!project?.enabled || !panel) return;
-  const title = panel.querySelector("[data-school-project-title]");
-  const kicker = panel.querySelector(".school-project-kicker");
-  const media = panel.querySelector("[data-school-project-media]");
-  if (title) title.textContent = project.city ? `${project.city} \xB7 ${project.title}` : project.title;
-  if (kicker) kicker.textContent = project.category === "internship" ? "INTERNSHIP" : project.category === "school" ? "SCHOOL PROJECT" : "PERSONAL PROJECT";
-  media?.querySelectorAll("video").forEach((video) => video.pause());
-  media?.replaceChildren();
-  panel.hidden = false;
-  if (project.media.length) {
-    const assets = await Promise.all(project.media.map(resolveProjectAspect));
-    await new Promise((resolve) => requestAnimationFrame(resolve));
-    const gap = window.innerWidth <= 600 ? 3 : 4;
-    const stage = panel.closest("#experience");
-    const mediaRect = media.getBoundingClientRect();
-    const stageRect = stage?.getBoundingClientRect();
-    const maxWidth = Math.max(220, Math.min(media.clientWidth || panel.clientWidth, window.innerWidth - 32));
-    const maxHeight = Math.max(180, Math.min(window.innerHeight * 0.8, (stageRect?.bottom || window.innerHeight) - mediaRect.top - 18));
-    const layout = solveJustifiedMosaic(assets, maxWidth, maxHeight, gap);
-    layout.rows.forEach((rowAssets, rowIndex) => {
-      const row = document.createElement("div");
-      row.className = "school-project-media-row";
-      row.style.width = `${layout.width}px`;
-      row.style.height = `${layout.heights[rowIndex]}px`;
-      rowAssets.forEach((asset) => row.append(createProjectMedia(asset)));
-      media.append(row);
-    });
-  } else {
-    if (media) media.innerHTML = '<p class="project-coming-soon">\u9879\u76EE\u8D44\u6599\u6574\u7406\u4E2D\uFF0C\u656C\u8BF7\u671F\u5F85\u3002</p>';
-  }
-  document.querySelectorAll("[data-experience-project]").forEach((trigger) => {
-    const active = trigger.dataset.experienceProject === projectKey;
-    trigger.classList.toggle("is-active", active);
-    if (trigger instanceof HTMLButtonElement) trigger.setAttribute("aria-pressed", String(active));
+  const content = PROJECT_CONTENT.get(projectKey) || { title: project.title, summary: "\u9879\u76EE\u5185\u5BB9\u6574\u7406\u4E2D\u3002" };
+  const island = ISLAND_CONTENT[project.category];
+  renderProjectDetail(panel, { ...content, category: project.category, title: content.title || project.title }, island, {
+    onOpenMedia: (slot, index) => openExperienceMediaInNewTab(slot, index)
   });
+  if (overview) overview.hidden = true;
+  panel.hidden = false;
+  const scrollContainer = panel.closest(".experience-copy");
+  if (scrollContainer) {
+    scrollContainer.classList.remove("is-overview");
+    scrollContainer.scrollTop = 0;
+  }
 }
 async function mountExperienceIsland(container) {
   if (!(container instanceof HTMLElement) || activeMount) return activeMount;
@@ -32332,17 +33169,177 @@ async function mountExperienceIsland(container) {
     let running = false;
     let loading2 = false;
     let pointerDown = null;
+    const NAVIGATION_DURATION_MS = 760;
     let activeCategory = null;
+    let selectedProjectKey = null;
+    let hoveredProjectKey = null;
+    let pointerHoveredProjectKey = null;
+    let focusedProjectKey = null;
+    let leftHoveredProjectKey = null;
+    let leftFocusedProjectKey = null;
+    let navigationState = createExperienceNavigationState(null);
+    let navigationAnimation = null;
+    let queuedNavigation = null;
+    let dragging = false;
+    let hasFitted = false;
+    const stabilizeIsland = createIslandStabilizer();
     const pointer = new Vector2();
     const raycaster = new Raycaster();
     const projectedAnchor = new Vector3();
     const cameraAnchor = new Vector3();
     const highlightColor = new Color(16738842);
     const highlightShells = /* @__PURE__ */ new Map();
-    const visibleProjectKeys = /* @__PURE__ */ new Set();
+    const projectedVisibleProjectKeys = /* @__PURE__ */ new Set();
+    const interactiveProjectKeys = /* @__PURE__ */ new Set();
+    const displayedLabelKeys = /* @__PURE__ */ new Set();
+    let labelOffsets = /* @__PURE__ */ new Map();
     const clickableMeshes = [];
     const clickableProjectKeys = /* @__PURE__ */ new WeakMap();
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const labels = [...area.querySelectorAll("button[data-experience-project]")].map((button) => ({
+      button,
+      outer: button.parentElement,
+      key: button.dataset.experienceProject,
+      project: PROJECT_BY_KEY.get(button.dataset.experienceProject),
+      width: 0,
+      height: 0
+    }));
+    const measureLabels = () => {
+      labels.forEach((label) => {
+        const hidden = label.outer.hidden;
+        label.outer.hidden = false;
+        label.width = label.button.offsetWidth;
+        label.height = label.button.offsetHeight;
+        label.outer.hidden = hidden;
+      });
+    };
+    let maxLabelScale = 1.1;
+    const measureLabelScale = () => {
+      const css = getComputedStyle(container);
+      maxLabelScale = Math.max(...["dim", "current", "hover", "selected"].map((state) => parseFloat(css.getPropertyValue(`--island-label-${state}-scale`)) || 1));
+      measureLabels();
+    };
+    const syncNavigationState = (next) => {
+      navigationState = next;
+      activeCategory = next.activeCategory;
+      selectedProjectKey = next.selectedProjectKey;
+    };
+    const updateCategoryUI = () => {
+      area?.setAttribute("data-front-island", activeCategory ?? "");
+      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
+        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      }
+      area?.querySelectorAll("[data-experience-island]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
+      });
+    };
+    const syncLabelStates = () => labels.forEach(({ button, outer, key, project }) => {
+      const current = project.category === activeCategory;
+      button.classList.toggle("is-current", current);
+      button.classList.toggle("is-selected", current && key === selectedProjectKey);
+      button.classList.toggle("is-hovered", current && key === hoveredProjectKey);
+      button.disabled = !current || !project.enabled;
+      button.setAttribute("aria-pressed", String(key === selectedProjectKey));
+      outer.style.zIndex = key === selectedProjectKey ? "4" : key === hoveredProjectKey ? "3" : current ? "2" : "1";
+    });
+    const syncHover = () => {
+      hoveredProjectKey = [pointerHoveredProjectKey, focusedProjectKey, leftHoveredProjectKey, leftFocusedProjectKey].find((key) => key && PROJECT_BY_KEY.get(key)?.enabled && (interactiveProjectKeys.has(key) || key === leftHoveredProjectKey || key === leftFocusedProjectKey)) || null;
+      syncLabelStates();
+      updateBuildingHighlights();
+    };
+    const renderContentForState = () => {
+      if (selectedProjectKey) showExperienceProject(selectedProjectKey);
+      else if (activeCategory) renderIslandDefault(activeCategory, navigateToProject);
+    };
+    const commitActiveCategory = (category, projectKey = null, mode = "manual") => {
+      const next = mode === "programmatic" ? finishProgrammaticNavigation(navigationState, category, projectKey) : commitManualCategory(navigationState, category);
+      syncNavigationState(next);
+      stabilizeIsland.reset(category);
+      updateCategoryUI();
+      syncLabelStates();
+      updateBuildingHighlights();
+      renderContentForState();
+    };
+    const getCameraDestination = (category) => {
+      if (!model) return null;
+      const island = SUB_ISLANDS.find((item) => item.category === category);
+      if (!island) return null;
+      const anchor = new Vector3(island.anchor.x, island.anchor.y, island.anchor.z);
+      model.localToWorld(anchor);
+      const target = controls.target.clone();
+      const offset = camera.position.clone().sub(target);
+      const distance = Math.max(offset.length(), 1e-3);
+      const polar = Math.acos(MathUtils.clamp(offset.y / distance, -1, 1));
+      const horizontal = new Vector3(anchor.x - target.x, 0, anchor.z - target.z);
+      if (horizontal.lengthSq() < 1e-6) horizontal.set(offset.x, 0, offset.z);
+      horizontal.normalize();
+      const sinPolar = Math.sin(polar);
+      return {
+        position: target.clone().add(new Vector3(
+          horizontal.x * sinPolar * distance,
+          Math.cos(polar) * distance,
+          horizontal.z * sinPolar * distance
+        )),
+        target
+      };
+    };
+    const startProgrammaticNavigation = (category, projectKey = null) => {
+      if (!model) {
+        queuedNavigation = { category, projectKey };
+        return;
+      }
+      if (category === activeCategory && !navigationAnimation) {
+        syncNavigationState({ ...navigationState, selectedProjectKey: projectKey, navigationMode: "manual" });
+        updateCategoryUI();
+        syncLabelStates();
+        updateBuildingHighlights();
+        renderContentForState();
+        return;
+      }
+      const destination = getCameraDestination(category);
+      if (!destination) return;
+      navigationAnimation = {
+        startPosition: camera.position.clone(),
+        endPosition: destination.position,
+        startTarget: controls.target.clone(),
+        endTarget: destination.target,
+        category,
+        projectKey,
+        startedAt: performance.now(),
+        duration: NAVIGATION_DURATION_MS
+      };
+      syncNavigationState(beginProgrammaticNavigation(navigationState, category, projectKey));
+      syncLabelStates();
+    };
+    const navigateToIsland = (category) => {
+      if (!ISLAND_CONTENT[category]) return;
+      startProgrammaticNavigation(category, null);
+    };
+    const navigateToProject = (projectKey) => {
+      const project = PROJECT_BY_KEY.get(projectKey);
+      if (!project?.enabled) return;
+      if (project.category === activeCategory && !navigationAnimation) {
+        syncNavigationState({ ...navigationState, selectedProjectKey: projectKey, navigationMode: "manual" });
+        hoveredProjectKey = projectKey;
+        updateCategoryUI();
+        syncLabelStates();
+        updateBuildingHighlights();
+        renderContentForState();
+        return;
+      }
+      startProgrammaticNavigation(project.category, projectKey);
+    };
+    const updateProgrammaticNavigation = (time) => {
+      if (!navigationAnimation) return;
+      const animation = navigationAnimation;
+      const progress = Math.min(1, Math.max(0, (time - animation.startedAt) / animation.duration));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      camera.position.lerpVectors(animation.startPosition, animation.endPosition, eased);
+      controls.target.lerpVectors(animation.startTarget, animation.endTarget, eased);
+      if (progress >= 1) {
+        navigationAnimation = null;
+        commitActiveCategory(animation.category, animation.projectKey, "programmatic");
+      }
+    };
     const updateProjectLabels = () => {
       if (!model) return;
       const islandDepths = SUB_ISLANDS.map((island) => {
@@ -32351,14 +33348,10 @@ async function mountExperienceIsland(container) {
         camera.worldToLocal(cameraAnchor);
         return { category: island.category, depth: cameraAnchor.z };
       });
-      activeCategory = selectFrontIsland(islandDepths);
-      area?.setAttribute("data-front-island", activeCategory ?? "");
-      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
-        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      if (navigationState.navigationMode === "manual") {
+        const stableCategory = stabilizeIsland(selectFrontIsland(islandDepths), performance.now());
+        if (stableCategory && stableCategory !== activeCategory) commitActiveCategory(stableCategory);
       }
-      area?.querySelectorAll("[data-experience-island]").forEach((button) => {
-        button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
-      });
       const projectPositions = EXPERIENCE_PROJECTS.map((project) => {
         projectedAnchor.set(project.anchor.x, project.anchor.y, project.anchor.z);
         model.localToWorld(projectedAnchor);
@@ -32369,45 +33362,114 @@ async function mountExperienceIsland(container) {
           key: project.key,
           category: project.category,
           depth: cameraAnchor.z,
-          inView: projectedAnchor.z >= -1 && projectedAnchor.z <= 1 && Math.abs(projectedAnchor.x) <= 1.04 && Math.abs(projectedAnchor.y) <= 1.04,
+          inView: cameraAnchor.z < 0 && projectedAnchor.z >= -1 && projectedAnchor.z <= 1 && Math.abs(projectedAnchor.x) <= 1.04 && Math.abs(projectedAnchor.y) <= 1.04,
           x: (projectedAnchor.x * 0.5 + 0.5) * container.clientWidth,
           y: (-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight
         };
       });
-      const visibleKeys = new Set(selectVisibleProjects(
-        projectPositions,
-        activeCategory,
-        labelLimitForCategory(activeCategory)
-      ));
-      visibleProjectKeys.clear();
-      visibleKeys.forEach((key) => visibleProjectKeys.add(key));
-      const positionsByKey = new Map(projectPositions.map((position) => [position.key, position]));
-      area?.querySelectorAll("[data-experience-project]").forEach((trigger) => {
-        const key = trigger.dataset.experienceProject;
-        const position = positionsByKey.get(key);
-        if (!position) {
-          trigger.hidden = true;
-          return;
+      projectedVisibleProjectKeys.clear();
+      interactiveProjectKeys.clear();
+      projectPositions.forEach((position) => {
+        if (!position.inView) return;
+        projectedVisibleProjectKeys.add(position.key);
+        if (position.category === activeCategory && PROJECT_BY_KEY.get(position.key).enabled) {
+          interactiveProjectKeys.add(position.key);
         }
-        trigger.style.left = `${position.x}px`;
-        trigger.style.top = `${position.y}px`;
-        trigger.hidden = !visibleKeys.has(key);
+      });
+      if (!interactiveProjectKeys.has(pointerHoveredProjectKey)) pointerHoveredProjectKey = null;
+      if (!interactiveProjectKeys.has(focusedProjectKey)) focusedProjectKey = null;
+      syncHover();
+      const positionsByKey = new Map(projectPositions.map((position) => [position.key, position]));
+      const candidates = labels.filter((label) => projectedVisibleProjectKeys.has(label.key)).map((label) => {
+        const p = positionsByKey.get(label.key);
+        return {
+          ...p,
+          x: p.x + 8,
+          y: p.y - 8 - label.height * maxLabelScale,
+          width: label.width * maxLabelScale,
+          height: label.height * maxLabelScale
+        };
+      });
+      const placed = layoutProjectLabels(candidates, activeCategory, selectedProjectKey, hoveredProjectKey, labelOffsets);
+      labelOffsets = new Map(placed.map((p) => [p.key, { top: p.y, offsetY: p.offsetY }]));
+      const placements = new Map(placed.map((p) => [p.key, p]));
+      displayedLabelKeys.clear();
+      placed.forEach((p) => displayedLabelKeys.add(p.key));
+      labels.forEach(({ outer, key }) => {
+        const position = positionsByKey.get(key);
+        const placement = placements.get(key);
+        outer.hidden = !displayedLabelKeys.has(key);
+        if (!placement) return;
+        outer.style.left = `${position.x + 8}px`;
+        outer.style.top = `${position.y - 8 + placement.offsetY}px`;
       });
     };
-    const updateBuildingHighlights = (time) => {
-      EXPERIENCE_PROJECTS.forEach((project, index) => {
-        const active = project.enabled && visibleProjectKeys.has(project.key);
-        const pulse = reducedMotion.matches ? 1 : 1 + Math.sin(time * 2e-3 + index * 0.72) * 0.012;
+    const updateBuildingHighlights = () => {
+      EXPERIENCE_PROJECTS.forEach((project) => {
+        const selected = project.key === selectedProjectKey;
+        const hovered = project.key === hoveredProjectKey;
+        const active = project.enabled && (selected || hovered);
         (highlightShells.get(project.key) || []).forEach((record) => {
           record.shell.visible = active;
-          record.material.opacity = 1;
-          record.shell.scale.setScalar(record.baseScale * pulse);
+          record.material.transparent = true;
+          record.material.opacity = selected ? 0.95 : 0.45;
+          record.shell.scale.setScalar(record.baseScale);
         });
       });
     };
-    area?.querySelectorAll("button[data-experience-project]").forEach((trigger) => {
-      trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
+    labels.forEach(({ button, key }) => {
+      button.addEventListener("click", () => navigateToProject(key));
+      button.addEventListener("pointerenter", () => {
+        pointerHoveredProjectKey = key;
+        syncHover();
+      });
+      button.addEventListener("pointerleave", () => {
+        pointerHoveredProjectKey = null;
+        syncHover();
+      });
+      button.addEventListener("focus", () => {
+        focusedProjectKey = key;
+        syncHover();
+      });
+      button.addEventListener("blur", () => {
+        focusedProjectKey = null;
+        syncHover();
+      });
     });
+    const overview = document.querySelector("[data-experience-overview]");
+    overview?.addEventListener("click", (event) => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (projectButton) navigateToProject(projectButton.dataset.navigateProject);
+    });
+    overview?.addEventListener("pointerover", (event) => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton) return;
+      leftHoveredProjectKey = projectButton.dataset.navigateProject;
+      syncHover();
+    });
+    overview?.addEventListener("pointerout", (event) => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton || projectButton.contains(event.relatedTarget)) return;
+      leftHoveredProjectKey = null;
+      syncHover();
+    });
+    overview?.addEventListener("focusin", (event) => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton) return;
+      leftFocusedProjectKey = projectButton.dataset.navigateProject;
+      syncHover();
+    });
+    overview?.addEventListener("focusout", (event) => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton || projectButton.contains(event.relatedTarget)) return;
+      leftFocusedProjectKey = null;
+      syncHover();
+    });
+    window.experienceIslandNavigation = {
+      navigateToIsland,
+      navigateToProject,
+      getState: () => ({ activeCategory, selectedProjectKey, hoveredProjectKey, navigationMode: navigationState.navigationMode })
+    };
     const fitModel = () => {
       if (!model) return;
       const distance = modelDistance(camera, radius);
@@ -32417,6 +33479,15 @@ async function mountExperienceIsland(container) {
       controls.minDistance = zoomRange.minDistance;
       controls.maxDistance = zoomRange.maxDistance;
       controls.update();
+      if (!hasFitted) {
+        const initialView = getCameraDestination("school");
+        if (initialView) {
+          camera.position.copy(initialView.position);
+          controls.target.copy(initialView.target);
+          controls.update();
+        }
+      }
+      hasFitted = true;
     };
     const resize = () => {
       const width = Math.max(container.clientWidth, 1);
@@ -32424,14 +33495,30 @@ async function mountExperienceIsland(container) {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
-      fitModel();
+      if (model) {
+        if (!hasFitted) fitModel();
+        else {
+          const range = experienceIslandZoomRange(modelDistance(camera, radius));
+          controls.minDistance = range.minDistance;
+          controls.maxDistance = range.maxDistance;
+          preserveOrbitDistance(camera, controls.target, range);
+          camera.updateMatrixWorld();
+        }
+      }
+      measureLabelScale();
+      updateProjectLabels();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
+    document.fonts.ready.then(() => {
+      measureLabelScale();
+      updateProjectLabels();
+    });
     const render = (time) => {
       if (!running) return;
       controls.update();
+      updateProgrammaticNavigation(time || performance.now());
       updateProjectLabels();
       updateBuildingHighlights(time || 0);
       renderer.render(scene, camera);
@@ -32453,7 +33540,7 @@ async function mountExperienceIsland(container) {
     const projectFromIntersection = (intersection) => {
       const key = intersection?.object ? clickableProjectKeys.get(intersection.object) : null;
       const project = key ? PROJECT_BY_KEY.get(key) : null;
-      return project?.enabled && visibleProjectKeys.has(key) ? key : null;
+      return project?.enabled && interactiveProjectKeys.has(key) ? key : null;
     };
     const pickExperienceProject = (event) => {
       if (!model) return null;
@@ -32467,14 +33554,30 @@ async function mountExperienceIsland(container) {
     renderer.domElement.addEventListener("pointerdown", (event) => {
       pointerDown = { x: event.clientX, y: event.clientY };
     });
+    controls.addEventListener("start", () => {
+      if (navigationAnimation) {
+        navigationAnimation = null;
+        syncNavigationState(cancelProgrammaticNavigation(navigationState));
+      }
+      dragging = true;
+      pointerHoveredProjectKey = null;
+      syncHover();
+    });
+    controls.addEventListener("end", () => {
+      dragging = false;
+    });
     let lastHoverPick = 0;
     renderer.domElement.addEventListener("pointermove", (event) => {
       if (event.timeStamp - lastHoverPick < 50) return;
       lastHoverPick = event.timeStamp;
-      renderer.domElement.style.cursor = pickExperienceProject(event) ? "pointer" : "grab";
+      pointerHoveredProjectKey = dragging ? null : pickExperienceProject(event);
+      syncHover();
+      renderer.domElement.style.cursor = pointerHoveredProjectKey ? "pointer" : "grab";
     });
     renderer.domElement.addEventListener("pointerleave", () => {
       renderer.domElement.style.cursor = "grab";
+      pointerHoveredProjectKey = null;
+      syncHover();
     });
     renderer.domElement.addEventListener("click", (event) => {
       if (pointerDown) {
@@ -32483,7 +33586,7 @@ async function mountExperienceIsland(container) {
         if (moved > 8) return;
       }
       const project = pickExperienceProject(event);
-      if (project) showExperienceProject(project);
+      if (project) navigateToProject(project);
     });
     const loadScene = async () => {
       if (loading2 || model) return Boolean(model);
@@ -32630,6 +33733,11 @@ async function mountExperienceIsland(container) {
         resize();
         if (status) status.hidden = true;
         syncVisibility();
+        if (queuedNavigation) {
+          const pending = queuedNavigation;
+          queuedNavigation = null;
+          startProgrammaticNavigation(pending.category, pending.projectKey);
+        }
         return true;
       } catch {
         area?.classList.add("model-load-error");

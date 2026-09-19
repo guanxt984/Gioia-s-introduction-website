@@ -1,9 +1,17 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { experienceIslandZoomRange } from "./experience-island-zoom.js";
-import { labelLimitForCategory, selectFrontIsland, selectVisibleProjects } from "./experience-island-visibility.js";
-import { solveJustifiedMosaic } from "../public/justified-media-layout.js";
+import { experienceIslandZoomRange, preserveOrbitDistance } from "./experience-island-zoom.js";
+import { createIslandStabilizer, layoutProjectLabels, selectFrontIsland } from "./experience-island-visibility.js";
+import { ISLAND_CONTENT, PROJECT_CONTENT } from "./experience-island-content.js";
+import { openExperienceMediaInNewTab, renderIslandOverview, renderProjectDetail } from "./experience-island-renderers.js";
+import {
+  beginProgrammaticNavigation,
+  cancelProgrammaticNavigation as cancelProgrammaticNavigationState,
+  commitManualCategory,
+  createExperienceNavigationState,
+  finishProgrammaticNavigation,
+} from "./experience-island-navigation.js";
 
 const MODEL_URL = "./models/experience-island-uploaded-preview.glb";
 const SUB_ISLANDS = [
@@ -23,22 +31,13 @@ const EXPERIENCE_PROJECTS = [
   { key: "internship-baimi", category: "internship", city: "杭州", title: "白米", enabled: true, landmark: "西湖", meshName: "tripo_part_7", anchor: { x: -0.15, y: 0.40, z: 0.19 }, media: [
     { type: "image", src: "assets/experience-island-details/internship/baimi/proof.webp", alt: "白米项目证明", width: 2085, height: 2780 },
   ] },
-  { key: "internship-jiuling", category: "internship", city: "深圳", title: "九瓴", enabled: true, landmark: "平安金融中心", meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [
-    { type: "image", src: "assets/experience-island-details/internship/jiuling/agreement.webp", alt: "九瓴实习协议解除资料", width: 1698, height: 2400 },
-  ] },
-  { key: "personal-claude-translator", category: "personal", title: "Claude 桌面翻译", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
+  { key: "internship-pollo-ai", category: "internship", title: "Pollo AI", enabled: true, meshName: "tripo_part_5", anchor: { x: -0.325, y: 0.71, z: 0.075 }, media: [] },
+  { key: "personal-comfyui", category: "personal", title: "ComfyUI", enabled: true, meshName: "tripo_part_0", highlightMode: "local", highlightShape: "building", anchor: { x: 0.235, y: 0.49, z: -0.075 }, media: [] },
   { key: "personal-squirrel-docs", category: "personal", title: "Codex 松鼠文仓", enabled: true, meshName: "tripo_part_9", anchor: { x: 0.195, y: 0.49, z: 0.23 }, media: [] },
   { key: "personal-fullydancy", category: "personal", title: "Codex FullyDancy", enabled: true, meshName: "tripo_part_8", anchor: { x: 0.345, y: 0.52, z: -0.095 }, media: [] },
-  { key: "school-uiux", category: "school", title: "UIUX", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [
-    { type: "image", src: "assets/experience-island-details/school/uiux/ux.webp", alt: "UIUX 项目资料", width: 2400, height: 1354 },
-  ] },
-  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [
-    { type: "video", src: "assets/experience-island-details/school/apex/demo.mp4", alt: "APEX 项目视频" },
-    { type: "image", src: "assets/experience-island-details/school/apex/section.webp", alt: "APEX 项目长图", width: 2400, height: 5214 },
-  ] },
-  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [
-    { type: "video", src: "assets/experience-projects/school/cell-factory/innovation.mp4", alt: "细胞工厂项目视频" },
-  ] },
+  { key: "school-memora", category: "school", title: "MEMORA", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: 0.0301, y: 0.4191, z: -0.2511 }, anchor: { x: 0.0301, y: 0.47, z: -0.2511 }, media: [] },
+  { key: "school-apex", category: "school", title: "APEX", enabled: true, meshName: "tripo_part_14", anchor: { x: 0.09, y: 0.51, z: -0.37 }, media: [] },
+  { key: "school-cell-factory", category: "school", title: "细胞工厂", enabled: true, meshName: "tripo_part_4", highlightMode: "component", componentAnchor: { x: -0.0358, y: 0.4256, z: -0.3058 }, anchor: { x: -0.0358, y: 0.48, z: -0.3058 }, media: [] },
 ];
 
 const PROJECT_BY_KEY = new Map(EXPERIENCE_PROJECTS.map(project => [project.key, project]));
@@ -128,96 +127,38 @@ function extractConnectedComponentGeometry(mesh, modelAnchor) {
   return { geometry, center, size };
 }
 
-function resolveProjectAspect(asset) {
-  if (asset.width && asset.height) return Promise.resolve({ ...asset, aspect: asset.width / asset.height });
-  if (asset.type !== "video") return Promise.resolve({ ...asset, aspect: 0.707 });
-  return new Promise(resolve => {
-    const probe = document.createElement("video");
-    const finish = () => resolve({ ...asset, aspect: probe.videoWidth && probe.videoHeight ? probe.videoWidth / probe.videoHeight : 16 / 9 });
-    probe.preload = "metadata";
-    probe.addEventListener("loadedmetadata", finish, { once: true });
-    probe.addEventListener("error", finish, { once: true });
-    probe.src = asset.src;
-  });
-}
-
-function createProjectMedia(asset) {
-  const figure = document.createElement("figure");
-  figure.style.flexGrow = asset.aspect;
-  if (asset.type === "image") {
-    const link = document.createElement("a");
-    link.href = asset.src;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.setAttribute("aria-label", `${asset.alt}，打开原图`);
-    const image = document.createElement("img");
-    image.src = asset.src;
-    image.alt = asset.alt;
-    image.width = asset.width;
-    image.height = asset.height;
-    link.append(image);
-    figure.append(link);
-  } else if (asset.type === "video") {
-    const video = document.createElement("video");
-    video.src = asset.src;
-    video.controls = true;
-    video.playsInline = true;
-    video.preload = "metadata";
-    video.setAttribute("aria-label", asset.alt);
-    figure.append(video);
-  } else {
-    const link = document.createElement("a");
-    link.href = asset.src;
-    link.target = "_blank";
-    link.rel = "noopener";
-    link.textContent = "打开 PDF ↗";
-    const frame = document.createElement("iframe");
-    frame.src = asset.src;
-    frame.title = asset.alt;
-    figure.append(link, frame);
+function renderIslandDefault(category, onNavigate = null) {
+  const overview = document.querySelector("[data-experience-overview]");
+  const detail = document.querySelector("[data-school-project-panel]");
+  const content = ISLAND_CONTENT[category];
+  if (!overview || !content) return;
+  overview.hidden = false;
+  if (detail) detail.hidden = true;
+  renderIslandOverview(overview, content, onNavigate || (projectKey => window.experienceIslandNavigation?.navigateToProject(projectKey)));
+  const scrollContainer = overview.closest(".experience-copy");
+  if (scrollContainer) {
+    scrollContainer.classList.add("is-overview");
+    scrollContainer.scrollTop = 0;
   }
-  return figure;
 }
 
-async function showExperienceProject(projectKey) {
+function showExperienceProject(projectKey) {
   const project = PROJECT_BY_KEY.get(projectKey);
+  const overview = document.querySelector("[data-experience-overview]");
   const panel = document.querySelector("[data-school-project-panel]");
   if (!project?.enabled || !panel) return;
-
-  const title = panel.querySelector("[data-school-project-title]");
-  const kicker = panel.querySelector(".school-project-kicker");
-  const media = panel.querySelector("[data-school-project-media]");
-  if (title) title.textContent = project.city ? `${project.city} · ${project.title}` : project.title;
-  if (kicker) kicker.textContent = project.category === "internship" ? "INTERNSHIP" : project.category === "school" ? "SCHOOL PROJECT" : "PERSONAL PROJECT";
-  media?.querySelectorAll("video").forEach(video => video.pause());
-  media?.replaceChildren();
-  panel.hidden = false;
-  if (project.media.length) {
-    const assets = await Promise.all(project.media.map(resolveProjectAspect));
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    const gap = window.innerWidth <= 600 ? 3 : 4;
-    const stage = panel.closest("#experience");
-    const mediaRect = media.getBoundingClientRect();
-    const stageRect = stage?.getBoundingClientRect();
-    const maxWidth = Math.max(220, Math.min(media.clientWidth || panel.clientWidth, window.innerWidth - 32));
-    const maxHeight = Math.max(180, Math.min(window.innerHeight * 0.80, (stageRect?.bottom || window.innerHeight) - mediaRect.top - 18));
-    const layout = solveJustifiedMosaic(assets, maxWidth, maxHeight, gap);
-    layout.rows.forEach((rowAssets, rowIndex) => {
-      const row = document.createElement("div");
-      row.className = "school-project-media-row";
-      row.style.width = `${layout.width}px`;
-      row.style.height = `${layout.heights[rowIndex]}px`;
-      rowAssets.forEach(asset => row.append(createProjectMedia(asset)));
-      media.append(row);
-    });
-  } else {
-    if (media) media.innerHTML = '<p class="project-coming-soon">项目资料整理中，敬请期待。</p>';
-  }
-  document.querySelectorAll("[data-experience-project]").forEach(trigger => {
-    const active = trigger.dataset.experienceProject === projectKey;
-    trigger.classList.toggle("is-active", active);
-    if (trigger instanceof HTMLButtonElement) trigger.setAttribute("aria-pressed", String(active));
+  const content = PROJECT_CONTENT.get(projectKey) || { title: project.title, summary: "项目内容整理中。" };
+  const island = ISLAND_CONTENT[project.category];
+  renderProjectDetail(panel, { ...content, category: project.category, title: content.title || project.title }, island, {
+    onOpenMedia: (slot, index) => openExperienceMediaInNewTab(slot, index),
   });
+  if (overview) overview.hidden = true;
+  panel.hidden = false;
+  const scrollContainer = panel.closest(".experience-copy");
+  if (scrollContainer) {
+    scrollContainer.classList.remove("is-overview");
+    scrollContainer.scrollTop = 0;
+  }
 }
 
 export async function mountExperienceIsland(container) {
@@ -264,17 +205,178 @@ export async function mountExperienceIsland(container) {
     let running = false;
     let loading = false;
     let pointerDown = null;
+    const NAVIGATION_DURATION_MS = 760;
     let activeCategory = null;
+    let selectedProjectKey = null;
+    let hoveredProjectKey = null;
+    let pointerHoveredProjectKey = null;
+    let focusedProjectKey = null;
+    let leftHoveredProjectKey = null;
+    let leftFocusedProjectKey = null;
+    let navigationState = createExperienceNavigationState(null);
+    let navigationAnimation = null;
+    let queuedNavigation = null;
+    let dragging = false;
+    let hasFitted = false;
+    const stabilizeIsland = createIslandStabilizer();
     const pointer = new THREE.Vector2();
     const raycaster = new THREE.Raycaster();
     const projectedAnchor = new THREE.Vector3();
     const cameraAnchor = new THREE.Vector3();
     const highlightColor = new THREE.Color(0xff6a1a);
     const highlightShells = new Map();
-    const visibleProjectKeys = new Set();
+    const projectedVisibleProjectKeys = new Set();
+    const interactiveProjectKeys = new Set();
+    const displayedLabelKeys = new Set();
+    let labelOffsets = new Map();
     const clickableMeshes = [];
     const clickableProjectKeys = new WeakMap();
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const labels = [...area.querySelectorAll("button[data-experience-project]")].map(button => ({
+      button, outer: button.parentElement, key: button.dataset.experienceProject,
+      project: PROJECT_BY_KEY.get(button.dataset.experienceProject), width: 0, height: 0,
+    }));
+    const measureLabels = () => {
+      labels.forEach(label => {
+        const hidden = label.outer.hidden;
+        label.outer.hidden = false;
+        label.width = label.button.offsetWidth;
+        label.height = label.button.offsetHeight;
+        label.outer.hidden = hidden;
+      });
+    };
+    let maxLabelScale = 1.1;
+    const measureLabelScale = () => {
+      const css = getComputedStyle(container);
+      maxLabelScale = Math.max(...['dim', 'current', 'hover', 'selected'].map(state =>
+        parseFloat(css.getPropertyValue(`--island-label-${state}-scale`)) || 1));
+      measureLabels();
+    };
+    const syncNavigationState = next => {
+      navigationState = next;
+      activeCategory = next.activeCategory;
+      selectedProjectKey = next.selectedProjectKey;
+    };
+    const updateCategoryUI = () => {
+      area?.setAttribute("data-front-island", activeCategory ?? "");
+      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
+        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      }
+      area?.querySelectorAll("[data-experience-island]").forEach(button => {
+        button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
+      });
+    };
+    const syncLabelStates = () => labels.forEach(({button, outer, key, project}) => {
+      const current = project.category === activeCategory;
+      button.classList.toggle('is-current', current);
+      button.classList.toggle('is-selected', current && key === selectedProjectKey);
+      button.classList.toggle('is-hovered', current && key === hoveredProjectKey);
+      button.disabled = !current || !project.enabled;
+      button.setAttribute('aria-pressed', String(key === selectedProjectKey));
+      outer.style.zIndex = key === selectedProjectKey ? '4' : key === hoveredProjectKey ? '3' : current ? '2' : '1';
+    });
+    const syncHover = () => {
+      hoveredProjectKey = [pointerHoveredProjectKey, focusedProjectKey, leftHoveredProjectKey, leftFocusedProjectKey]
+        .find(key => key && PROJECT_BY_KEY.get(key)?.enabled && (interactiveProjectKeys.has(key) || key === leftHoveredProjectKey || key === leftFocusedProjectKey)) || null;
+      syncLabelStates();
+      updateBuildingHighlights();
+    };
+
+    const renderContentForState = () => {
+      if (selectedProjectKey) showExperienceProject(selectedProjectKey);
+      else if (activeCategory) renderIslandDefault(activeCategory, navigateToProject);
+    };
+    const commitActiveCategory = (category, projectKey = null, mode = "manual") => {
+      const next = mode === "programmatic"
+        ? finishProgrammaticNavigation(navigationState, category, projectKey)
+        : commitManualCategory(navigationState, category);
+      syncNavigationState(next);
+      stabilizeIsland.reset(category);
+      updateCategoryUI();
+      syncLabelStates();
+      updateBuildingHighlights();
+      renderContentForState();
+    };
+    const getCameraDestination = category => {
+      if (!model) return null;
+      const island = SUB_ISLANDS.find(item => item.category === category);
+      if (!island) return null;
+      const anchor = new THREE.Vector3(island.anchor.x, island.anchor.y, island.anchor.z);
+      model.localToWorld(anchor);
+      const target = controls.target.clone();
+      const offset = camera.position.clone().sub(target);
+      const distance = Math.max(offset.length(), 0.001);
+      const polar = Math.acos(THREE.MathUtils.clamp(offset.y / distance, -1, 1));
+      const horizontal = new THREE.Vector3(anchor.x - target.x, 0, anchor.z - target.z);
+      if (horizontal.lengthSq() < 0.000001) horizontal.set(offset.x, 0, offset.z);
+      horizontal.normalize();
+      const sinPolar = Math.sin(polar);
+      return {
+        position: target.clone().add(new THREE.Vector3(
+          horizontal.x * sinPolar * distance,
+          Math.cos(polar) * distance,
+          horizontal.z * sinPolar * distance,
+        )),
+        target,
+      };
+    };
+    const startProgrammaticNavigation = (category, projectKey = null) => {
+      if (!model) {
+        queuedNavigation = { category, projectKey };
+        return;
+      }
+      if (category === activeCategory && !navigationAnimation) {
+        syncNavigationState({ ...navigationState, selectedProjectKey: projectKey, navigationMode: "manual" });
+        updateCategoryUI();
+        syncLabelStates();
+        updateBuildingHighlights();
+        renderContentForState();
+        return;
+      }
+      const destination = getCameraDestination(category);
+      if (!destination) return;
+      navigationAnimation = {
+        startPosition: camera.position.clone(),
+        endPosition: destination.position,
+        startTarget: controls.target.clone(),
+        endTarget: destination.target,
+        category,
+        projectKey,
+        startedAt: performance.now(),
+        duration: NAVIGATION_DURATION_MS,
+      };
+      syncNavigationState(beginProgrammaticNavigation(navigationState, category, projectKey));
+      syncLabelStates();
+    };
+    const navigateToIsland = category => {
+      if (!ISLAND_CONTENT[category]) return;
+      startProgrammaticNavigation(category, null);
+    };
+    const navigateToProject = projectKey => {
+      const project = PROJECT_BY_KEY.get(projectKey);
+      if (!project?.enabled) return;
+      if (project.category === activeCategory && !navigationAnimation) {
+        syncNavigationState({ ...navigationState, selectedProjectKey: projectKey, navigationMode: "manual" });
+        hoveredProjectKey = projectKey;
+        updateCategoryUI();
+        syncLabelStates();
+        updateBuildingHighlights();
+        renderContentForState();
+        return;
+      }
+      startProgrammaticNavigation(project.category, projectKey);
+    };
+    const updateProgrammaticNavigation = time => {
+      if (!navigationAnimation) return;
+      const animation = navigationAnimation;
+      const progress = Math.min(1, Math.max(0, (time - animation.startedAt) / animation.duration));
+      const eased = 1 - Math.pow(1 - progress, 3);
+      camera.position.lerpVectors(animation.startPosition, animation.endPosition, eased);
+      controls.target.lerpVectors(animation.startTarget, animation.endTarget, eased);
+      if (progress >= 1) {
+        navigationAnimation = null;
+        commitActiveCategory(animation.category, animation.projectKey, "programmatic");
+      }
+    };
 
     const updateProjectLabels = () => {
       if (!model) return;
@@ -284,14 +386,10 @@ export async function mountExperienceIsland(container) {
         camera.worldToLocal(cameraAnchor);
         return { category: island.category, depth: cameraAnchor.z };
       });
-      activeCategory = selectFrontIsland(islandDepths);
-      area?.setAttribute("data-front-island", activeCategory ?? "");
-      if (currentIslandLabel && CURRENT_ISLAND_LABELS[activeCategory]) {
-        currentIslandLabel.textContent = CURRENT_ISLAND_LABELS[activeCategory];
+      if (navigationState.navigationMode === "manual") {
+        const stableCategory = stabilizeIsland(selectFrontIsland(islandDepths), performance.now());
+        if (stableCategory && stableCategory !== activeCategory) commitActiveCategory(stableCategory);
       }
-      area?.querySelectorAll("[data-experience-island]").forEach(button => {
-        button.setAttribute("aria-pressed", String(button.dataset.experienceIsland === activeCategory));
-      });
 
       const projectPositions = EXPERIENCE_PROJECTS.map(project => {
         projectedAnchor.set(project.anchor.x, project.anchor.y, project.anchor.z);
@@ -303,48 +401,101 @@ export async function mountExperienceIsland(container) {
           key: project.key,
           category: project.category,
           depth: cameraAnchor.z,
-          inView: projectedAnchor.z >= -1 && projectedAnchor.z <= 1
+          inView: cameraAnchor.z < 0 && projectedAnchor.z >= -1 && projectedAnchor.z <= 1
             && Math.abs(projectedAnchor.x) <= 1.04 && Math.abs(projectedAnchor.y) <= 1.04,
           x: (projectedAnchor.x * 0.5 + 0.5) * container.clientWidth,
           y: (-projectedAnchor.y * 0.5 + 0.5) * container.clientHeight,
         };
       });
-      const visibleKeys = new Set(selectVisibleProjects(
-        projectPositions,
-        activeCategory,
-        labelLimitForCategory(activeCategory),
-      ));
-      visibleProjectKeys.clear();
-      visibleKeys.forEach(key => visibleProjectKeys.add(key));
+      projectedVisibleProjectKeys.clear();
+      interactiveProjectKeys.clear();
+      projectPositions.forEach(position => {
+        if (!position.inView) return;
+        projectedVisibleProjectKeys.add(position.key);
+        if (position.category === activeCategory && PROJECT_BY_KEY.get(position.key).enabled) {
+          interactiveProjectKeys.add(position.key);
+        }
+      });
+      if (!interactiveProjectKeys.has(pointerHoveredProjectKey)) pointerHoveredProjectKey = null;
+      if (!interactiveProjectKeys.has(focusedProjectKey)) focusedProjectKey = null;
+      syncHover();
       const positionsByKey = new Map(projectPositions.map(position => [position.key, position]));
-
-      area?.querySelectorAll("[data-experience-project]").forEach(trigger => {
-        const key = trigger.dataset.experienceProject;
+      const candidates = labels.filter(label => projectedVisibleProjectKeys.has(label.key)).map(label => {
+        const p = positionsByKey.get(label.key);
+        return {...p, x: p.x + 8, y: p.y - 8 - label.height * maxLabelScale,
+          width: label.width * maxLabelScale, height: label.height * maxLabelScale};
+      });
+      const placed = layoutProjectLabels(candidates, activeCategory, selectedProjectKey, hoveredProjectKey, labelOffsets);
+      labelOffsets = new Map(placed.map(p => [p.key, { top: p.y, offsetY: p.offsetY }]));
+      const placements = new Map(placed.map(p => [p.key, p]));
+      displayedLabelKeys.clear();
+      placed.forEach(p => displayedLabelKeys.add(p.key));
+      labels.forEach(({outer, key}) => {
         const position = positionsByKey.get(key);
-        if (!position) { trigger.hidden = true; return; }
-        trigger.style.left = `${position.x}px`;
-        trigger.style.top = `${position.y}px`;
-        trigger.hidden = !visibleKeys.has(key);
+        const placement = placements.get(key);
+        outer.hidden = !displayedLabelKeys.has(key);
+        if (!placement) return;
+        outer.style.left = `${position.x + 8}px`;
+        outer.style.top = `${position.y - 8 + placement.offsetY}px`;
       });
     };
 
-    const updateBuildingHighlights = time => {
-      EXPERIENCE_PROJECTS.forEach((project, index) => {
-        const active = project.enabled && visibleProjectKeys.has(project.key);
-        const pulse = reducedMotion.matches
-          ? 1
-          : 1 + Math.sin(time * 0.002 + index * 0.72) * 0.012;
+    const updateBuildingHighlights = () => {
+      EXPERIENCE_PROJECTS.forEach(project => {
+        const selected = project.key === selectedProjectKey;
+        const hovered = project.key === hoveredProjectKey;
+        const active = project.enabled && (selected || hovered);
         (highlightShells.get(project.key) || []).forEach(record => {
           record.shell.visible = active;
-          record.material.opacity = 1;
-          record.shell.scale.setScalar(record.baseScale * pulse);
+          record.material.transparent = true;
+          record.material.opacity = selected ? 0.95 : 0.45;
+          record.shell.scale.setScalar(record.baseScale);
         });
       });
     };
 
-    area?.querySelectorAll("button[data-experience-project]").forEach(trigger => {
-      trigger.addEventListener("click", () => showExperienceProject(trigger.dataset.experienceProject));
+    labels.forEach(({button, key}) => {
+      button.addEventListener('click', () => navigateToProject(key));
+      button.addEventListener('pointerenter', () => { pointerHoveredProjectKey = key; syncHover(); });
+      button.addEventListener('pointerleave', () => { pointerHoveredProjectKey = null; syncHover(); });
+      button.addEventListener('focus', () => { focusedProjectKey = key; syncHover(); });
+      button.addEventListener('blur', () => { focusedProjectKey = null; syncHover(); });
     });
+
+    const overview = document.querySelector("[data-experience-overview]");
+    overview?.addEventListener("click", event => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (projectButton) navigateToProject(projectButton.dataset.navigateProject);
+    });
+    overview?.addEventListener("pointerover", event => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton) return;
+      leftHoveredProjectKey = projectButton.dataset.navigateProject;
+      syncHover();
+    });
+    overview?.addEventListener("pointerout", event => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton || projectButton.contains(event.relatedTarget)) return;
+      leftHoveredProjectKey = null;
+      syncHover();
+    });
+    overview?.addEventListener("focusin", event => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton) return;
+      leftFocusedProjectKey = projectButton.dataset.navigateProject;
+      syncHover();
+    });
+    overview?.addEventListener("focusout", event => {
+      const projectButton = event.target.closest("[data-navigate-project]");
+      if (!projectButton || projectButton.contains(event.relatedTarget)) return;
+      leftFocusedProjectKey = null;
+      syncHover();
+    });
+    window.experienceIslandNavigation = {
+      navigateToIsland,
+      navigateToProject,
+      getState: () => ({ activeCategory, selectedProjectKey, hoveredProjectKey, navigationMode: navigationState.navigationMode }),
+    };
 
     const fitModel = () => {
       if (!model) return;
@@ -355,6 +506,15 @@ export async function mountExperienceIsland(container) {
       controls.minDistance = zoomRange.minDistance;
       controls.maxDistance = zoomRange.maxDistance;
       controls.update();
+      if (!hasFitted) {
+        const initialView = getCameraDestination("school");
+        if (initialView) {
+          camera.position.copy(initialView.position);
+          controls.target.copy(initialView.target);
+          controls.update();
+        }
+      }
+      hasFitted = true;
     };
 
     const resize = () => {
@@ -363,15 +523,28 @@ export async function mountExperienceIsland(container) {
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
-      fitModel();
+      if (model) {
+        if (!hasFitted) fitModel();
+        else {
+          const range = experienceIslandZoomRange(modelDistance(camera, radius));
+          controls.minDistance = range.minDistance;
+          controls.maxDistance = range.maxDistance;
+          preserveOrbitDistance(camera, controls.target, range);
+          camera.updateMatrixWorld();
+        }
+      }
+      measureLabelScale();
+      updateProjectLabels();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
+    document.fonts.ready.then(() => { measureLabelScale(); updateProjectLabels(); });
 
     const render = time => {
       if (!running) return;
       controls.update();
+      updateProgrammaticNavigation(time || performance.now());
       updateProjectLabels();
       updateBuildingHighlights(time || 0);
       renderer.render(scene, camera);
@@ -394,7 +567,7 @@ export async function mountExperienceIsland(container) {
     const projectFromIntersection = intersection => {
       const key = intersection?.object ? clickableProjectKeys.get(intersection.object) : null;
       const project = key ? PROJECT_BY_KEY.get(key) : null;
-      return project?.enabled && visibleProjectKeys.has(key) ? key : null;
+      return project?.enabled && interactiveProjectKeys.has(key) ? key : null;
     };
 
     const pickExperienceProject = event => {
@@ -410,14 +583,28 @@ export async function mountExperienceIsland(container) {
     renderer.domElement.addEventListener("pointerdown", event => {
       pointerDown = { x: event.clientX, y: event.clientY };
     });
+    controls.addEventListener('start', () => {
+      if (navigationAnimation) {
+        navigationAnimation = null;
+        syncNavigationState(cancelProgrammaticNavigationState(navigationState));
+      }
+      dragging = true;
+      pointerHoveredProjectKey = null;
+      syncHover();
+    });
+    controls.addEventListener('end', () => { dragging = false; });
     let lastHoverPick = 0;
     renderer.domElement.addEventListener("pointermove", event => {
       if (event.timeStamp - lastHoverPick < 50) return;
       lastHoverPick = event.timeStamp;
-      renderer.domElement.style.cursor = pickExperienceProject(event) ? "pointer" : "grab";
+      pointerHoveredProjectKey = dragging ? null : pickExperienceProject(event);
+      syncHover();
+      renderer.domElement.style.cursor = pointerHoveredProjectKey ? "pointer" : "grab";
     });
     renderer.domElement.addEventListener("pointerleave", () => {
       renderer.domElement.style.cursor = "grab";
+      pointerHoveredProjectKey = null;
+      syncHover();
     });
     renderer.domElement.addEventListener("click", event => {
       if (pointerDown) {
@@ -426,7 +613,7 @@ export async function mountExperienceIsland(container) {
         if (moved > 8) return;
       }
       const project = pickExperienceProject(event);
-      if (project) showExperienceProject(project);
+      if (project) navigateToProject(project);
     });
 
     const loadScene = async () => {
@@ -573,6 +760,11 @@ export async function mountExperienceIsland(container) {
         resize();
         if (status) status.hidden = true;
         syncVisibility();
+        if (queuedNavigation) {
+          const pending = queuedNavigation;
+          queuedNavigation = null;
+          startProgrammaticNavigation(pending.category, pending.projectKey);
+        }
         return true;
       } catch {
         area?.classList.add("model-load-error");
